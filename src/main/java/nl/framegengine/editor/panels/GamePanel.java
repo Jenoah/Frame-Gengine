@@ -4,7 +4,6 @@ import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
-import nl.framegengine.core.debugging.RenderMetrics;
 import nl.framegengine.core.rendering.RenderManager;
 import nl.framegengine.editor.EditorGameLauncher;
 import nl.framegengine.editor.EditorPanel;

@@ -1,12 +1,10 @@
 package nl.framegengine.editor.panels;
 
 import imgui.ImGui;
-import imgui.ImVec2;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImInt;
 import nl.framegengine.editor.EditorPanel;
 import nl.framegengine.editor.ImGuiHelper;
-import org.joml.Math;
 
 public class ControlPanel extends EditorPanel {
 
