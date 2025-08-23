@@ -9,8 +9,8 @@ import nl.framegengine.editor.ImGuiHelper;
 public class ControlPanel extends EditorPanel {
 
     private GamePanel gamePanel;
-    private String[] aspectRatios = new String[]{"16 x 9", "16 x 10", "Freeform"};
-    private ImInt currentAspectRatio = new ImInt(0);
+    private final String[] aspectRatios = new String[]{"16 x 9", "16 x 10", "Freeform"};
+    private final ImInt currentAspectRatio = new ImInt(0);
 
     public ControlPanel(int posX, int posY, int sizeX, int sizeY) {
         super(posX, posY, sizeX, sizeY);
@@ -44,7 +44,7 @@ public class ControlPanel extends EditorPanel {
         }
         ImGui.sameLine(0, spacing);
 
-        if (ImGui.button("Toggle Stats", buttonWidth, buttonHeight)) {
+        if (ImGui.button("Stats", buttonWidth, buttonHeight)) {
             if (gamePanel != null) gamePanel.toggleStats();
         }
         ImGui.sameLine(0, spacing);
