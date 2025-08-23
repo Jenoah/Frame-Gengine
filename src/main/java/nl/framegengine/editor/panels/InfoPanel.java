@@ -70,6 +70,7 @@ public class InfoPanel extends EditorPanel {
 
         if(currentlySelectedObject == null) return;
         try {
+            hierarchyObjects.add(ClassHelper.getFieldFromObject("isEnabled", currentlySelectedObject.getClass()));
             hierarchyObjects.add(ClassHelper.getFieldFromObject("localPosition", currentlySelectedObject.getClass()));
             hierarchyObjects.add(ClassHelper.getFieldFromObject("localRotation", currentlySelectedObject.getClass()));
             hierarchyObjects.add(ClassHelper.getFieldFromObject("scale", currentlySelectedObject.getClass()));
