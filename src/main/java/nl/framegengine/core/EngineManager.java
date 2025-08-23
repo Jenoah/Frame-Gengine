@@ -16,21 +16,21 @@ public class EngineManager {
 
     // Consider making these instance fields if multiple EngineManagers are possible
     private double lastLoopTime = 0.0;
-    private float timeAccumulator = 0.0f;
+    private float fpsUpdateTimer = 0.0f;
     private static int fps = 0;
     public static int frameCount = 0;
     private static float deltaTime = 0.0f;
     private static float frameTime = 0.0f;
     private static float spareTime = 0.0f;
 
-    private static final float MIN_DELTA_TIME = 1.0f / 1000f; // 1ms minimum, adjust as needed
+    private static final float MIN_DELTA_TIME = 1.0f / 10000f; // 1ms minimum, adjust as needed
 
-    private void init(final ILogic IgameLogic, boolean standaloneWindow) throws Exception {
+    private void init(final ILogic IGameLogic, boolean standaloneWindow) throws Exception {
         errorCallback = GLFWErrorCallback.createPrint(System.err);
         GLFW.glfwSetErrorCallback(errorCallback);
 
         window = WindowManager.getInstance();
-        gameLogic = IgameLogic;
+        gameLogic = IGameLogic;
         window.init();
 
         mouseInput = new MouseInput();
@@ -67,17 +67,11 @@ public class EngineManager {
 
     private void renderSingleFrame(){
         if (window.windowShouldClose()) stop();
-
-        double frameStart = getCurrentTime();
-
         updateDeltaTime();
         handleInput();
         updateGame();
         renderFrame();
-
-        double frameEnd = getCurrentTime();
-        frameTime = (float)(frameEnd - frameStart);
-        spareTime = Math.max(0f, getDeltaTime() - frameTime); // Ensure spare time is non-negative
+        calculateFps();
     }
 
     public void stop() {
@@ -93,14 +87,14 @@ public class EngineManager {
 
     private void updateGame() {
         gameLogic.update(deltaTime, mouseInput);
+    }
 
-        frameCount++;
-        timeAccumulator += deltaTime;
+    private void calculateFps(){
+        fpsUpdateTimer += deltaTime;
 
-        if (timeAccumulator >= 1.0f) {
-            fps = frameCount;
-            frameCount = 0;
-            timeAccumulator -= 1.0f;
+        if (fpsUpdateTimer >= 1.0f) {
+            fps = Math.round(1f / getDeltaTime());
+            fpsUpdateTimer = 0.0f;
         }
     }
 
@@ -137,22 +131,7 @@ public class EngineManager {
     }
 
     public static float getDeltaTimeMS() {
-        return Math.round(deltaTime * 100000f) / 100f;
-    }
-
-    public static float getFrameTime() {
-        return frameTime;
-    }
-
-    public static float getFrameTimeMS() {
-        return Math.round(frameTime * 100000f) / 100f;
-    }
-
-    public static float getSpareTime() {
-        return spareTime;
-    }
-    public static float getSpareTimeMS() {
-        return Math.round(spareTime * 100000f) / 100f;
+        return (deltaTime * 100000f) / 100f;
     }
 
     public static ILogic getGameLogic(){

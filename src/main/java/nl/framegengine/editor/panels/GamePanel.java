@@ -4,6 +4,8 @@ import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
+import nl.framegengine.core.debugging.RenderMetrics;
+import nl.framegengine.core.rendering.RenderManager;
 import nl.framegengine.editor.EditorGameLauncher;
 import nl.framegengine.editor.EditorPanel;
 import nl.framegengine.editor.EditorWindow;
@@ -18,6 +20,7 @@ public class GamePanel extends EditorPanel {
     private int aspectWidth = 0;
     private int aspectHeight = 0;
     private float aspectRatio = 1.7778f;
+    private boolean showStats = false;
 
     public GamePanel(int posX, int posY, int sizeX, int sizeY) {
         super(posX, posY, sizeX, sizeY);
@@ -58,6 +61,13 @@ public class GamePanel extends EditorPanel {
 
         ImGui.setCursorPos(8, 24);
         ImGui.text("FPS: " + EngineManager.getFps());
+
+        if(showStats){
+            ImGui.setCursorPos(8, 48);
+            ImGui.pushTextWrapPos(sizeX / 2f);
+            ImGui.text("Stats: " + RenderManager.getInstance().getMetrics());
+            ImGui.popTextWrapPos();
+        }
     }
 
     @Override
@@ -80,6 +90,7 @@ public class GamePanel extends EditorPanel {
     }
 
     public void stopGame(){
+        disableStats();
         if(editorGameLauncher != null){
             editorGameLauncher.stop();
             editorGameLauncher = null;
@@ -112,5 +123,20 @@ public class GamePanel extends EditorPanel {
         if(refreshGameInstance && WindowManager.getInstance() != null){
             WindowManager.getInstance().setWindowSize(aspectWidth, aspectHeight);
         }
+    }
+
+    public void toggleStats(){
+        showStats = !showStats;
+        if(RenderManager.getInstance() != null) RenderManager.getInstance().recordMetrics(showStats);
+    }
+
+    public void enableStats(){
+        showStats = true;
+        if(RenderManager.getInstance() != null) RenderManager.getInstance().recordMetrics(true);
+    }
+
+    public void disableStats(){
+        showStats = false;
+        if(RenderManager.getInstance() != null) RenderManager.getInstance().recordMetrics(false);
     }
 }

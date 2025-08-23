@@ -1,5 +1,6 @@
 package nl.framegengine.core.debugging;
 
+import nl.framegengine.core.EngineManager;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL33;
 
@@ -64,13 +65,14 @@ public class RenderMetrics {
     // Reporting
     public String getMetrics() {
         return String.format(
-                "CPU: %.2fms | GPU: %.2fms | Draws: %d | Shaders: %d | VAOs: %d | Vertex count: %d",
+                "CPU: %.2fs | GPU: %.2fs | Draws: %d | Shaders: %d | VAOs: %d | Vertex count: %d | DeltaTime: %fs",
                 lastFrameDuration / 1e6,
                 gpuTimeNs / 1e6,
                 drawCalls,
                 shaderBinds,
                 vaoBinds,
-                vertexCount
+                vertexCount,
+                EngineManager.getDeltaTimeMS()
         );
     }
 }

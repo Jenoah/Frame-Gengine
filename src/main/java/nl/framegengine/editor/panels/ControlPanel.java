@@ -23,12 +23,13 @@ public class ControlPanel extends EditorPanel {
 
     @Override
     public void renderFrame() {
-        float buttonWidth = 64f;
-        float buttonHeight = 32f; // Height for buttons
-        float comboWidth = ImGuiHelper.calculateTextWidth(aspectRatios) + 32;
-        float spacing = 20f;
+        int buttonWidth = 64;
+        int buttonHeight = 32; // Height for buttons
+        int buttonCount = 3;
+        int comboWidth = ImGuiHelper.calculateTextWidth(aspectRatios) + 32;
+        int spacing = 20;
 
-        float totalWidth = buttonWidth * 2 + comboWidth + 2 * spacing;
+        int totalWidth = buttonWidth * buttonCount + comboWidth + buttonCount * spacing;
 
         float startX = (sizeX - totalWidth) * 0.5f;
         float startY = (sizeY - buttonHeight) * 0.5f;
@@ -42,6 +43,11 @@ public class ControlPanel extends EditorPanel {
 
         if (ImGui.button("Stop", buttonWidth, buttonHeight)) {
             if (gamePanel != null) gamePanel.stopGame();
+        }
+        ImGui.sameLine(0, spacing);
+
+        if (ImGui.button("Toggle Stats", buttonWidth, buttonHeight)) {
+            if (gamePanel != null) gamePanel.toggleStats();
         }
         ImGui.sameLine(0, spacing);
 
