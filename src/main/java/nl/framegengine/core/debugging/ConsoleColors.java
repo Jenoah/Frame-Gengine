@@ -14,6 +14,7 @@ public class ConsoleColors {
 
     // Map ANSI color codes to ImGui colors
     private static final Map<String, float[]> ANSI_TO_IMGUI = Map.of(
+            "\u001B[31m", new float[]{1.0f, 0.2f, 0.2f, 1.0f}, // gray
             "\u001B[35m", new float[]{0.58f, 0.0f, 0.83f, 1.0f}, // purple
             "\u001B[90m", new float[]{0.56f, 0.56f, 0.56f, 1.0f}, // gray
             "\u001B[0m",  new float[]{1.0f, 1.0f, 1.0f, 1.0f} // reset to white

@@ -16,7 +16,7 @@ public class ConsolePanel extends EditorPanel {
     @Override
     public void renderFrame() {
         ImGui.setWindowFontScale(1.2f);
-        for (Debug.LogEntry entry : Debug.GetLog()) {
+        for (Debug.LogEntry entry : Debug.GetLog().stream().toList()) {
             for (ConsoleColors seg : entry.segments) {
                 ImGui.textColored(seg.color[0], seg.color[1], seg.color[2], seg.color[3], seg.text);
                 ImGui.sameLine(0, 0);
