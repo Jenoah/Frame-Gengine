@@ -18,8 +18,6 @@ public class GameInstance implements ILogic{
         renderer = RenderManager.getInstance();
         window = WindowManager.getInstance();
         sceneManager = SceneManager.getInstance();
-
-        window.updateProjectionMatrix();
     }
 
     @Override

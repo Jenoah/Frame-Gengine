@@ -2,6 +2,7 @@ package nl.framegengine.core;
 
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.SceneManager;
+import nl.framegengine.editor.ImGuiHelper;
 import org.joml.Math;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -32,11 +33,14 @@ public class EngineManager {
         window = WindowManager.getInstance();
         gameLogic = IGameLogic;
         window.init();
+        window.updateProjectionMatrix();
 
         mouseInput = new MouseInput();
         gameLogic.init();
         mouseInput.init();
-        SceneManager.getInstance().getCurrentScene().postStart();
+        SceneManager.currentScene.postStart();
+
+        if(!window.isStandalone()) ImGuiHelper.hideProgressBar();
 
         lastLoopTime = getCurrentTime();
     }
