@@ -5,10 +5,7 @@ import imgui.ImVec2;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import nl.framegengine.core.rendering.RenderManager;
-import nl.framegengine.editor.EditorGameLauncher;
-import nl.framegengine.editor.EditorPanel;
-import nl.framegengine.editor.EditorWindow;
-import nl.framegengine.editor.EngineSettings;
+import nl.framegengine.editor.*;
 import nl.framegengine.core.EngineManager;
 import nl.framegengine.core.WindowManager;
 import nl.framegengine.core.debugging.Debug;
@@ -84,6 +81,7 @@ public class GamePanel extends EditorPanel {
         }
         if(editorGameLauncher == null) {
             editorGameLauncher = new EditorGameLauncher();
+            ImGuiHelper.showProgressBar("Booting game...");
             editorGameLauncher.run(sizeX, sizeY - 20);
         }
     }

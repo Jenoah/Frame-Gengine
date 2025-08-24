@@ -3,6 +3,7 @@ package nl.framegengine.editor;
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImString;
+import nl.framegengine.core.EngineManager;
 import nl.framegengine.core.callbacks.NameEnteredCallback;
 import org.joml.Math;
 
@@ -10,6 +11,13 @@ public class ImGuiHelper {
     private static boolean showNewFilePopup = false;
     private static final ImString newNameBuffer = new ImString(256);
     private static NameEnteredCallback nameEnteredCallback = null;
+
+    //Progress
+    private static boolean isShowingProgress = false;
+    private static boolean showCloseProgress = false;
+    private static String progressName = "progress";
+
+    private static float currentProgressPercentage = 0;
 
     public static void setInputFieldModal(NameEnteredCallback callback) {
         showNewFilePopup = true;
@@ -64,5 +72,31 @@ public class ImGuiHelper {
             guid = name.substring(i+1);
         }
         return guid;
+    }
+
+    public static void showProgressBar(String progressText){
+        isShowingProgress = true;
+        progressName = progressText;
+    }
+
+    public static void drawProgressBar(){
+        if(isShowingProgress){
+            ImGui.openPopup("Loading");
+            isShowingProgress = false;
+        }
+        ImGui.setNextWindowSize(EditorLayout.fromPercentageX(50), EditorLayout.fromPercentageY(20));
+        if(ImGui.beginPopupModal("Loading", ImGuiWindowFlags.AlwaysAutoResize)){
+            ImGui.separatorText(progressName);
+            ImGui.progressBar((Math.sin((float)EngineManager.getCurrentTime() * 2f) + 1f) / 2);
+            if(showCloseProgress){
+                showCloseProgress = false;
+                ImGui.closeCurrentPopup();
+            }
+            ImGui.endPopup();
+        }
+    }
+
+    public static void hideProgressBar(){
+        showCloseProgress = true;
     }
 }

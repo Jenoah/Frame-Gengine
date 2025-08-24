@@ -31,11 +31,11 @@ public class EditorLayout {
         ((GamePanel)editorPanels[1]).recalculateResolution();
     }
 
-    private int fromPercentageX(int absoluteX){
+    public static int fromPercentageX(int absoluteX){
         return (int)(EditorWindow.windowWidth / 100f * absoluteX / EditorWindow.windowScaleX);
     }
 
-    private int fromPercentageY(int absoluteY){
+    public static int fromPercentageY(int absoluteY){
         return (int)(EditorWindow.windowHeight / 100f * absoluteY / EditorWindow.windowScaleY);
     }
 
@@ -46,6 +46,7 @@ public class EditorLayout {
             editorPanel.endFrame();
         }
         renderMenuBar();
+        ImGuiHelper.drawProgressBar();
     }
 
     private void renderMenuBar(){
@@ -54,6 +55,11 @@ public class EditorLayout {
             if(ImGui.menuItem("New")) EngineSettings.createNewProject();
             if(ImGui.menuItem("Open")) EngineSettings.loadProject();
             if(ImGui.menuItem("Save")) EngineSettings.saveSettings();
+            if(ImGui.beginMenu("Export")) {
+                if (ImGui.menuItem("Export Mac")) EngineSettings.buildProjectMac();
+                if (ImGui.menuItem("Export Windows")) EngineSettings.buildProjectWindows();
+                ImGui.endMenu();
+            }
             ImGui.endMenu();
         }
         ImGui.endMainMenuBar();
