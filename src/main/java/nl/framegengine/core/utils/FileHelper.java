@@ -10,16 +10,11 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -28,8 +23,21 @@ import static org.lwjgl.util.nfd.NativeFileDialog.*;
 public class FileHelper {
 
     public static String getFileName(String filePath) {
-        String fileName = new File(filePath).getName();
-        return fileName.substring(0, fileName.lastIndexOf('.'));
+        try {
+            if(filePath == null || filePath.isBlank()) return "";
+            String fileName = new File(filePath).getName();
+            if (fileName.isBlank()) return "";
+
+            int lastDotIndex = fileName.lastIndexOf('.');
+            if (lastDotIndex <= 0) {
+                return fileName;
+            }
+
+            String fileNameShort = fileName.substring(0, lastDotIndex);
+            return fileNameShort.isBlank() ? "" : fileNameShort;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static String getDirectoryName(String directoryPath) {
@@ -68,19 +76,36 @@ public class FileHelper {
     }
 
     public static List<File> findFilesInDirectory(File rootDir) {
-        return findFilesInDirectory(rootDir, false);
+        return findFilesInDirectory(rootDir, false, new String[]{});
     }
 
     public static List<File> findFilesInDirectory(File rootDir, boolean showHiddenFiles) {
+        return findFilesInDirectory(rootDir, showHiddenFiles, new String[]{});
+    }
+
+    public static List<File> findFilesInDirectory(File rootDir, String[] foldersToExclude) {
+        return findFilesInDirectory(rootDir, false, foldersToExclude);
+    }
+
+    public static List<File> findFilesInDirectory(File rootDir, boolean showHiddenFiles, String[] extensionsToExclude) {
         List<File> files = new ArrayList<>();
         File[] directoryFiles = rootDir.listFiles();
         if (directoryFiles != null) {
             for (File file : directoryFiles) {
                 if (file.isDirectory()) {
-                    if(showHiddenFiles || (!showHiddenFiles && !file.isHidden()))
-                    files.addAll(findFilesInDirectory(file));
+                    boolean visible = showHiddenFiles || (!showHiddenFiles && !file.isHidden());
+                    boolean isExcludedFolder = Arrays.stream(extensionsToExclude)
+                            .anyMatch(ext -> file.getName().toLowerCase().endsWith(ext.toLowerCase()));
+
+                    if (visible && !isExcludedFolder) {
+                        files.addAll(findFilesInDirectory(file, showHiddenFiles, extensionsToExclude));
+                    }
                 } else {
-                    files.add(file);
+                    boolean isExcludedFile = Arrays.stream(extensionsToExclude)
+                            .anyMatch(ext -> file.getName().toLowerCase().endsWith(ext.toLowerCase()));
+                    if (!isExcludedFile) {
+                        files.add(file);
+                    }
                 }
             }
         }
@@ -301,15 +326,46 @@ public class FileHelper {
         }
     }
 
-    public static boolean deleteFile(File inputFile){
-        if(!inputFile.exists()) return false;
-        File[] allContents = inputFile.listFiles();
-        if (allContents != null) {
-            for (File fileChild : allContents) {
-                deleteFile(fileChild);
+    public static boolean deleteFile(File file) {
+        if (!file.exists()) return false;
+
+        if (file.isDirectory()) {
+            File[] allContents = file.listFiles();
+            if (allContents != null) {
+                for (File child : allContents) {
+                    if (!deleteFile(child)) {
+                        Debug.LogError("Could not delete " + child.getPath());
+                        return false;
+                    }
+                }
             }
         }
-        return inputFile.delete();
+        return file.delete();
+    }
+
+    public static boolean deleteDirectory(Path path) {
+        try {
+            Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    if (exc == null) {
+                        Files.delete(dir);
+                        return FileVisitResult.CONTINUE;
+                    } else {
+                        throw exc;
+                    }
+                }
+            });
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public static String getChecksum(String filepath){

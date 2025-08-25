@@ -8,17 +8,20 @@ import nl.framegengine.core.utils.JsonHelper;
 import javax.json.*;
 import java.io.File;
 import java.io.StringReader;
+import java.util.concurrent.CompletableFuture;
 
 public class EngineSettings {
     public static String currentProjectDirectory = "";
     public static String currentLevelPath = "";
     public static String currentProjectName = "Unknown project";
+    public static String currentProjectIconGuid = "";
 
     private static final String settingsFileName = "/.fgsettings";
 
     public static void saveSettings(){
         JsonObjectBuilder jsonSaveContent = Json.createObjectBuilder();
         jsonSaveContent.add("currentLevelPath", currentLevelPath);
+        jsonSaveContent.add("currentProjectIconGuid", currentProjectIconGuid);
 
         JsonObject jsonSaveContentObject = jsonSaveContent.build();
         FileHelper.writeToFile(jsonSaveContentObject.toString(), currentProjectDirectory + settingsFileName);
@@ -38,6 +41,7 @@ public class EngineSettings {
         JsonObject projectInfo = Json.createReader(new StringReader(saveFileContent)).readObject();
 
         if (JsonHelper.hasJsonKey(projectInfo, "currentLevelPath")) currentLevelPath = projectInfo.getString("currentLevelPath");
+        if(JsonHelper.hasJsonKey(projectInfo, "currentProjectIconGuid")) currentProjectIconGuid = projectInfo.getString("currentProjectIconGuid");
         currentProjectName = FileHelper.getDirectoryName(currentProjectDirectory);
         saveEngineConfig();
         ManifestHelper.updateManifest();
@@ -106,5 +110,83 @@ public class EngineSettings {
 
         currentProjectDirectory = projectInfo.getString("currentProjectDirectory");
         currentProjectName = FileHelper.getDirectoryName(currentProjectDirectory);
+    }
+
+    public static void buildProjectMac(){
+        ImGuiHelper.showProgressBar("Building");
+        Debug.Log("Starting build for Mac");
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                File outputDirectory = new File(currentProjectDirectory + File.separator + "build");
+                if(outputDirectory.exists()) FileHelper.deleteDirectory(outputDirectory.toPath());
+
+                String[] command = {"./gradlew",
+                        "buildGame",
+                        "-PcustomAppName=" + currentProjectName,
+                        "-PcustomDest=" + outputDirectory.getPath(),
+                        "-PcustomFileType=app-image",
+                };
+
+                ProcessBuilder pb = new ProcessBuilder(command);
+                pb.directory(new File(System.getProperty("user.dir"))); // Set working directory
+                pb.redirectErrorStream(true);
+                Process process = pb.start();
+
+                int exitCode = process.waitFor();
+                if (exitCode == 0) {
+                    Debug.Log("Build completed successfully.");
+                } else {
+                    Debug.LogError("Build failed. Exit code: " + exitCode);
+                }
+            } catch (
+                    Exception e) {
+                Debug.LogError("Error while building: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }).thenRun(() -> {
+            ImGuiHelper.hideProgressBar();
+        });
+    }
+
+    public static void buildProjectWindows(){
+        ImGuiHelper.showProgressBar("Building");
+        Debug.Log("Starting build for Windows");
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                File outputDirectory = new File(currentProjectDirectory + File.separator + "build");
+                if(outputDirectory.exists()) FileHelper.deleteDirectory(outputDirectory.toPath());
+
+                String[] command = {"./gradlew",
+                        "buildGame",
+                        "-PcustomAppName=" + currentProjectName,
+                        "-PcustomDest=" + outputDirectory.getPath(),
+                        "-PcustomFileType=exe",
+                };
+
+                ProcessBuilder pb = new ProcessBuilder(command);
+                pb.directory(new File(System.getProperty("user.dir"))); // Set working directory
+                pb.redirectErrorStream(true);
+                Process process = pb.start();
+
+                int exitCode = process.waitFor();
+                if (exitCode == 0) {
+                    Debug.Log("Build completed successfully.");
+                } else {
+                    Debug.LogError("Build failed. Exit code: " + exitCode);
+                }
+            } catch (
+                    Exception e) {
+                Debug.LogError("Error while building: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }).thenRun(() -> {
+            ImGuiHelper.hideProgressBar();
+        });
+    }
+
+    public static String getSettingsFileName(){
+        return settingsFileName;
     }
 }

@@ -15,10 +15,7 @@ import java.io.File;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -30,15 +27,57 @@ public class ManifestHelper {
     private static final List<HashMap<String, String>> levels = new ArrayList<>();
     private static final List<HashMap<String, String>> others = new ArrayList<>();
 
-    private static EventCallback eventCallback = null;
+    private static final List<EventCallback> eventCallbacks = new ArrayList<>();
 
     public static void registerManifestListener(){
+        String[] excludedFileNames = {
+                FileHelper.getFileName(manifestFileName) + "." + FileHelper.getExtension(manifestFileName),
+                FileHelper.getFileName(EngineSettings.getSettingsFileName()) + "." + FileHelper.getExtension(EngineSettings.getSettingsFileName()),
+                "*.app"
+        };
+
         try {
-            String filteredManifestFileName = FileHelper.getFileName(manifestFileName) + "." + FileHelper.getExtension(manifestFileName);
-            IOFileFilter excludeManifestFilter = FileFilterUtils.notFileFilter(FileFilterUtils.nameFileFilter(filteredManifestFileName));
+// Exclude specific directories
+            IOFileFilter excludeDirsFilter = new IOFileFilter() {
+                private final Set<String> excludedDirNames = Set.of("build", ".compiled");
+
+                @Override
+                public boolean accept(File file) {
+                    // Accept files only if not in excluded directories
+                    File parent = file.getParentFile();
+                    while (parent != null) {
+                        if (excludedDirNames.contains(parent.getName())) {
+                            return false;
+                        }
+                        parent = parent.getParentFile();
+                    }
+                    return true;
+                }
+
+                @Override
+                public boolean accept(File dir, String name) {
+                    // Directory accept only if not in excluded directories
+                    if (excludedDirNames.contains(name)) {
+                        return false;
+                    }
+                    return true;
+                }
+            };
+
+            IOFileFilter excludeFilesFilter = FileFilterUtils.or(
+                    Arrays.stream(excludedFileNames)
+                            .map(FileFilterUtils::nameFileFilter)
+                            .toArray(IOFileFilter[]::new)
+            );
+
+            IOFileFilter combinedFilter = FileFilterUtils.and(
+                    FileFilterUtils.notFileFilter(excludeFilesFilter),
+                    excludeDirsFilter
+            );
+
             FileAlterationObserver observer = FileAlterationObserver.builder()
                     .setFile(new File(EngineSettings.currentProjectDirectory))
-                    .setFileFilter(excludeManifestFilter)
+                    .setFileFilter(combinedFilter)
                     .get();
 
             FileAlterationMonitor monitor = new FileAlterationMonitor(1000);
@@ -105,7 +144,7 @@ public class ManifestHelper {
         List<HashMap<String, String>> manifestLevels = new ArrayList<>();
         List<HashMap<String, String>> manifestOthers = new ArrayList<>();
 
-        File[] filesInProject = FileHelper.findFilesInDirectory(new File(EngineSettings.currentProjectDirectory)).toArray(File[]::new);
+        File[] filesInProject = FileHelper.findFilesInDirectory(new File(EngineSettings.currentProjectDirectory), new String[]{".app", ".tmp", ".bak"}).toArray(File[]::new);
 
         for (File file : filesInProject) {
             manifestFileType fileType = fileToManifestFileType(file);
@@ -222,13 +261,13 @@ public class ManifestHelper {
             fileInfo.add("filename", manifestLevel.get("filename"));
             levelArray.add(fileInfo.build());
         });
-            manifestOthers.forEach(manifestOther -> {
-                JsonObjectBuilder fileInfo = Json.createObjectBuilder();
-                fileInfo.add("guid", manifestOther.get("guid"));
-                fileInfo.add("path", manifestOther.get("path"));
-                fileInfo.add("filename", manifestOther.get("filename"));
-                otherArray.add(fileInfo.build());
-            });
+        manifestOthers.forEach(manifestOther -> {
+            JsonObjectBuilder fileInfo = Json.createObjectBuilder();
+            fileInfo.add("guid", manifestOther.get("guid"));
+            fileInfo.add("path", manifestOther.get("path"));
+            fileInfo.add("filename", manifestOther.get("filename"));
+            otherArray.add(fileInfo.build());
+        });
 
         jsonManifestContent.add("textures", textureArray.build());
         jsonManifestContent.add("scripts", scriptArray.build());
@@ -245,11 +284,22 @@ public class ManifestHelper {
 
         FileHelper.writeToFile(stringWriter.toString(), getManifestPath());
 
-        if(eventCallback != null) eventCallback.onTrigger();
+        if(!eventCallbacks.isEmpty()) eventCallbacks.forEach(callback -> callback.onTrigger());
     }
 
-    public static void setEventCallback(EventCallback callback){
-        eventCallback = callback;
+    public static boolean setEventCallback(EventCallback callback){
+        eventCallbacks.clear();
+        if(!eventCallbacks.contains(callback)) return eventCallbacks.add(callback);
+        return false;
+    }
+
+    public static boolean addEventCallback(EventCallback callback){
+        if(!eventCallbacks.contains(callback)) return eventCallbacks.add(callback);
+        return false;
+    }
+
+    public static boolean removeEventCallback(EventCallback callback){
+        return eventCallbacks.remove(callback);
     }
 
     private static HashMap<String, String> manifestJsonToHashmapItem(JsonObject jsonObject){
@@ -308,7 +358,7 @@ public class ManifestHelper {
         }
     }
 
-    public static final String getGUIDbyPath(manifestFileType fileType, String path){
+    public static final String getGuidbyPath(manifestFileType fileType, String path){
         AtomicReference<String> guid = new AtomicReference<>();
         File file = new File(path);
         if(!file.exists()) return null;
@@ -325,6 +375,19 @@ public class ManifestHelper {
         });
         return guid.get();
     }
+
+    public static final String getPathByGuid(manifestFileType fileType, String guid){
+        AtomicReference<String> path = new AtomicReference<>();
+
+        List<HashMap<String, String>> typeArray = getOfType(fileType);
+        typeArray.forEach(map -> {
+            if(map.get("guid").equals(guid)){
+                path.set(map.get("path"));
+            }
+        });
+        return path.get();
+    }
+
 
     private static class ManifestFileListener implements FileAlterationListener {
         @Override
