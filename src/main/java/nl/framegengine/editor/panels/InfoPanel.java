@@ -34,7 +34,7 @@ public class InfoPanel extends EditorPanel {
 
     public InfoPanel(int posX, int posY, int sizeX, int sizeY) {
         super(posX, posY, sizeX, sizeY);
-        ManifestHelper.setEventCallback(() -> updateTextureList());
+        ManifestHelper.addEventCallback(() -> updateTextureList());
     }
 
     @Override
