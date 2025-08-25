@@ -22,6 +22,7 @@ public class EngineSettings {
         JsonObjectBuilder jsonSaveContent = Json.createObjectBuilder();
         jsonSaveContent.add("currentLevelPath", currentLevelPath);
         jsonSaveContent.add("currentProjectIconGuid", currentProjectIconGuid);
+        jsonSaveContent.add("currentProjectName", currentProjectName);
 
         JsonObject jsonSaveContentObject = jsonSaveContent.build();
         FileHelper.writeToFile(jsonSaveContentObject.toString(), currentProjectDirectory + settingsFileName);
@@ -41,8 +42,9 @@ public class EngineSettings {
         JsonObject projectInfo = Json.createReader(new StringReader(saveFileContent)).readObject();
 
         if (JsonHelper.hasJsonKey(projectInfo, "currentLevelPath")) currentLevelPath = projectInfo.getString("currentLevelPath");
-        if(JsonHelper.hasJsonKey(projectInfo, "currentProjectIconGuid")) currentProjectIconGuid = projectInfo.getString("currentProjectIconGuid");
-        currentProjectName = FileHelper.getDirectoryName(currentProjectDirectory);
+        if (JsonHelper.hasJsonKey(projectInfo, "currentProjectIconGuid")) currentProjectIconGuid = projectInfo.getString("currentProjectIconGuid");
+        if (JsonHelper.hasJsonKey(projectInfo, "currentProjectName")) currentProjectName = projectInfo.getString("currentProjectName");
+        if(currentProjectName.isBlank()) currentProjectName = FileHelper.getDirectoryName(currentProjectDirectory);
         saveEngineConfig();
         ManifestHelper.updateManifest();
         ManifestHelper.registerManifestListener();
