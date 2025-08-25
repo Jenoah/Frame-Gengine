@@ -119,12 +119,15 @@ public class EngineSettings {
         CompletableFuture.runAsync(() -> {
             try {
                 File outputDirectory = new File(currentProjectDirectory + File.separator + "build");
+                File iconPath = new File(ManifestHelper.getPathByGuid(ManifestHelper.manifestFileType.TEXTURE, currentProjectIconGuid));
+                if(iconPath == null || !iconPath.exists() || (iconPath.exists() && !FileHelper.getExtension(iconPath.getPath()).equalsIgnoreCase("icns"))) iconPath = new File("textures/FrameGengine_icon.icns");
                 if(outputDirectory.exists()) FileHelper.deleteDirectory(outputDirectory.toPath());
 
                 String[] command = {"./gradlew",
                         "buildGame",
                         "-PcustomAppName=" + currentProjectName,
                         "-PcustomDest=" + outputDirectory.getPath(),
+                        "-PcustomIcon=" + iconPath.getPath(),
                         "-PcustomFileType=app-image",
                 };
 
@@ -136,6 +139,7 @@ public class EngineSettings {
                 int exitCode = process.waitFor();
                 if (exitCode == 0) {
                     Debug.Log("Build completed successfully.");
+                    FileHelper.openDirectory(outputDirectory);
                 } else {
                     Debug.LogError("Build failed. Exit code: " + exitCode);
                 }
@@ -156,12 +160,15 @@ public class EngineSettings {
         CompletableFuture.runAsync(() -> {
             try {
                 File outputDirectory = new File(currentProjectDirectory + File.separator + "build");
+                File iconPath = new File(ManifestHelper.getPathByGuid(ManifestHelper.manifestFileType.TEXTURE, currentProjectIconGuid));
+                if(iconPath == null || !iconPath.exists() || (iconPath.exists() && !FileHelper.getExtension(iconPath.getPath()).equalsIgnoreCase("ico"))) iconPath = new File("textures/FrameGengine_icon.ico");
                 if(outputDirectory.exists()) FileHelper.deleteDirectory(outputDirectory.toPath());
 
                 String[] command = {"./gradlew",
                         "buildGame",
                         "-PcustomAppName=" + currentProjectName,
                         "-PcustomDest=" + outputDirectory.getPath(),
+                        "-PcustomIcon=" + iconPath.getAbsolutePath(),
                         "-PcustomFileType=exe",
                 };
 

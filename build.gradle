@@ -61,3 +61,53 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+task buildStandaloneJar(type: Jar) {
+    group = 'build'
+    description = 'Build a standalone runnable JAR for the game.'
+
+    // Set the main class for the manifest
+    manifest {
+        attributes(
+                'Main-Class': 'nl.framegengine.core.Launcher'  // Replace with your main class
+        )
+    }
+
+    // Include compiled classes and runtime dependencies
+    from sourceSets.main.output
+
+    // Include runtime dependencies (jars)
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    archiveBaseName.set('FrameGengineGame')
+    archiveVersion.set('1.0')
+    archiveExtension.set('jar')
+}
+
+tasks.register('buildGame', Exec) {
+    group = 'build'
+    description = 'Package the application using jpackage'
+
+    def appName = project.findProperty("customAppName") ?: "Your Game"
+    def dest = project.findProperty("customDest") ?: layout.buildDirectory.dir("jpackage").get().asFile.absolutePath
+    def fileType = project.findProperty("customFileType") ?: "exe"
+    def icon = project.findProperty("customIcon") ?: "textures/FrameGengine_icon.ico"
+
+
+    // Adjust input/output paths and options as needed
+    commandLine 'jpackage',
+            '--name', appName,
+            '--input', layout.buildDirectory.dir("libs").get().asFile.absolutePath,
+            '--main-jar', 'FrameGengineGame-1.0.jar',
+            '--main-class', 'nl.framegengine.core.Launcher',
+            '--type', fileType,  // 'app-image' or 'dmg' for Mac, 'exe' for Windows installer, etc.
+            '--dest', dest,
+            '--icon', icon,
+            '--verbose'
+    dependsOn 'buildStandaloneJar' // ensure your jar is built before packaging
+}
