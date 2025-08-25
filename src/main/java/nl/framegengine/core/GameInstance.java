@@ -29,7 +29,7 @@ public class GameInstance implements ILogic{
         Scene level = sceneManager.loadScene(EngineSettings.currentProjectDirectory + File.separator + EngineSettings.currentLevelPath);
 
         window.setClearColor(0, 0, 0, 0);
-        window.setWindowIcon("textures/window_icon.png");
+        window.setWindowIcon("textures/FrameGengine_icon.png");
 
         sceneManager.addScene(level);
         sceneManager.setCurrentScene(0);
