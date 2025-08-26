@@ -47,7 +47,6 @@ public class SceneManager {
 
         Scene scene = new Scene();
 
-        Debug.Log("Loading file " + filePath);
         InputStream is = null;
         if(EngineSettings.isCompiled) {
             is = getClass().getResourceAsStream(filePath);

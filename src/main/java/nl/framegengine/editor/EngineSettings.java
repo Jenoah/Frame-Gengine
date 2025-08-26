@@ -7,9 +7,6 @@ import nl.framegengine.core.utils.JsonHelper;
 
 import javax.json.*;
 import java.io.*;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
 
 public class EngineSettings {
@@ -112,13 +109,7 @@ public class EngineSettings {
         Debug.Log("App compilation is " + isCompiled);
 
         if(isCompiled) {
-            Path appBundleRoot = null;
-            try{
-                appBundleRoot = getAppBundleRoot();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            currentProjectDirectory = appBundleRoot.resolve("Contents").resolve("Resources").toString();
+            currentProjectDirectory = "/userresource";
             Debug.Log("Current directory set to " + currentProjectDirectory);
             return;
         }
@@ -146,8 +137,9 @@ public class EngineSettings {
         CompletableFuture.runAsync(() -> {
             try {
                 File outputDirectory = new File(currentProjectDirectory + File.separator + "build");
-                File iconPath = new File(ManifestHelper.getPathByGuid(ManifestHelper.manifestFileType.TEXTURE, currentProjectIconGuid));
-                if(iconPath == null || !iconPath.exists() || (iconPath.exists() && !FileHelper.getExtension(iconPath.getPath()).equalsIgnoreCase("icns"))) iconPath = new File("textures/FrameGengine_icon.icns");
+                String iconPath = ManifestHelper.getPathByGuid(ManifestHelper.manifestFileType.TEXTURE, currentProjectIconGuid);
+                File iconFile = (iconPath == null || iconPath.isBlank()) ? null : new File(iconPath);
+                if(iconFile == null || !iconFile.exists() || (iconFile.exists() && !FileHelper.getExtension(iconFile.getPath()).equalsIgnoreCase("icns"))) iconFile = new File("textures/FrameGengine_icon.icns");
                 if(outputDirectory.exists()) FileHelper.deleteDirectory(outputDirectory.toPath());
                 File currentProjectDirectoryFile = new File(currentProjectDirectory);
 
@@ -156,7 +148,7 @@ public class EngineSettings {
                         "--warn",
                         "-PcustomAppName=" + currentProjectName,
                         "-PcustomDest=" + outputDirectory.getPath(),
-                        "-PcustomIcon=" + iconPath.getPath(),
+                        "-PcustomIcon=" + iconFile.getPath(),
                         "-PcustomProjectPath=" + currentProjectDirectoryFile.getAbsolutePath(),
                         "-PcustomFileType=app-image",
                 };
@@ -227,32 +219,14 @@ public class EngineSettings {
                 } else {
                     Debug.LogError("Build failed. Exit code: " + exitCode);
                 }
-            } catch (
-                    Exception e) {
+            } catch (Exception e) {
                 Debug.LogError("Error while building: " + e.getMessage());
                 e.printStackTrace();
             }
-        }).thenRun(() -> {
-            ImGuiHelper.hideProgressBar();
-        });
+        }).thenRun(ImGuiHelper::hideProgressBar);
     }
 
     public static String getSettingsFileName(){
         return settingsFileName;
-    }
-
-    private static Path getAppBundleRoot() throws URISyntaxException {
-        // Get path of the running jar or folder for your class
-        Path classLocation = Paths.get(EngineSettings.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-
-        // macOS app bundles usually look like YourApp.app/Contents/Java/yourjar.jar
-        // So move up three levels to the .app folder:
-        Path appBundle = classLocation.getParent().getParent().getParent();
-
-        if (appBundle.toString().endsWith(".app")) {
-            return appBundle;
-        }
-
-        return null; // Not running inside an app bundle
     }
 }

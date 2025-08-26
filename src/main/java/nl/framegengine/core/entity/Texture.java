@@ -8,6 +8,7 @@ import nl.framegengine.editor.EngineSettings;
 
 import javax.json.*;
 import java.io.File;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.file.Paths;
 
@@ -84,9 +85,13 @@ public class Texture implements IJsonSerializable {
         }
 
         if(texturePath != null && !texturePath.isEmpty()){
+
             String absoluteTexturePath = Paths.get(EngineSettings.currentProjectDirectory, texturePath).toAbsolutePath().toString();
             File textureFile = new File(absoluteTexturePath);
-            this.id = TextureLoader.loadTexture(textureFile.exists() ? absoluteTexturePath : texturePath,
+            InputStream is = getClass().getResourceAsStream(absoluteTexturePath);
+            if(textureFile.exists() || is != null) texturePath = absoluteTexturePath;
+
+            this.id = TextureLoader.loadTexture(texturePath,
                     pointFilter,
                     flipped,
                     repeat,

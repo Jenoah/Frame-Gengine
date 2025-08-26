@@ -62,7 +62,7 @@ test {
     useJUnitPlatform()
 }
 
-task buildEditorJar(type: Jar) {
+tasks.register('buildEditorJar', Jar) {
     group = 'build'
     description = 'Build a standalone runnable JAR for the editor.'
 
@@ -111,31 +111,42 @@ tasks.register('buildEditor', Exec) {
     dependsOn 'buildEditorJar' // ensure your jar is built before packaging
 }
 
-task buildStandaloneJar(type: Jar) {
+tasks.register('buildStandaloneJar', Jar) {
     group = 'build'
     description = 'Build a standalone runnable JAR for the game.'
 
-    // Set the main class for the manifest
+    def customProjectPath = project.findProperty("customProjectPath")
+    if (!customProjectPath) {
+        throw new GradleException("Please set -PcustomProjectPath=/path/to/resources")
+    }
+    def projectFiles = file(customProjectPath)
+    logger.lifecycle("Using project files path: ${projectFiles.absolutePath}")
+
+
     manifest {
-        attributes(
-                'Main-Class': 'nl.framegengine.core.Launcher'  // Replace with your main class
-        )
+        attributes('Main-Class': 'nl.framegengine.core.Launcher')
     }
 
-    // Include compiled classes and runtime dependencies
     from sourceSets.main.output
-
-    // Include runtime dependencies (jars)
     dependsOn configurations.runtimeClasspath
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
 
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     archiveBaseName.set('FrameGengineGame')
     archiveVersion.set('1.0')
     archiveExtension.set('jar')
+
+    // Include extra resources from a custom directory (e.g., export/resources)
+    if (projectFiles.exists()) {
+        from(projectFiles) {
+            into 'userresource'
+        }
+    } else {
+        logger.info("Project path ${projectFiles.absolutePath} does not exist.")
+    }
+    logger.lifecycle("Game jar built")
+
 }
 
 tasks.register('buildGame', Exec) {
@@ -146,18 +157,17 @@ tasks.register('buildGame', Exec) {
     def dest = project.findProperty("customDest") ?: layout.buildDirectory.dir("jpackage").get().asFile.absolutePath
     def fileType = project.findProperty("customFileType") ?: "exe"
     def icon = project.findProperty("customIcon") ?: "textures/FrameGengine_icon.ico"
-    def projectFiles = file(project.findProperty("customProjectPath")  ?: "")
     def gameBuildTmpDir = layout.buildDirectory.dir("Resources").get().asFile
 
     // Adjust input/output paths and options as needed
-    commandLine 'jpackage',
-            '--name', appName,
+    executable 'jpackage'
+    args    '--name', appName,
             '--input', layout.buildDirectory.dir("libs").get().asFile.absolutePath,
             '--main-jar', 'FrameGengineGame-1.0.jar',
             '--main-class', 'nl.framegengine.core.Launcher',
             '--type', fileType,  // 'app-image' or 'dmg' for Mac, 'exe' for Windows installer, etc.
             '--dest', dest,
-            '--app-content', gameBuildTmpDir.absolutePath,
+            '--app-content', "\"${gameBuildTmpDir.absolutePath}\"",
             '--icon', icon,
             '--java-options', '-XstartOnFirstThread',
             '--verbose',
@@ -165,21 +175,14 @@ tasks.register('buildGame', Exec) {
     dependsOn 'buildStandaloneJar' // ensure your jar is built before packaging
 
     doFirst {
-
-
         // Prepare app content here: copy or merge folders into a temp directory
         delete gameBuildTmpDir
+        if (!gameBuildTmpDir.exists()) {
+            mkdir gameBuildTmpDir
+        }
         copy {
             from 'textures'
             into new File(gameBuildTmpDir, "textures")
-        }
-        if (projectFiles.exists()) {
-            copy {
-                from projectFiles
-                into gameBuildTmpDir
-            }
-        } else {
-            logger.info("Project path ${projectFiles.absolutePath} does not exist.")
         }
     }
 

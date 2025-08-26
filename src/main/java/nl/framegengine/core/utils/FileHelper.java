@@ -186,8 +186,6 @@ public class FileHelper {
         fileName = Path.of(fileName).toString();
         File fileToLoad = new File(fileName);
 
-        Debug.Log("Trying to load " + fileToLoad.getPath());
-
         try(InputStream in = Utils.class.getResourceAsStream(fileToLoad.getPath());
             Scanner scanner = new Scanner(in, StandardCharsets.UTF_8)){
             result = scanner.useDelimiter("\\A").next();

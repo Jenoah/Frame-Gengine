@@ -3,10 +3,13 @@ package nl.framegengine.core.loaders;
 import nl.framegengine.core.Settings;
 import nl.framegengine.editor.ManifestHelper;
 import org.joml.Math;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.*;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
 
+import java.io.File;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.HashMap;
@@ -29,29 +32,41 @@ public class TextureLoader {
         }
 
         ByteBuffer imageBuffer;
-        int width, height, alphaFormat;
+        int width = 0, height = 0, alphaFormat;
         IntBuffer comp;
 
-        try(MemoryStack stack = MemoryStack.stackPush()){
+        try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer w = stack.mallocInt(1);
             IntBuffer h = stack.mallocInt(1);
             comp = stack.mallocInt(1);
 
             stbi_set_flip_vertically_on_load(flipTexture);
-            imageBuffer = STBImage.stbi_load(fileName, w, h, comp, 0);
+            File file = new File(fileName);
+            if (file.exists()) {
+                imageBuffer = STBImage.stbi_load(fileName, w, h, comp, 0);
+            } else {
+                InputStream is = TextureLoader.class.getResourceAsStream(fileName);
+                if (is == null) {
+                    throw new Exception("Image file " + fileName + " could not be located in filesystem or resource folder: " + STBImage.stbi_failure_reason());
+                }
+                byte[] bytes = is.readAllBytes();
+                ByteBuffer buffer = BufferUtils.createByteBuffer(bytes.length).put(bytes);
+                buffer.flip();
+                imageBuffer = STBImage.stbi_load_from_memory(buffer, w, h, comp, 0);
+                is.close();
+            }
+
             if(imageBuffer == null){
                 throw new Exception("Image file " + fileName + " could not be loaded because " + STBImage.stbi_failure_reason());
             }
 
             width = w.get();
             height = h.get();
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
         int id = GL11.glGenTextures();
-
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
         GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
 
@@ -66,29 +81,24 @@ public class TextureLoader {
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA);
             format = isNormalMap ? GL11.GL_RGBA8 : GL21.GL_SRGB8_ALPHA8;
-
             alphaFormat = GL11.GL_RGBA;
         }
 
-        //GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL30.GL_SRGB_ALPHA, width, height, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, imageBuffer);
         GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, format, width, height, 0, alphaFormat, GL11.GL_UNSIGNED_BYTE, imageBuffer);
-
-
         GL30.glGenerateMipmap(GL11.GL_TEXTURE_2D);
 
-
         if(repeatTexture) {
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_REPEAT); // or GL_CLAMP_TO_EDGE
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_REPEAT); // or GL_CLAMP_TO_EDGE
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_REPEAT);
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_REPEAT);
         }else{
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE); // or GL_CLAMP_TO_EDGE
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE); // or GL_CLAMP_TO_EDGE
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
         }
 
         if(pointFilter) {
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST_MIPMAP_LINEAR);
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-        }else{
+        } else {
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
         }
@@ -112,6 +122,7 @@ public class TextureLoader {
 
         return id;
     }
+
 
     public static int loadTexture(String fileName, boolean pointFilter){
         TextureLoader.pointFilter = pointFilter;
