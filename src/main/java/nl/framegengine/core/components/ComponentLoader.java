@@ -1,6 +1,7 @@
 package nl.framegengine.core.components;
 
 import nl.framegengine.core.debugging.Debug;
+import nl.framegengine.editor.EngineSettings;
 
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
@@ -26,8 +27,10 @@ public class ComponentLoader {
     public ComponentLoader(String scriptSourcePath, String scriptBinPath) throws IOException {
         this.sourceDir = Paths.get(scriptSourcePath);
         this.binDir = Paths.get(scriptBinPath);
-        ensureDirectoryExists(binDir);
-        compileAllScripts();
+        if(!EngineSettings.isCompiled){
+            ensureDirectoryExists(binDir);
+            compileAllScripts();
+        }
         this.classLoader = createClassLoader();
     }
 

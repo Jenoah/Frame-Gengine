@@ -1,6 +1,7 @@
 package nl.framegengine.core.utils;
 
 import nl.framegengine.core.debugging.Debug;
+import nl.framegengine.editor.EngineSettings;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 
@@ -180,11 +181,18 @@ public class FileHelper {
         return extension;
     }
 
-    public static String loadResource(String fileName) throws Exception{
+    public static String loadResource(String fileName){
         String result;
-        try(InputStream in = Utils.class.getResourceAsStream(fileName);
+        fileName = Path.of(fileName).toString();
+        File fileToLoad = new File(fileName);
+
+        Debug.Log("Trying to load " + fileToLoad.getPath());
+
+        try(InputStream in = Utils.class.getResourceAsStream(fileToLoad.getPath());
             Scanner scanner = new Scanner(in, StandardCharsets.UTF_8)){
             result = scanner.useDelimiter("\\A").next();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
         return result;
     }
@@ -204,6 +212,8 @@ public class FileHelper {
     }
 
     public static String readFile(String filePath){
+        if(EngineSettings.isCompiled) return loadResource(filePath);
+
         StringBuilder sb = new StringBuilder();
         try {
             File fileToRead = new File(filePath);

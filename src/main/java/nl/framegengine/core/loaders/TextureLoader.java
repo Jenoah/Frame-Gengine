@@ -186,9 +186,7 @@ public class TextureLoader {
 
 
     public static void cleanUp(){
-        textures.forEach((guid, id) -> {
-            GL11.glDeleteTextures(id);
-        });
+        textures.forEach((guid, id) -> GL11.glDeleteTextures(id));
     }
 
     private static class TextureData{

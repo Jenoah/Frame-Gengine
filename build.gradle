@@ -62,6 +62,55 @@ test {
     useJUnitPlatform()
 }
 
+task buildEditorJar(type: Jar) {
+    group = 'build'
+    description = 'Build a standalone runnable JAR for the editor.'
+
+    // Set the main class for the manifest
+    manifest {
+        attributes(
+                'Main-Class': 'nl.framegengine.editor.EditorLauncher'  // Replace with your main class
+        )
+    }
+
+    // Include compiled classes and runtime dependencies
+    from sourceSets.main.output
+
+    // Include runtime dependencies (jars)
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    archiveBaseName.set('FrameGengine')
+    archiveVersion.set('1.0')
+    archiveExtension.set('jar')
+}
+
+tasks.register('buildEditor', Exec) {
+    group = 'build'
+    description = 'Package the editor using jpackage'
+
+    def resourceDir = file('src/main/resources').absolutePath
+
+    // Adjust input/output paths and options as needed
+    commandLine 'jpackage',
+            '--name', 'FrameGengine Editor',
+            '--input', layout.buildDirectory.dir("libs").get().asFile.absolutePath,
+            '--main-jar', 'FrameGengine-1.0.jar',
+            '--main-class', 'nl.framegengine.editor.EditorLauncher',
+            '--resource-dir', resourceDir,
+            '--copyright', 'Jenoah Kers',
+            '--type', 'app-image',  // 'app-image' or 'dmg' for Mac, 'exe' for Windows installer, etc.
+            '--dest', layout.buildDirectory.dir("builtEditor").get().asFile.absolutePath,
+            '--icon', "textures/FrameGengine_icon.icns",
+            '--java-options', '-XstartOnFirstThread',
+            '--verbose'
+    dependsOn 'buildEditorJar' // ensure your jar is built before packaging
+}
+
 task buildStandaloneJar(type: Jar) {
     group = 'build'
     description = 'Build a standalone runnable JAR for the game.'
@@ -97,7 +146,8 @@ tasks.register('buildGame', Exec) {
     def dest = project.findProperty("customDest") ?: layout.buildDirectory.dir("jpackage").get().asFile.absolutePath
     def fileType = project.findProperty("customFileType") ?: "exe"
     def icon = project.findProperty("customIcon") ?: "textures/FrameGengine_icon.ico"
-
+    def projectFiles = file(project.findProperty("customProjectPath")  ?: "")
+    def gameBuildTmpDir = layout.buildDirectory.dir("Resources").get().asFile
 
     // Adjust input/output paths and options as needed
     commandLine 'jpackage',
@@ -107,7 +157,33 @@ tasks.register('buildGame', Exec) {
             '--main-class', 'nl.framegengine.core.Launcher',
             '--type', fileType,  // 'app-image' or 'dmg' for Mac, 'exe' for Windows installer, etc.
             '--dest', dest,
+            '--app-content', gameBuildTmpDir.absolutePath,
             '--icon', icon,
-            '--verbose'
+            '--java-options', '-XstartOnFirstThread',
+            '--verbose',
+            '--java-options', '-Dapp.mode=compiled'
     dependsOn 'buildStandaloneJar' // ensure your jar is built before packaging
+
+    doFirst {
+
+
+        // Prepare app content here: copy or merge folders into a temp directory
+        delete gameBuildTmpDir
+        copy {
+            from 'textures'
+            into new File(gameBuildTmpDir, "textures")
+        }
+        if (projectFiles.exists()) {
+            copy {
+                from projectFiles
+                into gameBuildTmpDir
+            }
+        } else {
+            logger.info("Project path ${projectFiles.absolutePath} does not exist.")
+        }
+    }
+
+    doLast {
+        delete gameBuildTmpDir // Delete the temporary folder after copying if you want to "move"
+    }
 }

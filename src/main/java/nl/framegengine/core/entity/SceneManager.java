@@ -47,7 +47,13 @@ public class SceneManager {
 
         Scene scene = new Scene();
 
-        InputStream is = new FileInputStream(filePath);
+        Debug.Log("Loading file " + filePath);
+        InputStream is = null;
+        if(EngineSettings.isCompiled) {
+            is = getClass().getResourceAsStream(filePath);
+        }else{
+            is = new FileInputStream(filePath);
+        }
         JsonReader reader = Json.createReader(is);
         JsonObject sceneInfo = reader.readObject();
         scene.deserializeFromJson(sceneInfo.toString());
@@ -67,91 +73,6 @@ public class SceneManager {
         return scene;
     }
 
-
-    /*
-    public Scene loadScene(String filePath) throws Exception {
-        Scene newScene = new Scene();
-
-        if(componentLoader == null){
-            URL inputResourceUrl = new File(EngineSettings.currentProjectDirectory).toURI().toURL();
-            URL compiledResourceUrl = new File(EngineSettings.currentProjectDirectory + File.separator + "/.compiled").toURI().toURL();
-
-            componentLoader = new ComponentLoader(inputResourceUrl.toURI().getPath(), compiledResourceUrl.toURI().getPath());
-        }
-
-        try (InputStream is = new FileInputStream(filePath);
-             JsonReader reader = Json.createReader(is)) {
-            JsonObject sceneInfo = reader.readObject();
-
-            JsonHelper.loadVariableIntoObject(newScene, sceneInfo, new String[]{"gameObjects"});
-            Debug.Log("Loaded fog color is " + newScene.getFogColor());
-
-            // Game Objects
-            sceneInfo.getJsonArray("gameObjects").forEach(goInfoContainer -> {
-                JsonObject goInfo = goInfoContainer.asJsonObject();
-                String goTypeName = GameObject.class.getName();
-                if(JsonHelper.hasJsonKey(goInfo, "class")) goTypeName = goInfo.getString("class");
-
-                GameObject go = null;
-                try {
-                    go = (GameObject) this.getClass().getClassLoader().loadClass(goTypeName).getDeclaredConstructor().newInstance();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-
-                try {
-                    JsonHelper.loadVariableIntoObject(go, goInfo, new String[]{"parentGuid", "class", "meshPath", "texturePath", "isMain"});
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-                go.setGuid(go.getGuid());
-
-                if (JsonHelper.hasJsonKey(goInfo, "meshPath")) {
-                    Set<MeshMaterialSet> meshMaterialSets = OBJLoader.loadOBJModel(goInfo.getString("meshPath"));
-
-                    if(JsonHelper.hasJsonKey(goInfo, "texturePath")){
-                        JsonObject textureInfo = goInfo.getJsonObject("texturePath");
-                        if(!JsonHelper.hasJsonKey(textureInfo, "diffuse")) return;
-                        Material meshMaterial = new Material(ShaderManager.pbrShader);
-                        meshMaterial.setAlbedoTexture(new Texture(EngineSettings.currentProjectDirectory + File.separator + textureInfo.getString("diffuse")));
-                        if(JsonHelper.hasJsonKey(textureInfo, "normal")) meshMaterial.setNormalMap(new Texture(EngineSettings.currentProjectDirectory + File.separator + textureInfo.getString("normal"), false, false, true, true));
-                        if(JsonHelper.hasJsonKey(textureInfo, "roughness")) meshMaterial.setRoughnessMap(new Texture(EngineSettings.currentProjectDirectory + File.separator + textureInfo.getString("roughness"), false, false, true, false));
-                        meshMaterial.setRoughness(.6f);
-                        meshMaterialSets.forEach(meshMaterialSet -> meshMaterialSet.material = meshMaterial);
-                    }
-
-                    RenderComponent renderComponent = new RenderComponent(meshMaterialSets);
-                    go.addComponent(renderComponent);
-                }
-
-                tryAddComponent(goInfo, go);
-
-                switch (go){
-                    case DirectionalLight light -> tryAddLight(light, newScene);
-                    case PointLight light -> tryAddLight(light, newScene);
-                    case SpotLight light -> tryAddLight(light, newScene);
-                    case Camera camera -> {
-                        if(JsonHelper.hasJsonKey(goInfo, "isMain") && goInfo.getBoolean("isMain")) (camera).setAsMain();
-                    }
-                    default -> {}
-                }
-
-                if(JsonHelper.hasJsonKey(goInfo, "parentGuid")) go.setParent(GameObject.getByGUID(goInfo.getString("parentGuid")));
-
-                newScene.addEntity(go, false);
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        newScene.getGameObjects().forEach(go -> go.getComponents().forEach(Component::initiate));
-
-        newScene.updateLights();
-        return newScene;
-    }
-
-    /**/
-
     private void tryAddLight(Light lightObject, Scene scene){
         switch (lightObject) {
             case DirectionalLight directionalLight -> {
@@ -167,27 +88,6 @@ public class SceneManager {
                 scene.addPointLight(pointLight);
             }
             default -> throw new IllegalStateException("Unexpected value: " + lightObject);
-        }
-    }
-
-    private void tryAddComponent(JsonObject jsonObject, GameObject gameObject){
-        if(JsonHelper.hasJsonKey(jsonObject, "components")){
-            jsonObject.getJsonArray("components").forEach(componentInfoContainer -> {
-                JsonObject componentInfo = componentInfoContainer.asJsonObject();
-                if(! JsonHelper.hasJsonKey(componentInfo, "class")) return;
-                String className = componentInfo.getString("class");
-
-                try {
-                    Component component = componentLoader.loadComponent(className);
-                    if(component != null) {
-                        JsonHelper.loadVariableIntoObject(component, componentInfo, new String[]{"class"});
-                        component.setRoot(gameObject);
-                        gameObject.addComponent(component);
-                    }
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
         }
     }
 

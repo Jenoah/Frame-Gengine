@@ -6,8 +6,10 @@ import nl.framegengine.core.utils.FileHelper;
 import nl.framegengine.core.utils.JsonHelper;
 
 import javax.json.*;
-import java.io.File;
-import java.io.StringReader;
+import java.io.*;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.CompletableFuture;
 
 public class EngineSettings {
@@ -16,6 +18,7 @@ public class EngineSettings {
     public static String currentProjectName = "Unknown project";
     public static String currentProjectIconGuid = "";
 
+    public static boolean isCompiled = false;
     private static final String settingsFileName = "/.fgsettings";
 
     public static void saveSettings(){
@@ -31,8 +34,9 @@ public class EngineSettings {
     }
 
     public static void loadSettings() {
-        if(currentProjectDirectory.isEmpty() || !new File(currentProjectDirectory).exists()) return;
+        if (!isCompiled && (currentProjectDirectory.isEmpty() || !new File(currentProjectDirectory).exists())) return;
         String saveFileContent = FileHelper.readFile(currentProjectDirectory + settingsFileName);
+
         if(saveFileContent == null) {
             Debug.LogError("No settings file has been found. Creating...");
             saveSettings();
@@ -45,9 +49,12 @@ public class EngineSettings {
         if (JsonHelper.hasJsonKey(projectInfo, "currentProjectIconGuid")) currentProjectIconGuid = projectInfo.getString("currentProjectIconGuid");
         if (JsonHelper.hasJsonKey(projectInfo, "currentProjectName")) currentProjectName = projectInfo.getString("currentProjectName");
         if(currentProjectName.isBlank()) currentProjectName = FileHelper.getDirectoryName(currentProjectDirectory);
-        saveEngineConfig();
-        ManifestHelper.updateManifest();
-        ManifestHelper.registerManifestListener();
+
+        if(!isCompiled) {
+            saveEngineConfig();
+            ManifestHelper.updateManifest();
+            ManifestHelper.registerManifestListener();
+        }
 
         Debug.Log("Project settings successfully loaded in");
     }
@@ -99,6 +106,24 @@ public class EngineSettings {
         File configDir = new File(userHome, ".framegengine");
         File settingsFile = new File(configDir, "editorconfig.json");
 
+        String appMode = System.getProperty("app.mode", "dev"); // default to dev if not set
+
+        isCompiled = ("compiled".equalsIgnoreCase(appMode));
+        Debug.Log("App compilation is " + isCompiled);
+
+        if(isCompiled) {
+            Path appBundleRoot = null;
+            try{
+                appBundleRoot = getAppBundleRoot();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            currentProjectDirectory = appBundleRoot.resolve("Contents").resolve("Resources").toString();
+            Debug.Log("Current directory set to " + currentProjectDirectory);
+            return;
+        }
+
+
         String saveFileContent = FileHelper.readFile(settingsFile.getAbsolutePath());
         if(saveFileContent == null) {
             Debug.LogError("No editor config found. Creating...");
@@ -124,12 +149,15 @@ public class EngineSettings {
                 File iconPath = new File(ManifestHelper.getPathByGuid(ManifestHelper.manifestFileType.TEXTURE, currentProjectIconGuid));
                 if(iconPath == null || !iconPath.exists() || (iconPath.exists() && !FileHelper.getExtension(iconPath.getPath()).equalsIgnoreCase("icns"))) iconPath = new File("textures/FrameGengine_icon.icns");
                 if(outputDirectory.exists()) FileHelper.deleteDirectory(outputDirectory.toPath());
+                File currentProjectDirectoryFile = new File(currentProjectDirectory);
 
                 String[] command = {"./gradlew",
                         "buildGame",
+                        "--warn",
                         "-PcustomAppName=" + currentProjectName,
                         "-PcustomDest=" + outputDirectory.getPath(),
                         "-PcustomIcon=" + iconPath.getPath(),
+                        "-PcustomProjectPath=" + currentProjectDirectoryFile.getAbsolutePath(),
                         "-PcustomFileType=app-image",
                 };
 
@@ -138,7 +166,21 @@ public class EngineSettings {
                 pb.redirectErrorStream(true);
                 Process process = pb.start();
 
+                Thread outputReader = new Thread(() -> {
+                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            System.out.println(line); // Print to Java console or your logger
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+                outputReader.start();
+
                 int exitCode = process.waitFor();
+                outputReader.join(); // Wait until stream reading is done
+
                 if (exitCode == 0) {
                     Debug.Log("Build completed successfully.");
                     FileHelper.openDirectory(outputDirectory);
@@ -197,5 +239,20 @@ public class EngineSettings {
 
     public static String getSettingsFileName(){
         return settingsFileName;
+    }
+
+    private static Path getAppBundleRoot() throws URISyntaxException {
+        // Get path of the running jar or folder for your class
+        Path classLocation = Paths.get(EngineSettings.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+
+        // macOS app bundles usually look like YourApp.app/Contents/Java/yourjar.jar
+        // So move up three levels to the .app folder:
+        Path appBundle = classLocation.getParent().getParent().getParent();
+
+        if (appBundle.toString().endsWith(".app")) {
+            return appBundle;
+        }
+
+        return null; // Not running inside an app bundle
     }
 }
