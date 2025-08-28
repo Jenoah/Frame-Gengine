@@ -54,6 +54,7 @@ uniform sampler2D roughnessMap;
 uniform sampler2D metallicMap;
 uniform sampler2D aoMap;
 uniform sampler2D shadowMap;
+uniform samplerCube skyboxTexture;
 uniform int hasAlbedoMap = 0;
 uniform int hasNormalMap = 0;
 uniform int hasRoughnessMap = 0;
@@ -136,8 +137,18 @@ float getMetallic()  { return (hasMetallicMap == 1)  ? texture(metallicMap, UV).
 float getAO()        { return (hasAOMap == 1)        ? texture(aoMap, UV).r        : 1.0; }
 
 // UNIFIED PBR LIGHT FUNCTION
-vec3 calculatePBRLight(vec3 lightColor, vec3 lightDirection, float attenuation, vec3 N, vec3 V, vec3 albedo, float roughness, float metallic, float shadowInfluence)
-{
+vec3 calculatePBRLight(
+vec3 lightColor,
+vec3 lightDirection,
+float attenuation,
+vec3 N, // Normal
+vec3 V, // View dir
+vec3 albedo,
+float roughness,
+float metallic,
+float shadowInfluence,
+vec3 skybox // Skybox color for the reflected vector
+) {
     vec3 L = normalize(lightDirection);
     vec3 H = normalize(V + L);
 
@@ -146,11 +157,11 @@ vec3 calculatePBRLight(vec3 lightColor, vec3 lightDirection, float attenuation, 
     float NdotH = max(dot(N, H), 0.0);
     float VdotH = max(dot(V, H), 0.0);
 
-    // Fresnel
+    // Fresnel factor (Schlick)
     vec3 F0 = mix(vec3(material.reflectance), albedo, metallic);
     vec3 F = fresnelSchlick(VdotH, F0);
 
-    // Distribution & Geometry
+    // Microfacet distribution & geometry
     float D = DistributionGGX(N, H, roughness);
     float G = GeometrySmith(N, V, L, roughness);
 
@@ -163,8 +174,16 @@ vec3 calculatePBRLight(vec3 lightColor, vec3 lightDirection, float attenuation, 
     vec3 kD = (1.0 - kS) * (1.0 - metallic);
     vec3 diffuse = kD * albedo / PI;
 
-    // Final
-    return (diffuse + specular) * lightColor * NdotL * attenuation * shadowInfluence;
+    // *** Skybox Reflection - simple, energy conserving blend ***
+    float reflectance = max(max(F0.r, F0.g), F0.b);
+    float environmentFactor = (1.0 - roughness) * F.r * reflectance; // sharper with low roughness
+    vec3 reflection = skybox * environmentFactor;
+
+    // Final output
+    vec3 lightResult = (diffuse + specular) * lightColor * NdotL * attenuation * shadowInfluence;
+
+    // Lerp between normal lighting and added environment reflection
+    return lightResult + reflection;
 }
 
 float calculateShadowFactor(){
@@ -202,15 +221,17 @@ void main()
     vec3 ambient = ambientColor * albedo * irradiance * ao;
 
     //Shadow calculation
-
     float shadowFactor = calculateShadowFactor();
+
+    //Skybox
+    vec3 skybox = texture(skyboxTexture, reflect(-V, N)).rgb;
 
     // Directional Light
     vec3 result = ambient;
     if (directionalLight.intensity > 0.0) {
         vec3 L = normalize(-directionalLight.direction);
         float attenuation = directionalLight.intensity;
-        result += calculatePBRLight(directionalLight.color, L, attenuation, N, V, albedo, rough, metal, shadowFactor);
+        result += calculatePBRLight(directionalLight.color, L, attenuation, N, V, albedo, rough, metal, shadowFactor, skybox);
     }
 
     // Point Lights
@@ -222,7 +243,7 @@ void main()
             (pointLights[i].constant +
             pointLights[i].linear * distance +
             pointLights[i].exponent * distance * distance);
-            result += calculatePBRLight(pointLights[i].color, L, attenuation, N, V, albedo, rough, metal, shadowFactor);
+            result += calculatePBRLight(pointLights[i].color, L, attenuation, N, V, albedo, rough, metal, shadowFactor, skybox);
         }
     }
 
@@ -244,7 +265,7 @@ void main()
             attenuation *= intensity;
 
             if (attenuation > 0.0)
-            result += calculatePBRLight(spotLights[i].color, L, attenuation, N, V, albedo, rough, metal, shadowFactor);
+            result += calculatePBRLight(spotLights[i].color, L, attenuation, N, V, albedo, rough, metal, shadowFactor, skybox);
         }
     }
 

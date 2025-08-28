@@ -2,6 +2,7 @@ package nl.framegengine.core.shaders;
 
 import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.rendering.MeshMaterialSet;
+import nl.framegengine.core.skybox.SkyboxRenderer;
 import org.lwjgl.opengl.*;
 
 public class PBRShader extends SimpleLitShader{
@@ -27,6 +28,7 @@ public class PBRShader extends SimpleLitShader{
         createUniform("aoMap");
         createUniform("hasAOMap");
         createUniform("useInstancing");
+        createUniform("skyboxTexture");
     }
 
     @Override
@@ -75,5 +77,9 @@ public class PBRShader extends SimpleLitShader{
         }else{
             this.setUniform("hasAOMap", 0);
         }
+
+        GL13.glActiveTexture(GL13.GL_TEXTURE5);
+        GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, SkyboxRenderer.skyboxTextureID);
+        this.setUniform("skyboxTexture", 5);
     }
 }
