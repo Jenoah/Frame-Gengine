@@ -97,12 +97,14 @@ public class SkyboxRenderer {
 
     private void prepare(){
         GL11.glDepthMask(false);
+        GL11.glDepthFunc(GL11.GL_LEQUAL);
         if (recordMetrics) metrics.recordShaderBind();
         shader.bind();
     }
 
     private void endRendering(){
         GL11.glDepthMask(true);
+        GL11.glDepthFunc(GL11.GL_LESS);
         shader.unbind();
     }
 
