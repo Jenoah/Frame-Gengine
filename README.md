@@ -40,4 +40,4 @@ This demo scene includes a procedurally generated world. This is done with chunk
 <img width='100%' src="git-files/images/preview_proc_gen_lighting_shadow_pbr.gif" alt="preview of procedural generation in the Java game engine" />
 </p>
 
-![preview image of editor](git-files/images/editor_preview1.png)
+![preview image of editor](git-files/images/editor_preview2.jpeg)
