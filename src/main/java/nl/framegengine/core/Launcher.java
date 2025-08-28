@@ -22,6 +22,7 @@ public class Launcher {
             Debug.LogError("Error: " + e.getMessage());
             e.printStackTrace();
         }
+        System.exit(0);
     }
 
     public static GameInstance getGame() {

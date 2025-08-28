@@ -160,7 +160,7 @@ public class WindowManager {
     public void cleanUp() {
         instance = null;
         if(!standalone) return;
-        GLFW.glfwDestroyWindow(window);
+        GLFW.glfwDestroyWindow(GLFW.glfwGetCurrentContext());
         GLFW.glfwTerminate();
     }
 

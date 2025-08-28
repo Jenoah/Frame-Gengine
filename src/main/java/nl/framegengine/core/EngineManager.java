@@ -19,10 +19,7 @@ public class EngineManager {
     private double lastLoopTime = 0.0;
     private float fpsUpdateTimer = 0.0f;
     private static int fps = 0;
-    public static int frameCount = 0;
     private static float deltaTime = 0.0f;
-    private static float frameTime = 0.0f;
-    private static float spareTime = 0.0f;
 
     private static final float MIN_DELTA_TIME = 1.0f / 10000f; // 1ms minimum, adjust as needed
 
@@ -64,13 +61,18 @@ public class EngineManager {
                 renderSingleFrame();
             }
         } finally {
-            Debug.Log("Stopping engine");
-            cleanup();
+            if(running){
+                Debug.Log("Stopping engine");
+                cleanup();
+            }
         }
     }
 
     private void renderSingleFrame(){
-        if (window.windowShouldClose()) stop();
+        if (window.windowShouldClose() && running){
+            stop();
+            return;
+        }
         updateDeltaTime();
         handleInput();
         updateGame();
@@ -79,6 +81,7 @@ public class EngineManager {
     }
 
     public void stop() {
+        if(!running) return;
         Debug.Log("Stopping engine...");
         running = false;
         cleanup();
