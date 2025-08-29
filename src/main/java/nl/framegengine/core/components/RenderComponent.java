@@ -185,8 +185,11 @@ public class RenderComponent extends Component {
         /* */
 
         if(!meshMaterialSets.isEmpty()){
-            String meshPath = meshMaterialSets.stream().findFirst().get().getMesh().getMeshPath();
+            Mesh mesh = meshMaterialSets.stream().findFirst().get().getMesh();
+            float uvScale = mesh.getUvScale();
+            String meshPath = mesh.getMeshPath();
             Material mat = meshMaterialSets.stream().findFirst().get().material;
+            mesh = null;
             meshMaterialSets.clear();
             if(meshPath.isEmpty() || meshPath.isBlank()){
                 return this;
@@ -194,6 +197,7 @@ public class RenderComponent extends Component {
 
             Set<MeshMaterialSet> mms = OBJLoader.loadOBJModel(meshPath);
             mms.forEach(meshMaterialSet -> {
+                if(uvScale != 1f) meshMaterialSet.getMesh().setUVScale(uvScale);
                 meshMaterialSet.setRoot(getRoot());
                 meshMaterialSet.material = mat;
             });

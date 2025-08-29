@@ -41,6 +41,7 @@ public class Mesh implements IJsonSerializable {
 
     private boolean isVisible = true;
     private boolean isStatic = true;
+    protected float uvScale = 1f;
 
     //Instancing
     private boolean isInstanced = false;
@@ -422,6 +423,7 @@ public class Mesh implements IJsonSerializable {
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 
         this.uvs = updatedUVs;
+        this.uvScale = uvScale;
     }
 
     public void setNormals(Vector3f[] normals){
@@ -491,6 +493,8 @@ public class Mesh implements IJsonSerializable {
     public String getMeshPath() {
         return meshPath;
     }
+
+    public final float getUvScale() { return uvScale; }
 
     public final int getInstanceVBOID(){
         return instanceVBOID;
@@ -701,6 +705,7 @@ public class Mesh implements IJsonSerializable {
         } catch (Exception e) {
             Debug.LogError("Error loading in data: " + e.getMessage());
         }
+
         return this;
     }
 
