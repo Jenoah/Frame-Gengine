@@ -12,9 +12,12 @@ out vec2 UV;
 out mat3 TBN;
 out float fogFactor;
 out vec4 shadowCoords;
+out vec3 reflectionDirection;
+out vec3 viewDirection;
 
 //TODO: CALC TANGENT LIGHT POSITION, VIEWPOSITION AND FRAG POSITION IN VERTEX SHADER INSTEAD OF RECALCULATING FOR FRAGMENT AND JUST LET IT LERP BETWEEN AUTOMATICALLY
 
+uniform vec3 viewPosition;
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
@@ -43,6 +46,9 @@ void main(){
 
     fragPosition = worldPosition.xyz;
     UV = textureCoords;
+
+    viewDirection = normalize(worldPosition.xyz - viewPosition);
+    reflectionDirection = reflect(viewDirection, N);
 
     float cameraDistance = length(cameraObjectPosition.xyz);
     fogFactor = clamp(exp(-pow((cameraDistance*fogDensity), fogGradient)), 0.0, 1.0);

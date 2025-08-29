@@ -52,6 +52,9 @@ public class SimpleLitShader extends Shader {
         createUniform("shadowPCFCount");
         createUniform("shadowMapSize");
 
+        createUniform("pointLightCount");
+        createUniform("spotLightCount");
+
         createDirectionalLightUniform("directionalLight");
         createPointLightArrayUniform("pointLights", 5);
         createSpotLightArrayUniform("spotLights", 5);
@@ -219,6 +222,8 @@ public class SimpleLitShader extends Shader {
         //Lighting
         setUniform("ambientColor", Constants.AMBIENT_COLOR);
         setUniform("specularPower", Constants.SPECULAR_POWER);
+        setUniform("pointLightCount", SceneManager.currentScene != null ? SceneManager.currentScene.getPointLights().length : 0);
+        setUniform("spotLightCount", SceneManager.currentScene != null ? SceneManager.currentScene.getSpotLights().length : 0);
 
         //Camera
         setUniform("projectionMatrix", window.getProjectionMatrix());

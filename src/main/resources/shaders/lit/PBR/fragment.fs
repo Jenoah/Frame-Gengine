@@ -8,6 +8,8 @@ in vec3 fragPosition;
 in float fogFactor;
 in mat3 TBN;
 in vec4 shadowCoords;
+in vec3 reflectionDirection;
+in vec3 viewDirection;
 
 out vec4 color;
 
@@ -61,14 +63,15 @@ uniform int hasRoughnessMap = 0;
 uniform int hasMetallicMap = 0;
 uniform int hasAOMap;
 uniform float metallic = .1;
-//uniform float roughness = .2;
 uniform float specularPower = 0;
 uniform float shadowBias;
 uniform int shadowPCFCount = 2;
 uniform int shadowMapSize;
 
+uniform int pointLightCount = 0;
+uniform int spotLightCount = 0;
+
 uniform vec3 ambientColor;
-uniform vec3 viewPosition;
 uniform vec3 fogColor;
 
 uniform DirectionalLight directionalLight;
@@ -97,7 +100,7 @@ float DistributionGGX(vec3 N, vec3 H, float roughness)
 float GeometrySchlickGGX(float NdotV, float roughness)
 {
     float r = roughness + 1.0;
-    float k = (r * r) / 8.0;
+    float k = (r * r) * 0.125;
 
     return NdotV / (NdotV * (1.0 - k) + k);
 }
@@ -124,8 +127,7 @@ vec3 getNormal()
 {
     if (hasNormalMap == 1) {
         vec3 normalSample = texture(normalMap, UV).rgb;
-        normalSample = normalSample * 2.0 - 1.0;
-        normalSample = normalize(normalSample);
+        normalSample = normalize(normalSample * 2.0 - 1.0);
         return normalize(TBN * normalSample);
     } else {
         return normalize(TBN[2]);
@@ -211,7 +213,7 @@ void main()
     vec4 albedoSample = getAlbedo();
     vec3 albedo = albedoSample.rgb;
     vec3 N = getNormal();
-    vec3 V = normalize(viewPosition - fragPosition);
+    vec3 V = -normalize(viewDirection);
 
     float rough = clamp((1 - getRoughness()), 0.05, 1.0); // avoid 0
     float metal = clamp(getMetallic(), 0.0, 1.0);
@@ -224,7 +226,7 @@ void main()
     float shadowFactor = calculateShadowFactor();
 
     //Skybox
-    vec3 skybox = texture(skyboxTexture, reflect(-V, N)).rgb;
+    vec3 skybox = texture(skyboxTexture, reflectionDirection).rgb;
 
     // Directional Light
     vec3 result = ambient;
@@ -235,7 +237,7 @@ void main()
     }
 
     // Point Lights
-    for (int i = 0; i < MAXIMUM_POINT_LIGHTS; ++i) {
+    for (int i = 0; i < pointLightCount; ++i) {
         if (pointLights[i].intensity > 0.0) {
             vec3 L = pointLights[i].position - fragPosition;
             float distance = length(L);
@@ -248,7 +250,7 @@ void main()
     }
 
     // Spot Lights
-    for (int i = 0; i < MAXIMUM_SPOT_LIGHTS; ++i) {
+    for (int i = 0; i < spotLightCount; ++i) {
         if (spotLights[i].intensity > 0.0) {
             vec3 L = spotLights[i].position - fragPosition;
             float distance = length(L);

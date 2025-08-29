@@ -1,5 +1,6 @@
 package nl.framegengine.core;
 
+import nl.framegengine.core.shaders.ShaderManager;
 import nl.framegengine.editor.EngineSettings;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.Scene;
@@ -33,6 +34,8 @@ public class GameInstance implements ILogic{
 
         sceneManager.addScene(level);
         sceneManager.setCurrentScene(0);
+
+        ShaderManager.updateGenericUniforms();
     }
 
     @Override

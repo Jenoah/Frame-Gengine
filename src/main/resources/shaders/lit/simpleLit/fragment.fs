@@ -56,6 +56,9 @@ uniform float shadowBias;
 uniform int shadowPCFCount = 2;
 uniform int shadowMapSize;
 
+uniform int pointLightCount = 0;
+uniform int spotLightCount = 0;
+
 uniform Material material;
 uniform DirectionalLight directionalLight;
 uniform PointLight pointLights[MAXIMUM_POINT_LIGHTS];
@@ -184,13 +187,13 @@ void main() {
     //Directional Light
     outColor = calculateDirectionalLight(directionalLight);
 
-    for(int i = 0; i < MAXIMUM_POINT_LIGHTS; i++){
+    for(int i = 0; i < pointLightCount; i++){
         if(pointLights[i].intensity > 0){
             outColor += calculatePointLight(pointLights[i]);
         }
     }
 
-    for(int i = 0; i < MAXIMUM_SPOT_LIGHTS; i++){
+    for(int i = 0; i < spotLightCount; i++){
         if(spotLights[i].intensity > 0){
             outColor += calculateSpotLight(spotLights[i]);
         }

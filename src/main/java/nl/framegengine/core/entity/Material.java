@@ -22,6 +22,7 @@ public class Material implements IJsonSerializable {
 
     protected float reflectance = 0.04f;
     protected float roughness = 0.1f;
+    protected float tilingScale = 1;
     protected Texture albedoTexture = null;
     protected Texture normalMap = null;
     protected Texture roughnessMap = null;
@@ -54,6 +55,7 @@ public class Material implements IJsonSerializable {
         this.metallicMap = material.getMetallicMap();
         this.aoMap = material.getAoMap();
         this.roughness = material.getRoughness();
+        this.tilingScale = material.getTilingScale();
     }
 
     public Material(Shader shader, Texture albedoTexture){
@@ -85,6 +87,11 @@ public class Material implements IJsonSerializable {
 
     public Material setRoughness(float roughness){
         this.roughness = Math.clamp(0.01f, 1f, roughness);
+        return this;
+    }
+
+    public Material setTilingScale(float tilingScale){
+        this.tilingScale = Math.max(0.001f, tilingScale);
         return this;
     }
 
@@ -159,6 +166,8 @@ public class Material implements IJsonSerializable {
     public final float getRoughness(){
         return roughness;
     }
+
+    public final float getTilingScale() { return tilingScale; }
 
     public final Texture getAlbedoTexture() {
         return albedoTexture;

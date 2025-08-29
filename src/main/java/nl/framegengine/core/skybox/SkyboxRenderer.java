@@ -81,12 +81,15 @@ public class SkyboxRenderer {
         if (recordMetrics) metrics.recordStateChange();
         shader.prepare(mainCamera);
         if (recordMetrics) metrics.recordVaoBind();
+
         GL30.glBindVertexArray(cube.getId());
         GL20.glEnableVertexAttribArray(0);
         GL13.glActiveTexture(GL13.GL_TEXTURE0);
         GL11.glBindTexture(GL13.GL_TEXTURE_CUBE_MAP, skyboxTextureID);
+
         if (recordMetrics) metrics.recordDrawCall();
         GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, cube.getMesh().getVertexCount());
+
         GL20.glDisableVertexAttribArray(0);
         GL30.glBindVertexArray(0);
         endRendering();
