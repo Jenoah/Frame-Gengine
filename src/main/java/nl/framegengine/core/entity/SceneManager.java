@@ -111,7 +111,7 @@ public class SceneManager {
         fogColor = currentScene.getFogColor();
         fogDensity = currentScene.getFogDensity();
         fogGradient = currentScene.getFogGradient();
-        Debug.Log("Loading " + currentScene.getLevelName());
+        Debug.log("Loading " + currentScene.getLevelName());
     }
 
     public void cleanUp(){

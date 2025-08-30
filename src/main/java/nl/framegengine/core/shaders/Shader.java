@@ -1,9 +1,9 @@
 package nl.framegengine.core.shaders;
 
 import nl.framegengine.core.entity.Camera;
-import nl.framegengine.core.WindowManager;
-import nl.framegengine.core.entity.Material;
-import nl.framegengine.core.rendering.MeshMaterialSet;
+import nl.framegengine.core.engine.WindowManager;
+import nl.framegengine.core.visual.Material;
+import nl.framegengine.core.visual.MeshMaterialSet;
 import nl.framegengine.core.utils.FileHelper;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;

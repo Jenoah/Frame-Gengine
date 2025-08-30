@@ -1,5 +1,5 @@
 package nl.framegengine.core.shaders;
-import nl.framegengine.core.rendering.MeshMaterialSet;
+import nl.framegengine.core.visual.MeshMaterialSet;
 import nl.framegengine.core.utils.Transformation;
 import org.joml.Matrix4f;
 

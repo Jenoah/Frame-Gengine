@@ -1,9 +1,9 @@
 package nl.framegengine.core.entity;
 
-import nl.framegengine.core.IJsonSerializable;
-import nl.framegengine.core.ModelManager;
-import nl.framegengine.core.MouseInput;
-import nl.framegengine.core.WindowManager;
+import nl.framegengine.core.utils.IJsonSerializable;
+import nl.framegengine.core.visual.ModelManager;
+import nl.framegengine.core.input.MouseInput;
+import nl.framegengine.core.engine.WindowManager;
 import nl.framegengine.core.components.Component;
 import nl.framegengine.core.fonts.fontMeshCreator.FontType;
 import nl.framegengine.core.fonts.fontMeshCreator.GUIText;
@@ -58,7 +58,7 @@ public class Scene implements IJsonSerializable {
 
     public void update(MouseInput mouseInput) {
         for (GameObject rootGameObject : rootGameObjects.stream().toList()) {
-            rootGameObject.OnUpdateTransform();
+            rootGameObject.onUpdateTransform();
         }
 
         for (GameObject gameObject : gameObjects.stream().toList()) {

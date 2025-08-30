@@ -2,9 +2,9 @@ package nl.framegengine.core.lighting;
 
 import nl.framegengine.core.components.RenderComponent;
 import nl.framegengine.core.entity.GameObject;
-import nl.framegengine.core.entity.Material;
-import nl.framegengine.core.entity.Texture;
-import nl.framegengine.core.loaders.PrimitiveLoader;
+import nl.framegengine.core.visual.Material;
+import nl.framegengine.core.visual.Texture;
+import nl.framegengine.core.modelLoaders.PrimitiveLoader;
 import nl.framegengine.core.shaders.ShaderManager;
 import nl.framegengine.core.utils.JsonHelper;
 import org.joml.Vector3f;

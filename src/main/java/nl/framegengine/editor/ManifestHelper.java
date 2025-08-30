@@ -396,19 +396,13 @@ public class ManifestHelper {
         }
 
         @Override
-        public void onDirectoryChange(File file) {
-
-        }
+        public void onDirectoryChange(File file) {}
 
         @Override
-        public void onDirectoryCreate(File file) {
-
-        }
+        public void onDirectoryCreate(File file) {}
 
         @Override
-        public void onDirectoryDelete(File file) {
-
-        }
+        public void onDirectoryDelete(File file) {}
 
         @Override
         public void onFileChange(File file) {

@@ -1,6 +1,6 @@
 package nl.framegengine.customScripts;
 
-import nl.framegengine.core.EngineManager;
+import nl.framegengine.core.engine.EngineManager;
 import nl.framegengine.core.components.Component;
 import nl.framegengine.core.utils.Constants;
 import nl.framegengine.core.utils.ObjectPool;

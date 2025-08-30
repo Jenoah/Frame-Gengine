@@ -1,6 +1,5 @@
 package nl.framegengine.core.utils;
 
-import nl.framegengine.core.IJsonSerializable;
 import nl.framegengine.core.components.Component;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.GameObject;
@@ -220,7 +219,7 @@ public class JsonHelper {
                 break;
             case ARRAY:
                 JsonArray jsonArray = jsonValue.asJsonArray();
-                Debug.Log("Array is " + jsonArray.toString());
+                Debug.log("Array is " + jsonArray.toString());
                 jsonArray.forEach(jsonArrayItem -> {
 
                 });
@@ -278,7 +277,6 @@ public class JsonHelper {
         return objectInfo.build();
     }
 
-    @SuppressWarnings("unchecked")
     public static void addPropertyToJsonObject(JsonObjectBuilder jsonObjectBuilder, String name, Object object) {
         switch (object) {
             case Vector3f vector -> jsonObjectBuilder.add(name, JsonHelper.vector3ToJsonObject(vector));
@@ -317,7 +315,6 @@ public class JsonHelper {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     public static void addPropertyToJsonArray(JsonArrayBuilder jsonArrayBuilder, Object object) {
         switch (object) {
             case Vector3f vector -> jsonArrayBuilder.add(JsonHelper.vector3ToJsonObject(vector));

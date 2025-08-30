@@ -6,8 +6,8 @@ import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import nl.framegengine.core.rendering.RenderManager;
 import nl.framegengine.editor.*;
-import nl.framegengine.core.EngineManager;
-import nl.framegengine.core.WindowManager;
+import nl.framegengine.core.engine.EngineManager;
+import nl.framegengine.core.engine.WindowManager;
 import nl.framegengine.core.debugging.Debug;
 
 public class GamePanel extends EditorPanel {
@@ -76,7 +76,7 @@ public class GamePanel extends EditorPanel {
 
     public void startGame(){
         if(EngineSettings.currentLevelPath.isEmpty()){
-            Debug.LogError("Cannot start game. No level selected");
+            Debug.logError("Cannot start game. No level selected");
             return;
         }
         if(editorGameLauncher == null) {

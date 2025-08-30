@@ -1,6 +1,6 @@
 package nl.framegengine.core.shaders.postProcessing.effects;
 
-import nl.framegengine.core.rendering.ImageRenderer;
+import nl.framegengine.core.rendering.renderers.ImageRenderer;
 import nl.framegengine.core.shaders.postProcessing.PPFXCombineShader;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;

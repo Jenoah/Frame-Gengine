@@ -8,7 +8,7 @@ public class Debug {
 
     private static final List<LogEntry> logHistory = new ArrayList<>();
 
-    public static void Log(String message){
+    public static void log(String message){
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 
         // Find the caller's class and line number (index 2 is the caller of Log())
@@ -24,7 +24,7 @@ public class Debug {
         System.out.println(debugMessage);
     }
 
-    public static void LogError(String message){
+    public static void logError(String message){
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 
         StackTraceElement caller = stackTrace[2];

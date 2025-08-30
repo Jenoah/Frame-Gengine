@@ -37,7 +37,7 @@ public class SimplexNoise {  // Simplex noise in 2D, 3D and 4D
         p=p_supply.clone();
 
         int seed = SimplexNoise.RANDOMSEED;
-        Debug.Log("Noise seed is: " + seed);
+        Debug.log("Noise seed is: " + seed);
 
         //if (seed==RANDOMSEED){
         //    Random rand=new Random();

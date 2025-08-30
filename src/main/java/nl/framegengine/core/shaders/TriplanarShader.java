@@ -1,7 +1,7 @@
 package nl.framegengine.core.shaders;
 
 import nl.framegengine.core.entity.Camera;
-import nl.framegengine.core.rendering.MeshMaterialSet;
+import nl.framegengine.core.visual.MeshMaterialSet;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 

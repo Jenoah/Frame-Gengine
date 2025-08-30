@@ -1,12 +1,17 @@
 package nl.framegengine.core.rendering;
 
+import nl.framegengine.core.rendering.renderers.ComponentRenderer;
+import nl.framegengine.core.rendering.renderers.DebugRenderer;
+import nl.framegengine.core.rendering.renderers.PostProcessing;
+import nl.framegengine.core.rendering.shadow.ShadowRenderer;
+import nl.framegengine.core.rendering.utils.FrameBuffer;
 import nl.framegengine.editor.EditorWindow;
 import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.components.RenderComponent;
 import nl.framegengine.core.debugging.RenderMetrics;
 import nl.framegengine.core.fonts.fontRendering.FontRenderer;
 import nl.framegengine.core.gui.GuiRenderer;
-import nl.framegengine.core.WindowManager;
+import nl.framegengine.core.engine.WindowManager;
 import nl.framegengine.core.entity.Scene;
 import nl.framegengine.core.skybox.SkyboxRenderer;
 import nl.framegengine.core.utils.Constants;
@@ -139,7 +144,7 @@ public class RenderManager {
     private void regenerateFrameBuffer(){
         frameBuffer = new FrameBuffer(window.getWidth(), window.getHeight(), FrameBuffer.DEPTH_RENDER_BUFFER);
         if(!window.isStandalone()){
-            editorBuffer = new FrameBuffer(window.getWidth(), window.getHeight(), FrameBuffer.DEPTH_RENDER_BUFFER);
+            editorBuffer = new FrameBuffer(window.getWidth(), window.getHeight(), FrameBuffer.NONE);
             EditorWindow.getInstance().setGameFBOID(editorBuffer.getColourTexture());
         }
     }

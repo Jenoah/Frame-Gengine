@@ -1,11 +1,11 @@
 package nl.framegengine.core.components;
 
-import nl.framegengine.core.IJsonSerializable;
+import nl.framegengine.core.utils.IJsonSerializable;
 import nl.framegengine.core.entity.GameObject;
-import nl.framegengine.core.entity.Material;
-import nl.framegengine.core.entity.Mesh;
-import nl.framegengine.core.loaders.OBJLoader.OBJLoader;
-import nl.framegengine.core.rendering.MeshMaterialSet;
+import nl.framegengine.core.visual.Material;
+import nl.framegengine.core.visual.Mesh;
+import nl.framegengine.core.modelLoaders.OBJLoader.OBJLoader;
+import nl.framegengine.core.visual.MeshMaterialSet;
 import nl.framegengine.core.rendering.RenderManager;
 import nl.framegengine.core.shaders.ShaderManager;
 import nl.framegengine.core.utils.AABB;

@@ -221,7 +221,7 @@ public class FileHelper {
                 sb.append(fileReader.nextLine());
             }
         } catch (Exception e) {
-            Debug.LogError("Error reading file: " + e.getMessage());
+            Debug.logError("Error reading file: " + e.getMessage());
         }
 
         return sb.toString();
@@ -240,13 +240,13 @@ public class FileHelper {
             fileOutput.write(content);
 
         } catch (IOException e) {
-            Debug.Log("Cannot write contents to file at " + targetPath + ". " + e.getMessage());
+            Debug.log("Cannot write contents to file at " + targetPath + ". " + e.getMessage());
         }finally {
             if(fileOutput != null){
                 try {
                     fileOutput.close();
                 } catch (IOException e) {
-                    Debug.Log("Cannot write contents to file at " + targetPath + ". " + e.getMessage());
+                    Debug.log("Cannot write contents to file at " + targetPath + ". " + e.getMessage());
                 }
             }
         }
@@ -263,9 +263,9 @@ public class FileHelper {
                 selectedDirectory = outPath.getStringUTF8(0);
                 NFD_FreePath(outPath.get(0));
             } else if (result == NFD_CANCEL) {
-                Debug.LogError("User canceled directory selection.");
+                Debug.logError("User canceled directory selection.");
             } else {
-                Debug.LogError("Something went wrong selecting a directory: " + NFD_GetError());
+                Debug.logError("Something went wrong selecting a directory: " + NFD_GetError());
             }
         }
 
@@ -342,7 +342,7 @@ public class FileHelper {
             if (allContents != null) {
                 for (File child : allContents) {
                     if (!deleteFile(child)) {
-                        Debug.LogError("Could not delete " + child.getPath());
+                        Debug.logError("Could not delete " + child.getPath());
                         return false;
                     }
                 }

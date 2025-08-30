@@ -1,14 +1,9 @@
 package nl.framegengine.core.utils;
 
-import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.json.JsonValue;
 import java.util.List;
 
 public class Conversion {
@@ -35,7 +30,7 @@ public class Conversion {
         return vectors;
     }
 
-    public static float[] V2toFloatArray(List<Vector2f> vectors){
+    public static float[] v2ToFloatArray(List<Vector2f> vectors){
         float[] vectorsStripped = new float[vectors.size() * 2];
         for (int i = 0; i < vectors.size(); i++) {
             vectorsStripped[i * 2] = vectors.get(i).x;
@@ -54,7 +49,7 @@ public class Conversion {
         return vectorsStripped;
     }
 
-    public static float[] V3toFloatArray(List<Vector3f> vectors){
+    public static float[] v3ToFloatArray(List<Vector3f> vectors){
         float[] vectorsStripped = new float[vectors.size() * 3];
         int i = 0;
         for(Vector3f vector : vectors){
@@ -77,7 +72,7 @@ public class Conversion {
         return vectorsStripped;
     }
 
-    public static int[] ToIntArray(List<Integer> integerArray){
+    public static int[] toIntArray(List<Integer> integerArray){
         return integerArray.stream().mapToInt(i->i).toArray();
     }
 
@@ -101,15 +96,15 @@ public class Conversion {
         return floatArray;
     }
 
-    public static String V3ToString(Vector3f vector){
-        return "X " + FloatTwoDecimals(vector.x) + ", Y " + FloatTwoDecimals(vector.y) + ", Z " + FloatTwoDecimals(vector.z);
+    public static String v3ToString(Vector3f vector){
+        return "X " + floatTwoDecimals(vector.x) + ", Y " + floatTwoDecimals(vector.y) + ", Z " + floatTwoDecimals(vector.z);
     }
 
-    public static String V2ToString(Vector2f vector){
-        return "X " + FloatTwoDecimals(vector.x) + ", Y " + FloatTwoDecimals(vector.y);
+    public static String v2ToString(Vector2f vector){
+        return "X " + floatTwoDecimals(vector.x) + ", Y " + floatTwoDecimals(vector.y);
     }
 
-    public static String FloatTwoDecimals(float number){
+    public static String floatTwoDecimals(float number){
         boolean isNegative = number < 0;
 
         int intPart = (int) Math.abs(number);  // Get absolute value for the integer part
@@ -119,11 +114,11 @@ public class Conversion {
         return (isNegative ? "-" : "") + intPart + "." + (decimalPart < 10 ? "0" : "") + decimalPart;
     }
 
-    public static Vector3i ToVector3i(Vector3f a){
+    public static Vector3i toVector3I(Vector3f a){
         return new Vector3i((int)a.x, (int)a.y, (int)a.z);
     }
 
-    public static Vector3f ToVector3f(Vector3i a){
+    public static Vector3f toVector3F(Vector3i a){
         return new Vector3f(a.x, a.y, a.z);
     }
 

@@ -1,7 +1,7 @@
 package nl.framegengine.core.shaders;
 
 import nl.framegengine.core.entity.Camera;
-import nl.framegengine.core.rendering.MeshMaterialSet;
+import nl.framegengine.core.visual.MeshMaterialSet;
 import org.joml.Vector2f;
 
 public class TerrainShader extends Shader {

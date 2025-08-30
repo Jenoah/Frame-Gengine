@@ -1,13 +1,13 @@
 package nl.framegengine.customScripts;
 
-import nl.framegengine.core.ModelManager;
+import nl.framegengine.core.visual.ModelManager;
 import nl.framegengine.core.components.RenderComponent;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.GameObject;
-import nl.framegengine.core.entity.Material;
-import nl.framegengine.core.entity.Mesh;
-import nl.framegengine.core.entity.Model;
-import nl.framegengine.core.rendering.MeshMaterialSet;
+import nl.framegengine.core.visual.Material;
+import nl.framegengine.core.visual.Mesh;
+import nl.framegengine.core.visual.Model;
+import nl.framegengine.core.visual.MeshMaterialSet;
 import nl.framegengine.core.shaders.ShaderManager;
 import nl.framegengine.core.utils.Constants;
 import nl.framegengine.core.utils.ObjectPool;
@@ -174,7 +174,7 @@ public class MarchingChunk {
 
     private int addVertex(Vector3f v) {
         if (vertexCount >= vertices.length) {
-            Debug.LogError("Marching chunk vertexCount exceeds vertex array length");
+            Debug.logError("Marching chunk vertexCount exceeds vertex array length");
         }
 
         vertices[vertexCount++] = v;
@@ -183,7 +183,7 @@ public class MarchingChunk {
 
     private void addTriangle(int idx) {
         if (triangleCount >= triangles.length) {
-            Debug.LogError("Marching chunk triangleCount exceeds triangles array length");
+            Debug.logError("Marching chunk triangleCount exceeds triangles array length");
         }
         triangles[triangleCount++] = idx;
     }

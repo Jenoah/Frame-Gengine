@@ -5,7 +5,7 @@ import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.lighting.DirectionalLight;
 import nl.framegengine.core.lighting.PointLight;
 import nl.framegengine.core.lighting.SpotLight;
-import nl.framegengine.core.rendering.MeshMaterialSet;
+import nl.framegengine.core.visual.MeshMaterialSet;
 import nl.framegengine.core.utils.Constants;
 import nl.framegengine.core.utils.Transformation;
 import org.joml.Matrix4f;

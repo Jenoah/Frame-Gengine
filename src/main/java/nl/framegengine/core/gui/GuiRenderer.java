@@ -1,8 +1,8 @@
 package nl.framegengine.core.gui;
 
-import nl.framegengine.core.ModelManager;
+import nl.framegengine.core.visual.ModelManager;
 import nl.framegengine.core.debugging.RenderMetrics;
-import nl.framegengine.core.entity.Model;
+import nl.framegengine.core.visual.Model;
 import org.joml.Vector2f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;

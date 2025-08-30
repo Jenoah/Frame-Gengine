@@ -1,6 +1,5 @@
 package nl.framegengine.core.utils;
 
-import nl.framegengine.core.IJsonSerializable;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.GameObject;
 
@@ -14,7 +13,7 @@ public class ClassHelper {
             try {
                 Field field = clazz.getDeclaredField(fieldName);
                 field.setAccessible(true);
-                Debug.Log("Found a " + clazz.getSimpleName() + " for " + fieldName + " with value of " + value.toString());
+                Debug.log("Found a " + clazz.getSimpleName() + " for " + fieldName + " with value of " + value.toString());
 
                 if(field.getType() == GameObject.class && value instanceof String guid) {
                     GameObject gameObject = GameObject.getByGUID(guid);
@@ -28,11 +27,11 @@ public class ClassHelper {
             } catch (NoSuchFieldException e) {
                 clazz = clazz.getSuperclass(); // try superclass
             } catch (IllegalAccessException e) {
-                Debug.LogError("Access denied to field: " + fieldName);
+                Debug.logError("Access denied to field: " + fieldName);
                 return;
             }
         }
-        Debug.LogError("Field '" + fieldName + "' not found in class " + instance.getClass().getName());
+        Debug.logError("Field '" + fieldName + "' not found in class " + instance.getClass().getName());
     }
 
     public static void setDeepProperty(Object instance, String propertyPath, Object value) {
@@ -42,7 +41,7 @@ public class ClassHelper {
             for (int i = 0; i < fields.length - 1; i++) {
                 Field field = ClassHelper.findField(currentObj.getClass(), fields[i]);
                 if (field == null) {
-                    Debug.LogError("Field '" + fields[i] + "' not found while traversing " + propertyPath);
+                    Debug.logError("Field '" + fields[i] + "' not found while traversing " + propertyPath);
                     return;
                 }
                 field.setAccessible(true);
@@ -55,13 +54,13 @@ public class ClassHelper {
             }
             Field lastField = ClassHelper.findField(currentObj.getClass(), fields[fields.length - 1]);
             if (lastField == null) {
-                Debug.LogError("Field '" + fields[fields.length - 1] + "' not found in " + currentObj.getClass().getName());
+                Debug.logError("Field '" + fields[fields.length - 1] + "' not found in " + currentObj.getClass().getName());
                 return;
             }
             lastField.setAccessible(true);
             lastField.set(currentObj, value);
         } catch (Exception e) {
-            Debug.LogError("Failed to set property '" + propertyPath + "': " + e.getMessage());
+            Debug.logError("Failed to set property '" + propertyPath + "': " + e.getMessage());
         }
     }
 

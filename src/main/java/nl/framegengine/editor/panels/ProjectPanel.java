@@ -84,7 +84,7 @@ public class ProjectPanel extends EditorPanel {
                 try {
                     FileHelper.openDirectory(new File(path));
                 } catch (IOException e) {
-                    Debug.Log("Cannot open directory: " + e.getMessage());
+                    Debug.log("Cannot open directory: " + e.getMessage());
                 }
 
                 ImGui.closeCurrentPopup();
@@ -98,21 +98,18 @@ public class ProjectPanel extends EditorPanel {
     }
 
     private void selectFile(File selectedFile){
-        Debug.Log("Selecting " + selectedFile.getName());
+        Debug.log("Selecting " + selectedFile.getName());
         try {
             String extension = FileHelper.getExtension(selectedFile.getName());
-            switch (extension){
-                case "lvl":
-                    Debug.Log("Loading level " + selectedFile.getName());
-                    EngineSettings.currentLevelPath = new File(EngineSettings.currentProjectDirectory).toURI().relativize(selectedFile.toURI()).getPath();
-                    EngineSettings.saveSettings();
-                    break;
-                default:
-                    FileHelper.openFile(selectedFile);
-                    break;
+            if (extension.equals("lvl")) {
+                Debug.log("Loading level " + selectedFile.getName());
+                EngineSettings.currentLevelPath = new File(EngineSettings.currentProjectDirectory).toURI().relativize(selectedFile.toURI()).getPath();
+                EngineSettings.saveSettings();
+            } else {
+                FileHelper.openFile(selectedFile);
             }
         } catch (IOException e) {
-            Debug.LogError("Cannot open file: " + e.getMessage());
+            Debug.logError("Cannot open file: " + e.getMessage());
         }
     }
 
