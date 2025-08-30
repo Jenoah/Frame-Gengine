@@ -64,7 +64,7 @@ public class ProjectPanel extends EditorPanel {
 
     private void showContextMenu(String stringID, String path){
         if (ImGui.beginPopupContextItem(stringID)) {
-            ImGui.text("-- Options --");
+            ImGui.separatorText("Options");
             if (ImGui.beginMenu("New")) {
                 if (ImGui.menuItem("Folder")) {
                     ImGuiHelper.setInputFieldModal(name -> createNewDirectory(FileHelper.getDirectoryPath(path), name));
@@ -72,6 +72,10 @@ public class ProjectPanel extends EditorPanel {
                 }
                 if (ImGui.menuItem("Class")) {
                     ImGuiHelper.setInputFieldModal(name -> createNewClass(FileHelper.getDirectoryPath(path), name));
+                    ImGui.closeCurrentPopup();
+                }
+                if (ImGui.menuItem("Material")) {
+                    ImGuiHelper.setInputFieldModal(name -> createNewMaterial(FileHelper.getDirectoryPath(path), name));
                     ImGui.closeCurrentPopup();
                 }
                 if (ImGui.menuItem("Other file")) {
@@ -115,6 +119,10 @@ public class ProjectPanel extends EditorPanel {
 
     private void createNewFile(String path, String fileName){
         FileHelper.writeToFile("", new File(path, fileName).getAbsolutePath());
+    }
+
+    private void createNewMaterial(String path, String fileName){
+        createNewFile(path, fileName + ".mtrl");
     }
 
     private void createNewDirectory(String path, String directoryName){

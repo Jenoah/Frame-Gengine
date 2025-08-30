@@ -140,7 +140,7 @@ public class HierarchyPanel extends EditorPanel {
 
     private void showContextMenuObject(){
         if (ImGui.beginPopupContextItem(contextObjectMenuStrID)) {
-            ImGui.text("-- Object settings --");
+            ImGui.separatorText("Object settings");
             if (ImGui.menuItem("Remove")) {
                 if(SceneManager.currentScene != null){
                     currentlySelectedGameObject.remove();
@@ -160,7 +160,7 @@ public class HierarchyPanel extends EditorPanel {
 
     private void showContextMenuEmpty(){
         if (ImGui.beginPopupContextItem(contextMenuStrID)) {
-            ImGui.text("-- Add new --");
+            ImGui.separatorText("Add new");
             if (ImGui.beginMenu("Shape")) {
                 if (ImGui.menuItem("Cube")) {
                     if(SceneManager.currentScene != null){
