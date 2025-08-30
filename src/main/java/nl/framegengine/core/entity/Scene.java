@@ -57,8 +57,11 @@ public class Scene implements IJsonSerializable {
     public void postStart() { }
 
     public void update(MouseInput mouseInput) {
+        for (GameObject rootGameObject : rootGameObjects.stream().toList()) {
+            rootGameObject.OnUpdateTransform();
+        }
+
         for (GameObject gameObject : gameObjects.stream().toList()) {
-            gameObject.OnUpdateTransform();
             gameObject.update(mouseInput);
         }
     }
@@ -109,7 +112,7 @@ public class Scene implements IJsonSerializable {
         if (gameObjects.contains(gameObject)) return;
 
         gameObjects.add(gameObject);
-        if(gameObject.getParent() != null) this.rootGameObjects.add(gameObject);
+        if(gameObject.getParent() == null) this.rootGameObjects.add(gameObject);
 
         if (gameObject.getChildren() != null) {
             for (GameObject child : gameObject.getChildren()) {
@@ -289,6 +292,14 @@ public class Scene implements IJsonSerializable {
         this.levelName = levelName;
     }
 
+    private void processGameObjects(){
+        rootGameObjects.clear();
+
+        gameObjects.forEach(go -> {
+            if(go.getParent() == null) rootGameObjects.add(go);
+        });
+    }
+
     @Override
     public JsonObject serializeToJson() {
         return null;
@@ -304,6 +315,7 @@ public class Scene implements IJsonSerializable {
                  IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+        processGameObjects();
         return this;
     }
 }

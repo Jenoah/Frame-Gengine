@@ -402,7 +402,10 @@ public class GameObject implements IJsonSerializable {
     }
 
     protected void OnUpdateTransform(){
-        children.forEach(GameObject::OnUpdateTransform);
+        children.forEach(go -> {
+            go.callUpdate();
+            go.OnUpdateTransform();
+        });
     }
 
     public final float getRadius(){
