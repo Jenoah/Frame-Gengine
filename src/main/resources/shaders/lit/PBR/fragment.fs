@@ -8,8 +8,6 @@ in vec3 fragPosition;
 in float fogFactor;
 in mat3 TBN;
 in vec4 shadowCoords;
-in vec3 reflectionDirection;
-in vec3 viewDirection;
 
 out vec4 color;
 
@@ -71,6 +69,7 @@ uniform int shadowMapSize;
 uniform int pointLightCount = 0;
 uniform int spotLightCount = 0;
 
+uniform vec3 viewPosition;
 uniform vec3 ambientColor;
 uniform vec3 fogColor;
 
@@ -213,7 +212,7 @@ void main()
     vec4 albedoSample = getAlbedo();
     vec3 albedo = albedoSample.rgb;
     vec3 N = getNormal();
-    vec3 V = -normalize(viewDirection);
+    vec3 V = normalize(viewPosition - fragPosition);
 
     float rough = clamp((1 - getRoughness()), 0.05, 1.0); // avoid 0
     float metal = clamp(getMetallic(), 0.0, 1.0);
@@ -226,6 +225,7 @@ void main()
     float shadowFactor = calculateShadowFactor();
 
     //Skybox
+    vec3 reflectionDirection = reflect(-V, N);
     vec3 skybox = texture(skyboxTexture, reflectionDirection).rgb;
 
     // Directional Light
