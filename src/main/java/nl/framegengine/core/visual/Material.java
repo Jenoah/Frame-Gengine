@@ -35,11 +35,14 @@ public class Material implements IJsonSerializable {
     protected boolean isTransparent;
 
     protected Shader shader;
+    protected String guid;
 
     public Material(){}
 
     public Material(Shader shader){
         this.shader = shader;
+        setGuid();
+        MaterialManager.addMaterial(this);
     }
 
     public Material(Material material){
@@ -56,11 +59,15 @@ public class Material implements IJsonSerializable {
         this.aoMap = material.getAoMap();
         this.roughness = material.getRoughness();
         this.tilingScale = material.getTilingScale();
+        setGuid();
+        MaterialManager.addMaterial(this);
     }
 
     public Material(Shader shader, Texture albedoTexture){
         this(shader);
         this.setAlbedoTexture(albedoTexture);
+        setGuid();
+        MaterialManager.addMaterial(this);
     }
 
 //      Setters
@@ -145,6 +152,16 @@ public class Material implements IJsonSerializable {
         return this;
     }
 
+    public Material setGuid(){
+        if(guid == null || guid.isBlank()) return setGuid(String.valueOf(java.util.UUID.randomUUID()));
+        return this;
+    }
+
+    public Material setGuid(String guid){
+        this.guid = guid;
+        return this;
+    }
+
     //    Getters
 
     public final Vector4f getAmbientColor() {
@@ -202,6 +219,8 @@ public class Material implements IJsonSerializable {
     public final boolean receiveShadows(){ return receiveShadows; }
 
     public final boolean isTransparent() { return isTransparent; }
+
+    public final String getGuid(){ return guid; }
 
 //  Has Getters
 
