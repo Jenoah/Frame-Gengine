@@ -85,12 +85,13 @@ public class Texture implements IJsonSerializable {
 
         if(texturePath != null && !texturePath.isEmpty()){
 
-            String absoluteTexturePath = Paths.get(EngineSettings.currentProjectDirectory, texturePath).toAbsolutePath().toString();
+            String textureLocalPath = texturePath;
+            String absoluteTexturePath = Paths.get(EngineSettings.currentProjectDirectory, textureLocalPath).toAbsolutePath().toString();
             File textureFile = new File(absoluteTexturePath);
             InputStream is = getClass().getResourceAsStream(absoluteTexturePath);
-            if(textureFile.exists() || is != null) texturePath = absoluteTexturePath;
+            if(textureFile.exists() || is != null) textureLocalPath = absoluteTexturePath;
 
-            this.id = TextureLoader.loadTexture(texturePath,
+            this.id = TextureLoader.loadTexture(textureLocalPath,
                     pointFilter,
                     flipped,
                     repeat,
