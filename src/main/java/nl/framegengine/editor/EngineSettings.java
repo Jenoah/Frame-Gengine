@@ -4,6 +4,7 @@ import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.utils.FileHelper;
 import nl.framegengine.core.utils.JsonHelper;
+import nl.framegengine.core.visual.MaterialManager;
 
 import javax.json.*;
 import java.io.*;
@@ -19,6 +20,7 @@ public class EngineSettings {
     private static final String settingsFileName = "/.fgsettings";
 
     public static void saveSettings(){
+        //Project settings
         JsonObjectBuilder jsonSaveContent = Json.createObjectBuilder();
         jsonSaveContent.add("currentLevelPath", currentLevelPath);
         jsonSaveContent.add("currentProjectIconGuid", currentProjectIconGuid);
@@ -26,8 +28,13 @@ public class EngineSettings {
 
         JsonObject jsonSaveContentObject = jsonSaveContent.build();
         FileHelper.writeToFile(jsonSaveContentObject.toString(), currentProjectDirectory + settingsFileName);
-        if(SceneManager.getInstance() != null && SceneManager.getInstance().getCurrentScene() != null)
-            FileHelper.writeToFile(SceneManager.sceneToJson(SceneManager.getInstance().getCurrentScene()), currentProjectDirectory + File.separator + currentLevelPath);
+
+        //Materials
+        MaterialManager.saveMaterials();
+
+        //Current scene
+        if(SceneManager.currentScene != null)
+            FileHelper.writeToFile(SceneManager.sceneToJson(SceneManager.currentScene), currentProjectDirectory + File.separator + currentLevelPath);
     }
 
     public static void loadSettings() {
@@ -35,7 +42,7 @@ public class EngineSettings {
         String saveFileContent = FileHelper.readFile(currentProjectDirectory + settingsFileName);
 
         if(saveFileContent == null) {
-            Debug.LogError("No settings file has been found. Creating...");
+            Debug.logError("No settings file has been found. Creating...");
             saveSettings();
             return;
         }
@@ -53,13 +60,13 @@ public class EngineSettings {
             ManifestHelper.registerManifestListener();
         }
 
-        Debug.Log("Project settings successfully loaded in");
+        Debug.log("Project settings successfully loaded in");
     }
 
     public static void createNewProject(){
         String projectDirectory = FileHelper.selectDirectory();
         if(projectDirectory == null){
-            Debug.LogError("Project directory is not a valid path");
+            Debug.logError("Project directory is not a valid path");
             return;
         }
         EngineSettings.currentProjectDirectory = projectDirectory;
@@ -68,15 +75,15 @@ public class EngineSettings {
         try {
             FileHelper.copyResourceToDirectory("default project/", projectDirectory);
         } catch (Exception e) {
-            Debug.Log("Something went wrong trying to create the project: " + e.getMessage());
+            Debug.log("Something went wrong trying to create the project: " + e.getMessage());
         }
-        Debug.Log("Creating new project at " + projectDirectory);
+        Debug.log("Creating new project at " + projectDirectory);
     }
 
     public static void loadProject(){
         String projectDirectory = FileHelper.selectDirectory();
         if(projectDirectory == null){
-            Debug.LogError("Project directory is not a valid path");
+            Debug.logError("Project directory is not a valid path");
             return;
         }
         EngineSettings.currentProjectDirectory = projectDirectory;
@@ -106,18 +113,17 @@ public class EngineSettings {
         String appMode = System.getProperty("app.mode", "dev"); // default to dev if not set
 
         isCompiled = ("compiled".equalsIgnoreCase(appMode));
-        Debug.Log("App compilation is " + isCompiled);
 
         if(isCompiled) {
             currentProjectDirectory = "/userresource";
-            Debug.Log("Current directory set to " + currentProjectDirectory);
+            Debug.log("Current directory set to " + currentProjectDirectory);
             return;
         }
 
 
         String saveFileContent = FileHelper.readFile(settingsFile.getAbsolutePath());
         if(saveFileContent == null) {
-            Debug.LogError("No editor config found. Creating...");
+            Debug.logError("No editor config found. Creating...");
             saveEngineConfig();
             return;
         }
@@ -132,7 +138,7 @@ public class EngineSettings {
 
     public static void buildProjectMac(){
         ImGuiHelper.showProgressBar("Building");
-        Debug.Log("Starting build for Mac");
+        Debug.log("Starting build for Mac");
 
         CompletableFuture.runAsync(() -> {
             try {
@@ -174,14 +180,14 @@ public class EngineSettings {
                 outputReader.join(); // Wait until stream reading is done
 
                 if (exitCode == 0) {
-                    Debug.Log("Build completed successfully.");
+                    Debug.log("Build completed successfully.");
                     FileHelper.openDirectory(outputDirectory);
                 } else {
-                    Debug.LogError("Build failed. Exit code: " + exitCode);
+                    Debug.logError("Build failed. Exit code: " + exitCode);
                 }
             } catch (
                     Exception e) {
-                Debug.LogError("Error while building: " + e.getMessage());
+                Debug.logError("Error while building: " + e.getMessage());
                 e.printStackTrace();
             }
         }).thenRun(() -> {
@@ -191,7 +197,7 @@ public class EngineSettings {
 
     public static void buildProjectWindows(){
         ImGuiHelper.showProgressBar("Building");
-        Debug.Log("Starting build for Windows");
+        Debug.log("Starting build for Windows");
 
         CompletableFuture.runAsync(() -> {
             try {
@@ -215,12 +221,12 @@ public class EngineSettings {
 
                 int exitCode = process.waitFor();
                 if (exitCode == 0) {
-                    Debug.Log("Build completed successfully.");
+                    Debug.log("Build completed successfully.");
                 } else {
-                    Debug.LogError("Build failed. Exit code: " + exitCode);
+                    Debug.logError("Build failed. Exit code: " + exitCode);
                 }
             } catch (Exception e) {
-                Debug.LogError("Error while building: " + e.getMessage());
+                Debug.logError("Error while building: " + e.getMessage());
                 e.printStackTrace();
             }
         }).thenRun(ImGuiHelper::hideProgressBar);

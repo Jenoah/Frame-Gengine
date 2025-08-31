@@ -1,7 +1,7 @@
 package nl.framegengine.core.entity;
 
-import nl.framegengine.core.WindowManager;
-import nl.framegengine.core.rendering.FrustumPlane;
+import nl.framegengine.core.engine.WindowManager;
+import nl.framegengine.core.rendering.utils.FrustumPlane;
 import nl.framegengine.core.rendering.RenderManager;
 import nl.framegengine.core.utils.AABB;
 import nl.framegengine.core.utils.ObjectPool;
@@ -169,8 +169,8 @@ public class Camera extends GameObject {
     }
 
     @Override
-    protected void OnUpdateTransform() {
-        super.OnUpdateTransform();
+    protected void onUpdateTransform() {
+        super.onUpdateTransform();
         if(!willUpdate) return;
         updateViewMatrix();
         updateViewProjectionMatrix();

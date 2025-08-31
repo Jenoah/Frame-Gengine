@@ -1,6 +1,6 @@
 package nl.framegengine.core.components;
 
-import nl.framegengine.core.IJsonSerializable;
+import nl.framegengine.core.utils.IJsonSerializable;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.utils.JsonHelper;
 

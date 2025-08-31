@@ -3,7 +3,7 @@ package nl.framegengine.editor;
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImString;
-import nl.framegengine.core.EngineManager;
+import nl.framegengine.core.engine.EngineManager;
 import nl.framegengine.core.callbacks.NameEnteredCallback;
 import org.joml.Math;
 

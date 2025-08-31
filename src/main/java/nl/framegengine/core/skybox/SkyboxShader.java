@@ -36,6 +36,5 @@ public class SkyboxShader extends Shader {
         setUniform("viewMatrix", viewMatrix);
         setUniform("projectionMatrix", projectionMatrix);
         setUniform("fogColor", SceneManager.fogColor);
-
     }
 }

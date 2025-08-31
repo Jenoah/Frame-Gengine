@@ -1,14 +1,14 @@
 package nl.framegengine.customScripts;
 
-import nl.framegengine.core.EngineManager;
+import nl.framegengine.core.engine.EngineManager;
 import nl.framegengine.core.components.Component;
 import nl.framegengine.core.components.RenderComponent;
 import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.entity.SceneManager;
-import nl.framegengine.core.loaders.OBJLoader.OBJLoader;
-import nl.framegengine.core.loaders.TextureLoader;
-import nl.framegengine.core.rendering.MeshMaterialSet;
+import nl.framegengine.core.modelLoaders.OBJLoader.OBJLoader;
+import nl.framegengine.core.visual.TextureLoader;
+import nl.framegengine.core.visual.MeshMaterialSet;
 import nl.framegengine.core.shaders.ShaderManager;
 import nl.framegengine.core.utils.Utils;
 

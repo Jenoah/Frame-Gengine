@@ -42,7 +42,7 @@ public class TerrainGeneration implements Runnable{
 
     @Override
     public void run() {
-        Debug.Log("Starting terrain generation on generation thread");
+        Debug.log("Starting terrain generation on generation thread");
 
         this.isRunning = true;
 
@@ -55,7 +55,7 @@ public class TerrainGeneration implements Runnable{
                     }
                     this.wait(waitTime);
                 } catch (InterruptedException e) {
-                    Debug.Log("STOPPING THREAD: " + e);
+                    Debug.log("STOPPING THREAD: " + e);
                     isRunning = false;
                 }
             }

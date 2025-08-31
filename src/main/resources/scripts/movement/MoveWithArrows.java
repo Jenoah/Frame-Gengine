@@ -1,7 +1,7 @@
 package nl.framegengine.customScripts;
 
-import nl.framegengine.core.EngineManager;
-import nl.framegengine.core.WindowManager;
+import nl.framegengine.core.engine.EngineManager;
+import nl.framegengine.core.engine.WindowManager;
 import nl.framegengine.core.components.Component;
 import nl.framegengine.core.debugging.Debug;
 import org.joml.Vector3f;
@@ -14,7 +14,7 @@ public class MoveWithArrows extends Component {
 
     public MoveWithArrows() {
         this.windowManager = WindowManager.getInstance();
-        Debug.Log("Starting movement");
+        Debug.log("Starting movement");
     }
 
     @Override

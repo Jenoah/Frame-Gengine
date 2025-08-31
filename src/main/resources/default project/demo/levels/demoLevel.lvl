@@ -67,15 +67,15 @@
                     ],
                     "meshMaterialSets": [
                         {
-                            "class": "nl.framegengine.core.rendering.MeshMaterialSet",
+                            "class": "nl.framegengine.core.visual.MeshMaterialSet",
                             "mesh": {
-                                "class": "nl.framegengine.core.entity.Mesh",
+                                "class": "nl.framegengine.core.visual.Mesh",
                                 "meshPath": "/models/cube.obj"
                             },
                             "material": {
-                                "class": "nl.framegengine.core.entity.Material",
+                                "class": "nl.framegengine.core.visual.Material",
                                 "albedoTexture": {
-                                    "class": "nl.framegengine.core.entity.Texture",
+                                    "class": "nl.framegengine.core.visual.Texture",
                                     "id": 15,
                                     "texturePath": "textures/grid_Kenney_prototype.png",
                                     "flipped": true
@@ -119,12 +119,12 @@
                     ],
                     "meshMaterialSets": [
                         {
-                            "class": "nl.framegengine.core.rendering.MeshMaterialSet",
+                            "class": "nl.framegengine.core.visual.MeshMaterialSet",
                             "mesh": {
-                                "class": "nl.framegengine.core.entity.Mesh"
+                                "class": "nl.framegengine.core.visual.Mesh"
                             },
                             "material": {
-                                "class": "nl.framegengine.core.entity.Material",
+                                "class": "nl.framegengine.core.visual.Material",
                                 "diffuseColor": {
                                     "x": 1.0,
                                     "y": 1.0,
@@ -132,7 +132,7 @@
                                     "w": 1.0
                                 },
                                 "albedoTexture": {
-                                    "class": "nl.framegengine.core.entity.Texture",
+                                    "class": "nl.framegengine.core.visual.Texture",
                                     "id": 34,
                                     "texturePath": "textures/lightDirection.png",
                                     "flipped": true
@@ -175,12 +175,12 @@
                     ],
                     "meshMaterialSets": [
                         {
-                            "class": "nl.framegengine.core.rendering.MeshMaterialSet",
+                            "class": "nl.framegengine.core.visual.MeshMaterialSet",
                             "mesh": {
-                                "class": "nl.framegengine.core.entity.Mesh"
+                                "class": "nl.framegengine.core.visual.Mesh"
                             },
                             "material": {
-                                "class": "nl.framegengine.core.entity.Material",
+                                "class": "nl.framegengine.core.visual.Material",
                                 "diffuseColor": {
                                     "x": 0.25,
                                     "y": 0.25,
@@ -188,7 +188,7 @@
                                     "w": 1.0
                                 },
                                 "albedoTexture": {
-                                    "class": "nl.framegengine.core.entity.Texture",
+                                    "class": "nl.framegengine.core.visual.Texture",
                                     "id": 35,
                                     "texturePath": "textures/light.png"
                                 },
@@ -238,12 +238,12 @@
                     ],
                     "meshMaterialSets": [
                         {
-                            "class": "nl.framegengine.core.rendering.MeshMaterialSet",
+                            "class": "nl.framegengine.core.visual.MeshMaterialSet",
                             "mesh": {
-                                "class": "nl.framegengine.core.entity.Mesh"
+                                "class": "nl.framegengine.core.visual.Mesh"
                             },
                             "material": {
-                                "class": "nl.framegengine.core.entity.Material",
+                                "class": "nl.framegengine.core.visual.Material",
                                 "diffuseColor": {
                                     "x": 0.10000000149011612,
                                     "y": 1.0,
@@ -251,7 +251,7 @@
                                     "w": 1.0
                                 },
                                 "albedoTexture": {
-                                    "class": "nl.framegengine.core.entity.Texture",
+                                    "class": "nl.framegengine.core.visual.Texture",
                                     "id": 36,
                                     "texturePath": "textures/lightDirection.png",
                                     "flipped": true
@@ -312,12 +312,12 @@
                     ],
                     "meshMaterialSets": [
                         {
-                            "class": "nl.framegengine.core.rendering.MeshMaterialSet",
+                            "class": "nl.framegengine.core.visual.MeshMaterialSet",
                             "mesh": {
-                                "class": "nl.framegengine.core.entity.Mesh"
+                                "class": "nl.framegengine.core.visual.Mesh"
                             },
                             "material": {
-                                "class": "nl.framegengine.core.entity.Material",
+                                "class": "nl.framegengine.core.visual.Material",
                                 "diffuseColor": {
                                     "x": 1.0,
                                     "y": 0.10000000149011612,
@@ -325,7 +325,7 @@
                                     "w": 1.0
                                 },
                                 "albedoTexture": {
-                                    "class": "nl.framegengine.core.entity.Texture",
+                                    "class": "nl.framegengine.core.visual.Texture",
                                     "id": 37,
                                     "texturePath": "textures/lightDirection.png",
                                     "flipped": true
@@ -374,15 +374,15 @@
                     ],
                     "meshMaterialSets": [
                         {
-                            "class": "nl.framegengine.core.rendering.MeshMaterialSet",
+                            "class": "nl.framegengine.core.visual.MeshMaterialSet",
                             "mesh": {
-                                "class": "nl.framegengine.core.entity.Mesh",
+                                "class": "nl.framegengine.core.visual.Mesh",
                                 "meshPath": "/models/cube.obj"
                             },
                             "material": {
-                                "class": "nl.framegengine.core.entity.Material",
+                                "class": "nl.framegengine.core.visual.Material",
                                 "albedoTexture": {
-                                    "class": "nl.framegengine.core.entity.Texture",
+                                    "class": "nl.framegengine.core.visual.Texture",
                                     "id": 25,
                                     "texturePath": "textures/grid_Kenney_prototype.png",
                                     "flipped": true
@@ -419,15 +419,15 @@
                     ],
                     "meshMaterialSets": [
                         {
-                            "class": "nl.framegengine.core.rendering.MeshMaterialSet",
+                            "class": "nl.framegengine.core.visual.MeshMaterialSet",
                             "mesh": {
-                                "class": "nl.framegengine.core.entity.Mesh",
+                                "class": "nl.framegengine.core.visual.Mesh",
                                 "meshPath": "/models/cube.obj"
                             },
                             "material": {
-                                "class": "nl.framegengine.core.entity.Material",
+                                "class": "nl.framegengine.core.visual.Material",
                                 "albedoTexture": {
-                                    "class": "nl.framegengine.core.entity.Texture",
+                                    "class": "nl.framegengine.core.visual.Texture",
                                     "id": 27,
                                     "texturePath": "textures/grid_Kenney_prototype.png",
                                     "flipped": true
@@ -464,15 +464,15 @@
                     ],
                     "meshMaterialSets": [
                         {
-                            "class": "nl.framegengine.core.rendering.MeshMaterialSet",
+                            "class": "nl.framegengine.core.visual.MeshMaterialSet",
                             "mesh": {
-                                "class": "nl.framegengine.core.entity.Mesh",
+                                "class": "nl.framegengine.core.visual.Mesh",
                                 "meshPath": "/models/cube.obj"
                             },
                             "material": {
-                                "class": "nl.framegengine.core.entity.Material",
+                                "class": "nl.framegengine.core.visual.Material",
                                 "albedoTexture": {
-                                    "class": "nl.framegengine.core.entity.Texture",
+                                    "class": "nl.framegengine.core.visual.Texture",
                                     "id": 29,
                                     "texturePath": "textures/grid_Kenney_prototype.png",
                                     "flipped": true
@@ -509,15 +509,15 @@
                     ],
                     "meshMaterialSets": [
                         {
-                            "class": "nl.framegengine.core.rendering.MeshMaterialSet",
+                            "class": "nl.framegengine.core.visual.MeshMaterialSet",
                             "mesh": {
-                                "class": "nl.framegengine.core.entity.Mesh",
+                                "class": "nl.framegengine.core.visual.Mesh",
                                 "meshPath": "/models/cube.obj"
                             },
                             "material": {
-                                "class": "nl.framegengine.core.entity.Material",
+                                "class": "nl.framegengine.core.visual.Material",
                                 "albedoTexture": {
-                                    "class": "nl.framegengine.core.entity.Texture",
+                                    "class": "nl.framegengine.core.visual.Texture",
                                     "id": 31,
                                     "texturePath": "textures/grid_Kenney_prototype.png",
                                     "flipped": true
@@ -554,13 +554,13 @@
                     ],
                     "meshMaterialSets": [
                         {
-                            "class": "nl.framegengine.core.rendering.MeshMaterialSet",
+                            "class": "nl.framegengine.core.visual.MeshMaterialSet",
                             "mesh": {
-                                "class": "nl.framegengine.core.entity.Mesh",
+                                "class": "nl.framegengine.core.visual.Mesh",
                                 "meshPath": "/models/cube.obj"
                             },
                             "material": {
-                                "class": "nl.framegengine.core.entity.Material",
+                                "class": "nl.framegengine.core.visual.Material",
                                 "diffuseColor": {
                                     "x": 1.0,
                                     "y": 0.5,
@@ -570,7 +570,7 @@
                                 "reflectance": 0.6000000238418579,
                                 "roughness": 1.0,
                                 "roughnessMap": {
-                                    "class": "nl.framegengine.core.entity.Texture",
+                                    "class": "nl.framegengine.core.visual.Texture",
                                     "id": 33,
                                     "texturePath": "textures/grid_Kenney_prototype.png",
                                     "flipped": true

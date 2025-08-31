@@ -1,9 +1,9 @@
 package nl.framegengine.core.entity;
 
-import nl.framegengine.core.IJsonSerializable;
-import nl.framegengine.core.ModelManager;
-import nl.framegengine.core.MouseInput;
-import nl.framegengine.core.WindowManager;
+import nl.framegengine.core.utils.IJsonSerializable;
+import nl.framegengine.core.visual.ModelManager;
+import nl.framegengine.core.input.MouseInput;
+import nl.framegengine.core.engine.WindowManager;
 import nl.framegengine.core.components.Component;
 import nl.framegengine.core.fonts.fontMeshCreator.FontType;
 import nl.framegengine.core.fonts.fontMeshCreator.GUIText;
@@ -57,8 +57,11 @@ public class Scene implements IJsonSerializable {
     public void postStart() { }
 
     public void update(MouseInput mouseInput) {
+        for (GameObject rootGameObject : rootGameObjects.stream().toList()) {
+            rootGameObject.onUpdateTransform();
+        }
+
         for (GameObject gameObject : gameObjects.stream().toList()) {
-            gameObject.OnUpdateTransform();
             gameObject.update(mouseInput);
         }
     }
@@ -109,7 +112,7 @@ public class Scene implements IJsonSerializable {
         if (gameObjects.contains(gameObject)) return;
 
         gameObjects.add(gameObject);
-        if(gameObject.getParent() != null) this.rootGameObjects.add(gameObject);
+        if(gameObject.getParent() == null) this.rootGameObjects.add(gameObject);
 
         if (gameObject.getChildren() != null) {
             for (GameObject child : gameObject.getChildren()) {
@@ -289,6 +292,14 @@ public class Scene implements IJsonSerializable {
         this.levelName = levelName;
     }
 
+    private void processGameObjects(){
+        rootGameObjects.clear();
+
+        gameObjects.forEach(go -> {
+            if(go.getParent() == null) rootGameObjects.add(go);
+        });
+    }
+
     @Override
     public JsonObject serializeToJson() {
         return null;
@@ -304,6 +315,7 @@ public class Scene implements IJsonSerializable {
                  IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+        processGameObjects();
         return this;
     }
 }

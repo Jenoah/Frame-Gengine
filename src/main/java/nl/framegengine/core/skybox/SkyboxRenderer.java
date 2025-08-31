@@ -1,10 +1,10 @@
 package nl.framegengine.core.skybox;
 
 import nl.framegengine.core.entity.Camera;
-import nl.framegengine.core.ModelManager;
+import nl.framegengine.core.visual.ModelManager;
 import nl.framegengine.core.debugging.RenderMetrics;
-import nl.framegengine.core.entity.Model;
-import nl.framegengine.core.loaders.TextureLoader;
+import nl.framegengine.core.visual.Model;
+import nl.framegengine.core.visual.TextureLoader;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.*;
 

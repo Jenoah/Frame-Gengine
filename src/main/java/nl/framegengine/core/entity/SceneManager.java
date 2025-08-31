@@ -111,7 +111,7 @@ public class SceneManager {
         fogColor = currentScene.getFogColor();
         fogDensity = currentScene.getFogDensity();
         fogGradient = currentScene.getFogGradient();
-        Debug.Log("Loading " + currentScene.getLevelName());
+        Debug.log("Loading " + currentScene.getLevelName());
     }
 
     public void cleanUp(){
@@ -119,6 +119,7 @@ public class SceneManager {
         instance = null;
     }
 
+    //TODO: Move underlying method to Scenes SerializeToJson function
     public static String sceneToJson(Scene scene){
         JsonObjectBuilder sceneInfo = Json.createObjectBuilder();
         sceneInfo.add("levelName", scene.getLevelName());

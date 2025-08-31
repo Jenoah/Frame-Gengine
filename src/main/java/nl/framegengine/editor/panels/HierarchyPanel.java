@@ -7,14 +7,12 @@ import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiStyleVar;
 import nl.framegengine.core.components.RenderComponent;
-import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.lighting.DirectionalLight;
 import nl.framegengine.core.lighting.PointLight;
 import nl.framegengine.core.lighting.SpotLight;
-import nl.framegengine.core.loaders.OBJLoader.OBJLoader;
-import nl.framegengine.core.rendering.MeshMaterialSet;
-import nl.framegengine.core.utils.FileHelper;
+import nl.framegengine.core.modelLoaders.OBJLoader.OBJLoader;
+import nl.framegengine.core.visual.MeshMaterialSet;
 import nl.framegengine.editor.EditorPanel;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.entity.SceneManager;
@@ -142,7 +140,7 @@ public class HierarchyPanel extends EditorPanel {
 
     private void showContextMenuObject(){
         if (ImGui.beginPopupContextItem(contextObjectMenuStrID)) {
-            ImGui.text("-- Object settings --");
+            ImGui.separatorText("Object settings");
             if (ImGui.menuItem("Remove")) {
                 if(SceneManager.currentScene != null){
                     currentlySelectedGameObject.remove();
@@ -162,7 +160,7 @@ public class HierarchyPanel extends EditorPanel {
 
     private void showContextMenuEmpty(){
         if (ImGui.beginPopupContextItem(contextMenuStrID)) {
-            ImGui.text("-- Add new --");
+            ImGui.separatorText("Add new");
             if (ImGui.beginMenu("Shape")) {
                 if (ImGui.menuItem("Cube")) {
                     if(SceneManager.currentScene != null){

@@ -8,9 +8,9 @@ import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import imgui.type.ImString;
 import nl.framegengine.core.debugging.Debug;
-import nl.framegengine.core.entity.Material;
-import nl.framegengine.core.entity.Texture;
-import nl.framegengine.core.loaders.TextureLoader;
+import nl.framegengine.core.visual.Material;
+import nl.framegengine.core.visual.Texture;
+import nl.framegengine.core.visual.TextureLoader;
 import nl.framegengine.core.utils.FileHelper;
 import nl.framegengine.editor.EditorPanel;
 import nl.framegengine.core.entity.GameObject;
@@ -195,11 +195,11 @@ public class InfoPanel extends EditorPanel {
                 int selectedTextureID = TextureLoader.getTextureByGUID(textureGUID);
                 if(selectedTextureID != -1){
                     Texture selectedTexture = new Texture(selectedTextureID);
-                    Debug.Log("Selected " + textureNames[currentSelectedItem.get()] + " at " + textureGUID);
+                    Debug.log("Selected " + textureNames[currentSelectedItem.get()] + " at " + textureGUID);
 
                     //TODO: ASSIGN selectedTexture TO CORRESPONDING MATERIAL
                 }else{
-                    Debug.LogError("Selected texture not loaded in");
+                    Debug.logError("Selected texture not loaded in");
                 }
             }
         }else{

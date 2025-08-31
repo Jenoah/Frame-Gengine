@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import nl.framegengine.core.WindowManager;
+import nl.framegengine.core.engine.WindowManager;
 
 /**
  * Provides functionality for getting the values from a font file.

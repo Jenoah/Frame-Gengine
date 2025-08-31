@@ -35,4 +35,13 @@ public class ShaderManager {
         if(unlitShader != null) unlitShader.updateGenericUniforms();
         if(billboardShader != null) billboardShader.updateGenericUniforms();
     }
+
+    public static Shader getShaderByQualifiedClassName(String qualifiedClassName){
+        if(litShader.getClass().getName().equals(qualifiedClassName)) return litShader;
+        if(pbrShader.getClass().getName().equals(qualifiedClassName)) return pbrShader;
+        if(triplanarShader.getClass().getName().equals(qualifiedClassName)) return triplanarShader;
+        if(unlitShader.getClass().getName().equals(qualifiedClassName)) return unlitShader;
+        if(billboardShader.getClass().getName().equals(qualifiedClassName)) return billboardShader;
+        return pbrShader;
+    }
 }

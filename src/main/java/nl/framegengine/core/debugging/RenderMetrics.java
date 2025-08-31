@@ -1,6 +1,6 @@
 package nl.framegengine.core.debugging;
 
-import nl.framegengine.core.EngineManager;
+import nl.framegengine.core.engine.EngineManager;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL33;
 

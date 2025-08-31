@@ -1,7 +1,7 @@
 package nl.framegengine.core.shaders.postProcessing;
 
-import nl.framegengine.core.Settings;
 import nl.framegengine.core.shaders.Shader;
+import nl.framegengine.core.utils.Constants;
 
 public class PPFXGammaCorrectShader extends Shader {
 
@@ -23,6 +23,6 @@ public class PPFXGammaCorrectShader extends Shader {
 
     @Override
     public void prepare() {
-        setUniform("gamma", Settings.getGamma());
+        setUniform("gamma", Constants.GAMMA);
     }
 }

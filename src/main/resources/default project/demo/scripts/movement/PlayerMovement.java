@@ -1,8 +1,8 @@
 package nl.framegengine.customScripts;
 
-import nl.framegengine.core.EngineManager;
-import nl.framegengine.core.MouseInput;
-import nl.framegengine.core.WindowManager;
+import nl.framegengine.core.engine.EngineManager;
+import nl.framegengine.core.input.MouseInput;
+import nl.framegengine.core.engine.WindowManager;
 import nl.framegengine.core.components.Component;
 import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.entity.GameObject;

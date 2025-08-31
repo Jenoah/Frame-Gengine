@@ -64,7 +64,7 @@ public class ProjectPanel extends EditorPanel {
 
     private void showContextMenu(String stringID, String path){
         if (ImGui.beginPopupContextItem(stringID)) {
-            ImGui.text("-- Options --");
+            ImGui.separatorText("Options");
             if (ImGui.beginMenu("New")) {
                 if (ImGui.menuItem("Folder")) {
                     ImGuiHelper.setInputFieldModal(name -> createNewDirectory(FileHelper.getDirectoryPath(path), name));
@@ -72,6 +72,10 @@ public class ProjectPanel extends EditorPanel {
                 }
                 if (ImGui.menuItem("Class")) {
                     ImGuiHelper.setInputFieldModal(name -> createNewClass(FileHelper.getDirectoryPath(path), name));
+                    ImGui.closeCurrentPopup();
+                }
+                if (ImGui.menuItem("Material")) {
+                    ImGuiHelper.setInputFieldModal(name -> createNewMaterial(FileHelper.getDirectoryPath(path), name));
                     ImGui.closeCurrentPopup();
                 }
                 if (ImGui.menuItem("Level")) {
@@ -88,7 +92,7 @@ public class ProjectPanel extends EditorPanel {
                 try {
                     FileHelper.openDirectory(new File(path));
                 } catch (IOException e) {
-                    Debug.Log("Cannot open directory: " + e.getMessage());
+                    Debug.log("Cannot open directory: " + e.getMessage());
                 }
 
                 ImGui.closeCurrentPopup();
@@ -102,26 +106,32 @@ public class ProjectPanel extends EditorPanel {
     }
 
     private void selectFile(File selectedFile){
-        Debug.Log("Selecting " + selectedFile.getName());
+        Debug.log("Selecting " + selectedFile.getName());
         try {
             String extension = FileHelper.getExtension(selectedFile.getName());
-            switch (extension){
-                case "lvl":
-                    Debug.Log("Loading level " + selectedFile.getName());
-                    EngineSettings.currentLevelPath = new File(EngineSettings.currentProjectDirectory).toURI().relativize(selectedFile.toURI()).getPath();
-                    EngineSettings.saveSettings();
-                    break;
-                default:
-                    FileHelper.openFile(selectedFile);
-                    break;
+            if (extension.equals("lvl")) {
+                Debug.log("Loading level " + selectedFile.getName());
+                EngineSettings.currentLevelPath = new File(EngineSettings.currentProjectDirectory).toURI().relativize(selectedFile.toURI()).getPath();
+                EngineSettings.saveSettings();
+            } else {
+                FileHelper.openFile(selectedFile);
             }
         } catch (IOException e) {
-            Debug.LogError("Cannot open file: " + e.getMessage());
+            Debug.logError("Cannot open file: " + e.getMessage());
         }
     }
 
     private void createNewFile(String path, String fileName){
         FileHelper.writeToFile("", new File(path, fileName).getAbsolutePath());
+    }
+
+    private void createNewMaterial(String path, String fileName){
+        try {
+            String classTemplate = FileHelper.loadResource("/templates/default_material.mtrl");
+            FileHelper.writeToFile(classTemplate, new File(path, (fileName + ".mtrl")).getAbsolutePath());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void createNewDirectory(String path, String directoryName){

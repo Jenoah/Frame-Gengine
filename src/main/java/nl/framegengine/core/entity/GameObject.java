@@ -1,7 +1,7 @@
 package nl.framegengine.core.entity;
 
-import nl.framegengine.core.IJsonSerializable;
-import nl.framegengine.core.MouseInput;
+import nl.framegengine.core.utils.IJsonSerializable;
+import nl.framegengine.core.input.MouseInput;
 import nl.framegengine.core.components.Component;
 import nl.framegengine.core.components.RenderComponent;
 import nl.framegengine.core.debugging.Debug;
@@ -358,7 +358,7 @@ public class GameObject implements IJsonSerializable {
 
     public Component addComponent(Component component){
         if(this.components.contains(component)){
-            Debug.Log("GameObject already contains component of type " + component.getClass().getSimpleName());
+            Debug.log("GameObject already contains component of type " + component.getClass().getSimpleName());
             return null;
         }
 
@@ -369,7 +369,7 @@ public class GameObject implements IJsonSerializable {
 
     public void removeComponent(Component component){
         if(!this.components.contains(component)){
-            Debug.Log("GameObject does not contains component of type " + component.getClass().getSimpleName());
+            Debug.log("GameObject does not contains component of type " + component.getClass().getSimpleName());
             return;
         }
 
@@ -393,7 +393,8 @@ public class GameObject implements IJsonSerializable {
         return this;
     }
 
-    public String ToString(){
+    @Override
+    public String toString(){
         return this.getClass().getSimpleName();
     }
 
@@ -401,8 +402,11 @@ public class GameObject implements IJsonSerializable {
         this.willUpdate = true;
     }
 
-    protected void OnUpdateTransform(){
-        children.forEach(GameObject::OnUpdateTransform);
+    protected void onUpdateTransform(){
+        children.forEach(go -> {
+            go.callUpdate();
+            go.onUpdateTransform();
+        });
     }
 
     public final float getRadius(){

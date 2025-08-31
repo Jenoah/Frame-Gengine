@@ -25,6 +25,7 @@ public class ManifestHelper {
     private static final List<HashMap<String, String>> textures = new ArrayList<>();
     private static final List<HashMap<String, String>> scripts = new ArrayList<>();
     private static final List<HashMap<String, String>> levels = new ArrayList<>();
+    private static final List<HashMap<String, String>> materials = new ArrayList<>();
     private static final List<HashMap<String, String>> others = new ArrayList<>();
 
     private static final List<EventCallback> eventCallbacks = new ArrayList<>();
@@ -98,6 +99,7 @@ public class ManifestHelper {
         textures.clear();
         scripts.clear();
         levels.clear();
+        materials.clear();
         others.clear();
 
         if(manifestFile.exists()){
@@ -122,6 +124,11 @@ public class ManifestHelper {
                                     levels.add(manifestJsonToHashmapItem(jsonArrayValue.asJsonObject()));
                                 }
                             });
+                            case "materials" -> jsonValue.asJsonArray().forEach(jsonArrayValue -> {
+                                if (jsonArrayValue.getValueType() == JsonValue.ValueType.OBJECT) {
+                                    materials.add(manifestJsonToHashmapItem(jsonArrayValue.asJsonObject()));
+                                }
+                            });
                             case null, default -> jsonValue.asJsonArray().forEach(jsonArrayValue -> {
                                 if (jsonArrayValue.getValueType() == JsonValue.ValueType.OBJECT) {
                                     others.add(manifestJsonToHashmapItem(jsonArrayValue.asJsonObject()));
@@ -137,11 +144,13 @@ public class ManifestHelper {
         JsonArrayBuilder textureArray = Json.createArrayBuilder();
         JsonArrayBuilder scriptArray = Json.createArrayBuilder();
         JsonArrayBuilder levelArray = Json.createArrayBuilder();
+        JsonArrayBuilder materialArray = Json.createArrayBuilder();
         JsonArrayBuilder otherArray = Json.createArrayBuilder();
 
         List<HashMap<String, String>> manifestTextures = new ArrayList<>();
         List<HashMap<String, String>> manifestScripts = new ArrayList<>();
         List<HashMap<String, String>> manifestLevels = new ArrayList<>();
+        List<HashMap<String, String>> manifestMaterials = new ArrayList<>();
         List<HashMap<String, String>> manifestOthers = new ArrayList<>();
 
         File[] filesInProject = FileHelper.findFilesInDirectory(new File(EngineSettings.currentProjectDirectory), new String[]{".app", ".tmp", ".bak"}).toArray(File[]::new);
@@ -149,129 +158,28 @@ public class ManifestHelper {
         for (File file : filesInProject) {
             manifestFileType fileType = fileToManifestFileType(file);
             if(!file.exists() || file.isHidden()) continue;
-            AtomicBoolean hasAddedFile = new AtomicBoolean(false);
             String fileGUID = FileHelper.getChecksum(file.getAbsolutePath());
             String relativePath = Paths.get(EngineSettings.currentProjectDirectory).relativize(file.toPath()).toString();
 
-            if(fileType == manifestFileType.TEXTURE){
-                for (HashMap<String, String> textures : textures) {
-                    if(textures.get("guid").equals(fileGUID) && !textures.get("path").equals(relativePath)){
-                        textures.replace("path", relativePath);
-                        textures.replace("filename", FileHelper.getFileName(file.getPath()));
-                        manifestTextures.add(textures);
-                        hasAddedFile.set(true);
-                        break;
-                    }else if(textures.get("path").equals(relativePath) && !textures.get("guid").equals(fileGUID)){
-                        manifestTextures.add(textures);
-                        hasAddedFile.set(true);
-                        break;
-                    }
-                }
-                if(!hasAddedFile.get()){
-                    HashMap<String, String> fileHashmap = new HashMap<>();
-                    fileHashmap.put("guid", fileGUID);
-                    fileHashmap.put("path", relativePath);
-                    fileHashmap.put("filename", FileHelper.getFileName(file.getPath()));
-                    manifestTextures.add(fileHashmap);
-                }
-            } else if (fileType == manifestFileType.SCRIPT) {
-                for (HashMap<String, String> script : scripts) {
-                    if(script.get("guid").equals(fileGUID) && !script.get("path").equals(relativePath)){
-                        script.replace("path", relativePath);
-                        script.replace("filename", FileHelper.getFileName(file.getPath()));
-                        manifestScripts.add(script);
-                        hasAddedFile.set(true);
-                        break;
-                    }else if(script.get("path").equals(relativePath) && !script.get("guid").equals(fileGUID)){
-                        manifestTextures.add(script);
-                        hasAddedFile.set(true);
-                        break;
-                    }
-                }
-                if(!hasAddedFile.get()){
-                    HashMap<String, String> fileHashmap = new HashMap<>();
-                    fileHashmap.put("guid", fileGUID);
-                    fileHashmap.put("path", relativePath);
-                    fileHashmap.put("filename", FileHelper.getFileName(file.getPath()));
-                    manifestScripts.add(fileHashmap);
-                }
-            } else if (fileType == manifestFileType.LEVEL) {
-                for (HashMap<String, String> level : levels) {
-                    if(level.get("guid").equals(fileGUID) && !level.get("path").equals(relativePath)){
-                        level.replace("path", relativePath);
-                        level.replace("filename", FileHelper.getFileName(file.getPath()));
-                        manifestLevels.add(level);
-                        hasAddedFile.set(true);
-                        break;
-                    }else if(level.get("path").equals(relativePath) && !level.get("guid").equals(fileGUID)){
-                        manifestLevels.add(level);
-                        hasAddedFile.set(true);
-                        break;
-                    }
-                }
-                if(!hasAddedFile.get()){
-                    HashMap<String, String> fileHashmap = new HashMap<>();
-                    fileHashmap.put("guid", fileGUID);
-                    fileHashmap.put("path", relativePath);
-                    fileHashmap.put("filename", FileHelper.getFileName(file.getPath()));
-                    manifestLevels.add(fileHashmap);
-                }
-            } else {
-                for (HashMap<String, String> other : others) {
-                    if (other.get("guid").equals(fileGUID) && !other.get("path").equals(relativePath)) {
-                        other.replace("path", relativePath);
-                        other.replace("filename", FileHelper.getFileName(file.getPath()));
-                        manifestScripts.add(other);
-                        hasAddedFile.set(true);
-                        break;
-                    } else if (other.get("path").equals(relativePath) && !other.get("guid").equals(fileGUID)) {
-                        manifestTextures.add(other);
-                        hasAddedFile.set(true);
-                        break;
-                    }
-                }
-                if (!hasAddedFile.get()) {
-                    HashMap<String, String> fileHashmap = new HashMap<>();
-                    fileHashmap.put("guid", fileGUID);
-                    fileHashmap.put("path", relativePath);
-                    fileHashmap.put("filename", FileHelper.getFileName(file.getPath()));
-                    manifestOthers.add(fileHashmap);
-                }
+            switch (fileType){
+                case TEXTURE -> addManifestRecord(textures, fileGUID, relativePath, manifestTextures, file);
+                case SCRIPT -> addManifestRecord(scripts, fileGUID, relativePath, manifestScripts, file);
+                case LEVEL -> addManifestRecord(levels, fileGUID, relativePath, manifestLevels, file);
+                case MATERIAL -> addManifestRecord(materials, fileGUID, relativePath, manifestMaterials, file);
+                case null, default -> addManifestRecord(others, fileGUID, relativePath, manifestOthers, file);
             }
         }
 
-        manifestTextures.forEach(manifestTexture -> {
-            JsonObjectBuilder fileInfo = Json.createObjectBuilder();
-            fileInfo.add("guid", manifestTexture.get("guid"));
-            fileInfo.add("path", manifestTexture.get("path"));
-            fileInfo.add("filename", manifestTexture.get("filename"));
-            textureArray.add(fileInfo.build());
-        });
-        manifestScripts.forEach(manifestScript -> {
-            JsonObjectBuilder fileInfo = Json.createObjectBuilder();
-            fileInfo.add("guid", manifestScript.get("guid"));
-            fileInfo.add("path", manifestScript.get("path"));
-            fileInfo.add("filename", manifestScript.get("filename"));
-            scriptArray.add(fileInfo.build());
-        });
-        manifestLevels.forEach(manifestLevel -> {
-            JsonObjectBuilder fileInfo = Json.createObjectBuilder();
-            fileInfo.add("guid", manifestLevel.get("guid"));
-            fileInfo.add("path", manifestLevel.get("path"));
-            fileInfo.add("filename", manifestLevel.get("filename"));
-            levelArray.add(fileInfo.build());
-        });
-        manifestOthers.forEach(manifestOther -> {
-            JsonObjectBuilder fileInfo = Json.createObjectBuilder();
-            fileInfo.add("guid", manifestOther.get("guid"));
-            fileInfo.add("path", manifestOther.get("path"));
-            fileInfo.add("filename", manifestOther.get("filename"));
-            otherArray.add(fileInfo.build());
-        });
+        manifestTextures.forEach(manifestValue -> addToManifestArray(manifestValue, textureArray));
+        manifestScripts.forEach(manifestValue -> addToManifestArray(manifestValue, scriptArray));
+        manifestLevels.forEach(manifestValue -> addToManifestArray(manifestValue, levelArray));
+        manifestMaterials.forEach(manifestValue -> addToManifestArray(manifestValue, materialArray));
+        manifestOthers.forEach(manifestValue -> addToManifestArray(manifestValue, otherArray));
 
         jsonManifestContent.add("textures", textureArray.build());
         jsonManifestContent.add("scripts", scriptArray.build());
         jsonManifestContent.add("levels", levelArray.build());
+        jsonManifestContent.add("materials", materialArray.build());
         jsonManifestContent.add("others", otherArray.build());
 
         Map<String, Boolean> config = new HashMap<>();
@@ -315,10 +223,43 @@ public class ManifestHelper {
         return Paths.get(EngineSettings.currentProjectDirectory, manifestFileName).toString();
     }
 
+    private static void addToManifestArray(HashMap<String, String> value, JsonArrayBuilder jsonArrayBuilder){
+        JsonObjectBuilder fileInfo = Json.createObjectBuilder();
+        fileInfo.add("guid", value.get("guid"));
+        fileInfo.add("path", value.get("path"));
+        fileInfo.add("filename", value.get("filename"));
+        jsonArrayBuilder.add(fileInfo.build());
+    }
+
+    private static void addManifestRecord(List<HashMap<String, String>> iterationList, String fileGuid, String relativePath, List<HashMap<String, String>> manifestArray, File file){
+        boolean hasAddedFile = false;
+        for (HashMap<String, String> value : iterationList) {
+            if(value.get("guid").equals(fileGuid) && !value.get("path").equals(relativePath)){
+                value.replace("path", relativePath);
+                value.replace("filename", FileHelper.getFileName(file.getPath()));
+                manifestArray.add(value);
+                hasAddedFile = true;
+                break;
+            }else if(value.get("path").equals(relativePath) && !value.get("guid").equals(fileGuid)){
+                manifestArray.add(value);
+                hasAddedFile = true;
+                break;
+            }
+        }
+        if(!hasAddedFile){
+            HashMap<String, String> fileHashmap = new HashMap<>();
+            fileHashmap.put("guid", fileGuid);
+            fileHashmap.put("path", relativePath);
+            fileHashmap.put("filename", FileHelper.getFileName(file.getPath()));
+            manifestArray.add(fileHashmap);
+        }
+    }
+
     public enum manifestFileType{
         TEXTURE,
         SCRIPT,
         LEVEL,
+        MATERIAL,
         NULL
     }
 
@@ -329,31 +270,23 @@ public class ManifestHelper {
             case "jpg", "jpeg", "JPG", "JPEG", "png", "PNG", "gif", "tiff" -> manifestFileType.TEXTURE;
             case "lvl" -> manifestFileType.LEVEL;
             case "java" -> manifestFileType.SCRIPT;
+            case "mtrl" -> manifestFileType.MATERIAL;
             case null, default -> manifestFileType.NULL;
         };
     }
 
-    public static final List<HashMap<String, String>> getTextures(){
-        return textures;
-    }
-
-    public static final List<HashMap<String, String>> getScripts(){
-        return scripts;
-    }
-
-    public static final List<HashMap<String, String>> getLevels(){
-        return levels;
-    }
-
-    public static final List<HashMap<String, String>> getOthers(){
-        return others;
-    }
+    public static final List<HashMap<String, String>> getTextures(){ return textures; }
+    public static final List<HashMap<String, String>> getScripts(){ return scripts; }
+    public static final List<HashMap<String, String>> getLevels(){ return levels; }
+    public static final List<HashMap<String, String>> getMaterials(){ return materials; }
+    public static final List<HashMap<String, String>> getOthers(){ return others; }
 
     public static final List<HashMap<String, String>> getOfType(manifestFileType fileType){
         switch (fileType){
             case TEXTURE -> { return getTextures(); }
             case SCRIPT -> { return getScripts(); }
             case LEVEL -> { return getLevels(); }
+            case MATERIAL -> { return getMaterials(); }
             case null, default -> { return getOthers(); }
         }
     }
@@ -388,6 +321,18 @@ public class ManifestHelper {
         return path.get();
     }
 
+    public static final boolean hasGuid(manifestFileType fileType, String guid){
+        AtomicBoolean hasGuid = new AtomicBoolean(false);
+
+        List<HashMap<String, String>> typeArray = getOfType(fileType);
+        typeArray.forEach(map -> {
+            if(map.get("guid").equals(guid)){
+                hasGuid.set(true);
+            }
+        });
+        return hasGuid.get();
+    }
+
 
     private static class ManifestFileListener implements FileAlterationListener {
         @Override
@@ -396,19 +341,13 @@ public class ManifestHelper {
         }
 
         @Override
-        public void onDirectoryChange(File file) {
-
-        }
+        public void onDirectoryChange(File file) {}
 
         @Override
-        public void onDirectoryCreate(File file) {
-
-        }
+        public void onDirectoryCreate(File file) {}
 
         @Override
-        public void onDirectoryDelete(File file) {
-
-        }
+        public void onDirectoryDelete(File file) {}
 
         @Override
         public void onFileChange(File file) {
