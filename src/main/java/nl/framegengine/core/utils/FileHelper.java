@@ -196,8 +196,22 @@ public class FileHelper {
     }
 
     public static List<String> readAllLines(String fileName) {
+        File file = new File(fileName);
         List<String> list = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(Class.forName(Utils.class.getName()).getResourceAsStream(fileName)))) {
+
+        try{
+            InputStream is = null;
+            if(file.exists()){
+                is = new FileInputStream(file);
+            }else{
+                is = Class.forName(Utils.class.getName()).getResourceAsStream(fileName);
+            }
+
+            if(is == null){
+                Debug.Log("InputStream is null for " + fileName);
+            }
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
             String line;
             while ((line = br.readLine()) != null) {
                 list.add(line);

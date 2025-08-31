@@ -10,16 +10,20 @@ import nl.framegengine.core.rendering.MeshMaterialSet;
 import nl.framegengine.core.shaders.ShaderManager;
 import nl.framegengine.core.utils.FileHelper;
 
+import nl.framegengine.editor.EngineSettings;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
 public class OBJLoader {
 
     public static Set<MeshMaterialSet> loadOBJModel(String fileName) {
+        Path filePath = Path.of(EngineSettings.currentProjectDirectory, fileName);
+        if(filePath.toFile().exists()) fileName = filePath.toString();
         List<String> lines = FileHelper.readAllLines(fileName);
         OBJObject objObject = new OBJObject();
         objObject.setModelPath(fileName);
