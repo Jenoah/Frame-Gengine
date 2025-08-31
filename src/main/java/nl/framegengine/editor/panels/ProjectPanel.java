@@ -122,7 +122,12 @@ public class ProjectPanel extends EditorPanel {
     }
 
     private void createNewMaterial(String path, String fileName){
-        createNewFile(path, fileName + ".mtrl");
+        try {
+            String classTemplate = FileHelper.loadResource("/templates/default_material.mtrl");
+            FileHelper.writeToFile(classTemplate, new File(path, (fileName + ".mtrl")).getAbsolutePath());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void createNewDirectory(String path, String directoryName){

@@ -1,0 +1,17 @@
+{
+  "guid": "",
+  "shader": "nl.framegengine.core.shaders.PBRShader",
+  "diffuseColor": {
+    "x": 0.8,
+    "y": 0.8,
+    "z": 0.8,
+    "w": 1.0
+  },
+  "reflectance": 0.4,
+  "roughness": 0.4,
+  "tilingScale": 1.0,
+  "isDoubleSided": false,
+  "castShadow": true,
+  "receiveShadows": true,
+  "isTransparent": false
+}
