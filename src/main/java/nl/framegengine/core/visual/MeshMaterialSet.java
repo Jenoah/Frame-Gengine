@@ -5,11 +5,9 @@ import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.shaders.ShaderManager;
 import nl.framegengine.core.utils.JsonHelper;
+import nl.framegengine.editor.ManifestHelper;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonReader;
+import javax.json.*;
 import java.io.StringReader;
 
 public class MeshMaterialSet implements IJsonSerializable {
@@ -45,9 +43,16 @@ public class MeshMaterialSet implements IJsonSerializable {
     @Override
     public JsonObject serializeToJson() {
         JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
-        JsonObject jsonObject = JsonHelper.objectToJson(this, new String[]{"root"});
+        JsonObject jsonObject = JsonHelper.objectToJson(this, new String[]{"root", "material"});
         jsonObject.forEach(jsonObjectBuilder::add);
         if(getRoot() != null) jsonObjectBuilder.add("root", root.getGuid());
+        if(material != null &&
+                material.getGuid() != null &&
+                ManifestHelper.hasGuid(ManifestHelper.manifestFileType.MATERIAL, material.getGuid())) {
+            jsonObjectBuilder.add("material", material.getGuid());
+        }else{
+            jsonObjectBuilder.add("material", "");
+        }
         return jsonObjectBuilder.build();
     }
 
@@ -56,10 +61,16 @@ public class MeshMaterialSet implements IJsonSerializable {
         JsonReader jsonReader = Json.createReader(new StringReader(json));
         JsonObject jsonInfo = jsonReader.readObject();
         try{
-            JsonHelper.loadVariableIntoObject(this, jsonInfo);
+            JsonHelper.loadVariableIntoObject(this, jsonInfo, new String[]{"material"});
+            if(JsonHelper.hasJsonKey(jsonInfo, "material") &&
+                    jsonInfo.get("material").getValueType() == JsonValue.ValueType.STRING){
+                this.material = MaterialManager.loadMaterialByGuid(jsonInfo.getString("material"));
+            }
         } catch (Exception e) {
             Debug.logError("Error loading in data: " + e.getMessage());
         }
+        if(this.material == null) this.material = MaterialManager.defaultMaterial;
+        if(this.material.shader == null) this.material.shader = ShaderManager.pbrShader;
         return this;
     }
 }

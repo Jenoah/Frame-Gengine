@@ -9,9 +9,7 @@ import nl.framegengine.core.utils.JsonHelper;
 import org.joml.Math;
 import org.joml.Vector4f;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
+import javax.json.*;
 import java.io.StringReader;
 
 public class Material implements IJsonSerializable {
@@ -246,7 +244,12 @@ public class Material implements IJsonSerializable {
 
     @Override
     public JsonObject serializeToJson() {
-        return JsonHelper.objectToJson(this);
+        JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
+        JsonObject jsonObject = JsonHelper.objectToJson(this, new String[]{"shader"});
+        jsonObject.forEach(jsonObjectBuilder::add);
+        jsonObjectBuilder.remove("class");
+        if(shader != null) jsonObjectBuilder.add("shader", shader.getClass().getName());
+        return jsonObjectBuilder.build();
     }
 
     @Override
@@ -254,11 +257,16 @@ public class Material implements IJsonSerializable {
         JsonReader jsonReader = Json.createReader(new StringReader(json));
         JsonObject jsonInfo = jsonReader.readObject();
         try{
-            JsonHelper.loadVariableIntoObject(this, jsonInfo);
+            JsonHelper.loadVariableIntoObject(this, jsonInfo, new String[]{"shader"});
         } catch (Exception e) {
             Debug.logError("Error loading in data: " + e.getMessage());
         }
 
+        if(JsonHelper.hasJsonKey(jsonInfo, "shader")){
+            ShaderManager.getShaderByQualifiedClassName(jsonInfo.get("shader").toString());
+        }
+
+        if(guid == null || guid.isBlank()) setGuid();
         if(shader == null) shader = ShaderManager.pbrShader;
         return this;
     }

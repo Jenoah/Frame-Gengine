@@ -4,6 +4,7 @@ import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.utils.FileHelper;
 import nl.framegengine.core.utils.JsonHelper;
+import nl.framegengine.core.visual.MaterialManager;
 
 import javax.json.*;
 import java.io.*;
@@ -19,6 +20,7 @@ public class EngineSettings {
     private static final String settingsFileName = "/.fgsettings";
 
     public static void saveSettings(){
+        //Project settings
         JsonObjectBuilder jsonSaveContent = Json.createObjectBuilder();
         jsonSaveContent.add("currentLevelPath", currentLevelPath);
         jsonSaveContent.add("currentProjectIconGuid", currentProjectIconGuid);
@@ -26,8 +28,13 @@ public class EngineSettings {
 
         JsonObject jsonSaveContentObject = jsonSaveContent.build();
         FileHelper.writeToFile(jsonSaveContentObject.toString(), currentProjectDirectory + settingsFileName);
-        if(SceneManager.getInstance() != null && SceneManager.getInstance().getCurrentScene() != null)
-            FileHelper.writeToFile(SceneManager.sceneToJson(SceneManager.getInstance().getCurrentScene()), currentProjectDirectory + File.separator + currentLevelPath);
+
+        //Materials
+        MaterialManager.saveMaterials();
+
+        //Current scene
+        if(SceneManager.currentScene != null)
+            FileHelper.writeToFile(SceneManager.sceneToJson(SceneManager.currentScene), currentProjectDirectory + File.separator + currentLevelPath);
     }
 
     public static void loadSettings() {

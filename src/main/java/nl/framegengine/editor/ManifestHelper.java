@@ -321,6 +321,18 @@ public class ManifestHelper {
         return path.get();
     }
 
+    public static final boolean hasGuid(manifestFileType fileType, String guid){
+        AtomicBoolean hasGuid = new AtomicBoolean(false);
+
+        List<HashMap<String, String>> typeArray = getOfType(fileType);
+        typeArray.forEach(map -> {
+            if(map.get("guid").equals(guid)){
+                hasGuid.set(true);
+            }
+        });
+        return hasGuid.get();
+    }
+
 
     private static class ManifestFileListener implements FileAlterationListener {
         @Override
