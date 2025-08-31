@@ -74,6 +74,10 @@ public class ProjectPanel extends EditorPanel {
                     ImGuiHelper.setInputFieldModal(name -> createNewClass(FileHelper.getDirectoryPath(path), name));
                     ImGui.closeCurrentPopup();
                 }
+                if (ImGui.menuItem("Level")) {
+                    ImGuiHelper.setInputFieldModal(name -> createNewLevel(FileHelper.getDirectoryPath(path), name));
+                    ImGui.closeCurrentPopup();
+                }
                 if (ImGui.menuItem("Other file")) {
                     ImGuiHelper.setInputFieldModal(name -> createNewFile(FileHelper.getDirectoryPath(path), name));
                     ImGui.closeCurrentPopup();
@@ -129,6 +133,15 @@ public class ProjectPanel extends EditorPanel {
             String classTemplate = FileHelper.loadResource("/templates/default_class.java");
             classTemplate = classTemplate.replaceAll("CLASSNAME", className);
             FileHelper.writeToFile(classTemplate, new File(path, (className + ".java")).getAbsolutePath());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void createNewLevel(String path, String levelName){
+        try {
+            String levelTemplate = FileHelper.loadResource("/templates/default_level.lvl");
+            FileHelper.writeToFile(levelTemplate, new File(path, (levelName + ".lvl")).getAbsolutePath());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
