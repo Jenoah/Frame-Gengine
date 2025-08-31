@@ -45,6 +45,7 @@ public class MaterialManager {
 
         Material material = new Material();
         material.deserializeFromJson(materialInfo.toString());
+        material.setGuid(materialGuid);
 
         materials.put(materialGuid, material);
 

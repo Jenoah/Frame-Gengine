@@ -208,7 +208,7 @@ public class FileHelper {
             }
 
             if(is == null){
-                Debug.Log("InputStream is null for " + fileName);
+                Debug.log("InputStream is null for " + fileName);
             }
 
             BufferedReader br = new BufferedReader(new InputStreamReader(is));

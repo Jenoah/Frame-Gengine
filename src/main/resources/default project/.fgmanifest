@@ -1,0 +1,78 @@
+
+{
+    "textures": [
+        {
+            "guid": "41f6ba20c61e46dd45d5ef1a2cb2cfc4f2b7db5eba0c4e30cbbd866ddb51ee97",
+            "path": "textures/rock/rock_albedo.jpg",
+            "filename": "rock_albedo"
+        },
+        {
+            "guid": "7d17fd463b08eacfc57fe25d1155aa6c4285c18c30345bbccf6469eea50be9c3",
+            "path": "textures/rock/rock_ao.jpg",
+            "filename": "rock_ao"
+        },
+        {
+            "guid": "1f32bab51b47e323975fca67aa49b225feb4607c12c81876f5866a0b01ed0286",
+            "path": "textures/rock/rock_roughness.jpg",
+            "filename": "rock_roughness"
+        },
+        {
+            "guid": "e0f05c814bb8e2e952d3f38de0bf8e23c863766d1adda191602b513877d402b8",
+            "path": "textures/rock/rock_normal.jpg",
+            "filename": "rock_normal"
+        },
+        {
+            "guid": "affe82474a9ae58431f3e7f576b91cd9dec0479d1d89ab161d719a72c2c644aa",
+            "path": "textures/grid_Kenney_prototype.png",
+            "filename": "grid_Kenney_prototype"
+        }
+    ],
+    "scripts": [
+        {
+            "guid": "d53e819f041954561786b56decd60e9da4c4835b74ec2987442b0d4247629fee",
+            "path": "scripts/movement/RotateOnAxis.java",
+            "filename": "RotateOnAxis"
+        },
+        {
+            "guid": "aff63792f9f53273c2aaf22662f0e93ec98ea062b5a611db4989024ccfa352b0",
+            "path": "scripts/movement/MoveWithArrows.java",
+            "filename": "MoveWithArrows"
+        },
+        {
+            "guid": "e297ef2105bb3c3ff43065e6d9e96b2ef1f65dc5e197af76ed19cd9ca01323fe",
+            "path": "scripts/movement/PlayerMovement.java",
+            "filename": "PlayerMovement"
+        }
+    ],
+    "levels": [
+        {
+            "guid": "fe3eb3394bb68ec284ee36608c96897d21a713298de7b332e23342c482ea8d66",
+            "path": "levels/demoLevel.lvl",
+            "filename": "demoLevel"
+        }
+    ],
+    "materials": [
+        {
+            "guid": "1f5ecfcca0b3277880727239d58745f745f284a9eb2f7c47d7c944fe4805ad6f",
+            "path": "materials/grid.mtrl",
+            "filename": "grid"
+        },
+        {
+            "guid": "f869ecb0b64d0081c35e3b470fddb1ef25784c307d869c4fd77f3018b47913be",
+            "path": "materials/rock.mtrl",
+            "filename": "rock"
+        }
+    ],
+    "others": [
+        {
+            "guid": "537a32d6bafd4e8930fcef081b49d444a822c56feca738e0abdf0d6fae60ce68",
+            "path": "models/punto/punto.obj",
+            "filename": "punto"
+        },
+        {
+            "guid": "0172b87e7324c3db9e4226f1a5f89f544dd33285c4660ff0dc490e17e7666a06",
+            "path": "models/punto/punto.mtl",
+            "filename": "punto"
+        }
+    ]
+}

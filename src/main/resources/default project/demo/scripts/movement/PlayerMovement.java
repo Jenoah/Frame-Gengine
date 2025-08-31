@@ -4,10 +4,12 @@ import nl.framegengine.core.engine.EngineManager;
 import nl.framegengine.core.input.MouseInput;
 import nl.framegengine.core.engine.WindowManager;
 import nl.framegengine.core.components.Component;
+import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.utils.Constants;
 import nl.framegengine.core.utils.ObjectPool;
+
 import org.joml.Quaternionf;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -20,7 +22,7 @@ public class PlayerMovement extends Component {
     private final Vector3f moveDelta = new Vector3f();
     private float pitch = 0;
     private float yaw = 0;
-    private float moveSpeed = 3f;
+    public float moveSpeed = 3f;
 
     public PlayerMovement() {}
 
@@ -36,7 +38,7 @@ public class PlayerMovement extends Component {
     @Override
     public void update() {
         super.update();
-
+        
         if(MouseInput.isRbDown()) rotate(MouseInput.getMouseDelta());
 
         move();

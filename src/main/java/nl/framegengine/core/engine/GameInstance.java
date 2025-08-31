@@ -13,13 +13,12 @@ import java.io.File;
 public class GameInstance implements ILogic{
     private final RenderManager renderer;
     private final WindowManager window;
-    private final SceneManager sceneManager;
 
     public GameInstance(){
         RenderManager.createInstance();
         renderer = RenderManager.getInstance();
         window = WindowManager.getInstance();
-        sceneManager = SceneManager.getInstance();
+        SceneManager.getInstance();
     }
 
     @Override
@@ -28,36 +27,36 @@ public class GameInstance implements ILogic{
         renderer.init();
         EngineSettings.loadSettings();
 
-        Scene level = sceneManager.loadScene(EngineSettings.currentProjectDirectory + File.separator + EngineSettings.currentLevelPath);
+        Scene level = SceneManager.loadScene(EngineSettings.currentProjectDirectory + File.separator + EngineSettings.currentLevelPath);
 
         window.setClearColor(0, 0, 0, 0);
         window.setWindowIcon("textures/FrameGengine_icon.png");
 
-        sceneManager.addScene(level);
-        sceneManager.setCurrentScene(0);
+        SceneManager.addScene(level);
+        SceneManager.setCurrentScene(0);
 
         ShaderManager.updateGenericUniforms();
     }
 
     @Override
     public void input() {
-        sceneManager.getCurrentScene().handleInput();
+        SceneManager.currentScene.handleInput();
     }
 
     @Override
     public void update(float interval, MouseInput mouseInput) {
-        sceneManager.getCurrentScene().update(mouseInput);
+        SceneManager.currentScene.update(mouseInput);
     }
 
     @Override
     public void render() {
-        renderer.render(sceneManager.getCurrentScene());
+        renderer.render(SceneManager.currentScene);
     }
 
     @Override
     public void cleanUp() {
         renderer.cleanUp();
-        sceneManager.cleanUp();
+        SceneManager.cleanUp();
     }
 
     public RenderManager getRenderer(){

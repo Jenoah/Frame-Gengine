@@ -19,7 +19,7 @@ import java.net.URL;
 import java.util.*;
 
 public class SceneManager {
-    private List<Scene> scenes = new ArrayList<>();
+    private static List<Scene> scenes = new ArrayList<>();
     public static Scene currentScene = null;
     public static Vector3f fogColor = new Vector3f(1);
     public static float fogDensity = 0.01f;
@@ -37,7 +37,7 @@ public class SceneManager {
         return instance;
     }
 
-    public Scene loadScene(String filePath) throws Exception {
+    public static Scene loadScene(String filePath) throws Exception {
         if(componentLoader == null){
             URL inputResourceUrl = new File(EngineSettings.currentProjectDirectory).toURI().toURL();
             URL compiledResourceUrl = new File(EngineSettings.currentProjectDirectory + File.separator + "/.compiled").toURI().toURL();
@@ -49,7 +49,7 @@ public class SceneManager {
 
         InputStream is = null;
         if(EngineSettings.isCompiled) {
-            is = getClass().getResourceAsStream(filePath);
+            is = SceneManager.class.getResourceAsStream(filePath);
         }else{
             is = new FileInputStream(filePath);
         }
@@ -72,7 +72,7 @@ public class SceneManager {
         return scene;
     }
 
-    private void tryAddLight(Light lightObject, Scene scene){
+    private static void tryAddLight(Light lightObject, Scene scene){
         switch (lightObject) {
             case DirectionalLight directionalLight -> {
                 scene.setDirectionalLight(directionalLight);
@@ -98,15 +98,15 @@ public class SceneManager {
         this.scenes = scenes;
     }
 
-    public void addScene(Scene scene){
-        this.scenes.add(scene);
+    public static void addScene(Scene scene){
+        scenes.add(scene);
     }
 
     public Scene getCurrentScene() {
         return currentScene;
     }
 
-    public void setCurrentScene(int sceneIndex) {
+    public static void setCurrentScene(int sceneIndex) {
         currentScene = scenes.get(sceneIndex);
         fogColor = currentScene.getFogColor();
         fogDensity = currentScene.getFogDensity();
@@ -114,7 +114,7 @@ public class SceneManager {
         Debug.log("Loading " + currentScene.getLevelName());
     }
 
-    public void cleanUp(){
+    public static void cleanUp(){
         currentScene.cleanUp();
         instance = null;
     }

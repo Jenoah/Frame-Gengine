@@ -14,6 +14,7 @@ public class MoveWithArrows extends Component {
 
     public MoveWithArrows() {
         this.windowManager = WindowManager.getInstance();
+        Debug.log("Starting movement");
     }
 
     @Override

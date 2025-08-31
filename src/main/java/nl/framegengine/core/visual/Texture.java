@@ -4,6 +4,7 @@ import nl.framegengine.core.utils.IJsonSerializable;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.utils.JsonHelper;
 import nl.framegengine.editor.EngineSettings;
+import nl.framegengine.editor.ManifestHelper;
 
 import javax.json.*;
 import java.io.File;
@@ -15,11 +16,11 @@ public class Texture implements IJsonSerializable {
 
     private int id;
     private String guid;
-    protected String texturePath;
     private boolean pointFilter = false;
     private boolean flipped = false;
     private boolean repeat = true;
     private boolean isNormalMap = false;
+    private String texturePath = "";
 
     public int getId() {
         return id;
@@ -29,7 +30,6 @@ public class Texture implements IJsonSerializable {
 
     public Texture(int id) {
         this.id = id;
-        this.texturePath = "";
         this.guid = TextureLoader.getGuidById(this.id);
     }
 
@@ -41,36 +41,36 @@ public class Texture implements IJsonSerializable {
 
     public Texture(String texturePath, boolean pointFilter){
         this.id = TextureLoader.loadTexture(texturePath, pointFilter);
-        this.texturePath = texturePath;
         this.pointFilter = pointFilter;
+        this.texturePath = texturePath;
         this.guid = TextureLoader.getGuidById(this.id);
     }
 
     public Texture(String texturePath, boolean pointFilter, boolean flipped){
         this.id = TextureLoader.loadTexture(texturePath, pointFilter, flipped);
-        this.texturePath = texturePath;
         this.pointFilter = pointFilter;
         this.flipped = flipped;
+        this.texturePath = texturePath;
         this.guid = TextureLoader.getGuidById(this.id);
     }
 
     public Texture(String texturePath, boolean pointFilter, boolean flipped, boolean repeat, boolean isNormalMap){
         this.id = TextureLoader.loadTexture(texturePath, pointFilter, flipped, repeat, isNormalMap);
-        this.texturePath = texturePath;
         this.pointFilter = pointFilter;
         this.flipped = flipped;
         this.repeat = repeat;
         this.isNormalMap = isNormalMap;
+        this.texturePath = texturePath;
         this.guid = TextureLoader.getGuidById(this.id);
     }
 
-    public final String getTexturePath(){
-        return texturePath;
+    public String getTexturePath(){
+        return texturePath.isBlank() ? texturePath : ManifestHelper.getPathByGuid(ManifestHelper.manifestFileType.TEXTURE, guid);
     }
 
     @Override
     public JsonObject serializeToJson() {
-        return JsonHelper.objectToJson(this, new String[]{"id"});
+        return JsonHelper.objectToJson(this, new String[]{"id", "texturePath"});
     }
 
     @Override
@@ -83,8 +83,11 @@ public class Texture implements IJsonSerializable {
             Debug.logError("Error loading in data: " + e.getMessage());
         }
 
-        if(texturePath != null && !texturePath.isEmpty()){
+        if(guid == null || guid.isBlank()) return null;
 
+        texturePath = ManifestHelper.getPathByGuid(ManifestHelper.manifestFileType.TEXTURE, guid);
+
+        if(texturePath != null && !texturePath.isBlank()){
             String textureLocalPath = texturePath;
             String absoluteTexturePath = Paths.get(EngineSettings.currentProjectDirectory, textureLocalPath).toAbsolutePath().toString();
             File textureFile = new File(absoluteTexturePath);

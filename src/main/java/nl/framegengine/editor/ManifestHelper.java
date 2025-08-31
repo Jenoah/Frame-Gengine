@@ -197,8 +197,7 @@ public class ManifestHelper {
 
     public static boolean setEventCallback(EventCallback callback){
         eventCallbacks.clear();
-        if(!eventCallbacks.contains(callback)) return eventCallbacks.add(callback);
-        return false;
+        return eventCallbacks.add(callback);
     }
 
     public static boolean addEventCallback(EventCallback callback){
