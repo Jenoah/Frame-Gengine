@@ -1,6 +1,5 @@
 package nl.framegengine.core.engine;
 
-import nl.framegengine.core.input.MouseInput;
 import nl.framegengine.core.shaders.ShaderManager;
 import nl.framegengine.editor.EngineSettings;
 import nl.framegengine.core.debugging.Debug;

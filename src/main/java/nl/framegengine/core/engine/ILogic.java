@@ -1,6 +1,5 @@
 package nl.framegengine.core.engine;
 
-import nl.framegengine.core.input.MouseInput;
 import nl.framegengine.core.rendering.RenderManager;
 
 public interface ILogic {
