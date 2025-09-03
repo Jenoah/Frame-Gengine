@@ -16,11 +16,10 @@ public class AABB {
     }
 
     public AABB(AABB aabb) {
-        this.min.set(aabb.min);
-        this.max.set(aabb.max);
-        this.size = aabb.getSize();
-        this.length = aabb.getLength();
+        set(aabb);
     }
+
+    public AABB() { }
 
     public final Vector3f getSize(){
         return this.size;
@@ -28,6 +27,14 @@ public class AABB {
 
     public final float getLength(){
         return length;
+    }
+
+    public AABB set(AABB aabb){
+        this.min.set(aabb.min);
+        this.max.set(aabb.max);
+        this.size = aabb.getSize();
+        this.length = aabb.getLength();
+        return this;
     }
 
     public AABB offset(Vector3f offset){

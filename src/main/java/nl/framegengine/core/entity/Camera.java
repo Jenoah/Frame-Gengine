@@ -18,6 +18,7 @@ public class Camera extends GameObject {
     private final Matrix4f viewMatrix = new Matrix4f();
     private final WindowManager windowManager;
     private FrustumPlane[] frustumPlanes = new FrustumPlane[6];
+    private final AABB worldFrustumTestingAABB = new AABB();
 
     public Camera() {
         super();
@@ -120,15 +121,15 @@ public class Camera extends GameObject {
     }
 
     public boolean isInFrustumAABB(GameObject object) {
-        AABB worldAABB = new AABB(object.getAabb()).offset(object.getPosition());
+        worldFrustumTestingAABB.set(object.getAabb()).offset(object.getPosition());
 
         Vector3f positiveCorner = ObjectPool.VECTOR3F_POOL.obtain().set(0,0,0);
 
         for (FrustumPlane plane : frustumPlanes) {
             positiveCorner = ObjectPool.VECTOR3F_POOL.obtain().set(
-                    plane.normal.x > 0 ? worldAABB.max.x : worldAABB.min.x,
-                    plane.normal.y > 0 ? worldAABB.max.y : worldAABB.min.y,
-                    plane.normal.z > 0 ? worldAABB.max.z : worldAABB.min.z
+                    plane.normal.x > 0 ? worldFrustumTestingAABB.max.x : worldFrustumTestingAABB.min.x,
+                    plane.normal.y > 0 ? worldFrustumTestingAABB.max.y : worldFrustumTestingAABB.min.y,
+                    plane.normal.z > 0 ? worldFrustumTestingAABB.max.z : worldFrustumTestingAABB.min.z
             );
 
             if (plane.getDistanceTo(positiveCorner) < 0) {
