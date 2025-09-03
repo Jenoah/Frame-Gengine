@@ -18,7 +18,9 @@ public class Camera extends GameObject {
     private final Matrix4f viewMatrix = new Matrix4f();
     private final WindowManager windowManager;
     private FrustumPlane[] frustumPlanes = new FrustumPlane[6];
+
     private final AABB worldFrustumTestingAABB = new AABB();
+    private final Vector3f frustumPlaneNormal = new Vector3f();
 
     public Camera() {
         super();
@@ -27,6 +29,10 @@ public class Camera extends GameObject {
         windowManager = WindowManager.getInstance();
 
         setPosition(new Vector3f(0, 0, 0));
+
+        for (int i = 0; i < frustumPlanes.length; i++) {
+            frustumPlanes[i] = new FrustumPlane();
+        }
 
         updateViewFrustum();
         callUpdate();
@@ -40,6 +46,10 @@ public class Camera extends GameObject {
         setPosition(position);
         setRotation(rotation);
 
+        for (int i = 0; i < frustumPlanes.length; i++) {
+            frustumPlanes[i] = new FrustumPlane();
+        }
+
         updateViewFrustum();
         callUpdate();
     }
@@ -52,59 +62,61 @@ public class Camera extends GameObject {
         setPosition(position);
         setRotation(rotation);
 
+        for (int i = 0; i < frustumPlanes.length; i++) {
+            frustumPlanes[i] = new FrustumPlane();
+        }
+
         updateViewFrustum();
         callUpdate();
     }
 
     public void updateViewFrustum(){
-        Vector3f normal = new Vector3f();
 
-        // Left plane
-        normal.set(viewProjectionMatrix.m03() + viewProjectionMatrix.m00(),
+        frustumPlaneNormal.set(viewProjectionMatrix.m03() + viewProjectionMatrix.m00(),
                 viewProjectionMatrix.m13() + viewProjectionMatrix.m10(),
                 viewProjectionMatrix.m23() + viewProjectionMatrix.m20());
         float d = viewProjectionMatrix.m33() + viewProjectionMatrix.m30();
-        frustumPlanes[0] = new FrustumPlane(normal, d);
+        frustumPlanes[0].set(frustumPlaneNormal, d);
         frustumPlanes[0].normalize();
 
         // Right plane
-        normal = new Vector3f(viewProjectionMatrix.m03() - viewProjectionMatrix.m00(),
+        frustumPlaneNormal.set(viewProjectionMatrix.m03() - viewProjectionMatrix.m00(),
                 viewProjectionMatrix.m13() - viewProjectionMatrix.m10(),
                 viewProjectionMatrix.m23() - viewProjectionMatrix.m20());
         d = viewProjectionMatrix.m33() - viewProjectionMatrix.m30();
-        frustumPlanes[1] = new FrustumPlane(normal, d);
+        frustumPlanes[1].set(frustumPlaneNormal, d);
         frustumPlanes[1].normalize();
 
         // Bottom plane
-        normal = new Vector3f(viewProjectionMatrix.m03() + viewProjectionMatrix.m01(),
+        frustumPlaneNormal.set(viewProjectionMatrix.m03() + viewProjectionMatrix.m01(),
                 viewProjectionMatrix.m13() + viewProjectionMatrix.m11(),
                 viewProjectionMatrix.m23() + viewProjectionMatrix.m21());
         d = viewProjectionMatrix.m33() + viewProjectionMatrix.m31();
-        frustumPlanes[2] = new FrustumPlane(normal, d);
+        frustumPlanes[2].set(frustumPlaneNormal, d);
         frustumPlanes[2].normalize();
 
         // Top plane
-        normal = new Vector3f(viewProjectionMatrix.m03() - viewProjectionMatrix.m01(),
+        frustumPlaneNormal.set(viewProjectionMatrix.m03() - viewProjectionMatrix.m01(),
                 viewProjectionMatrix.m13() - viewProjectionMatrix.m11(),
                 viewProjectionMatrix.m23() - viewProjectionMatrix.m21());
         d = viewProjectionMatrix.m33() - viewProjectionMatrix.m31();
-        frustumPlanes[3] = new FrustumPlane(normal, d);
+        frustumPlanes[3].set(frustumPlaneNormal, d);
         frustumPlanes[3].normalize();
 
         // Near plane
-        normal = new Vector3f(viewProjectionMatrix.m03() + viewProjectionMatrix.m02(),
+        frustumPlaneNormal.set(viewProjectionMatrix.m03() + viewProjectionMatrix.m02(),
                 viewProjectionMatrix.m13() + viewProjectionMatrix.m12(),
                 viewProjectionMatrix.m23() + viewProjectionMatrix.m22());
         d = viewProjectionMatrix.m33() + viewProjectionMatrix.m32();
-        frustumPlanes[4] = new FrustumPlane(normal, d);
+        frustumPlanes[4].set(frustumPlaneNormal, d);
         frustumPlanes[4].normalize();
 
         // Far plane
-        normal = new Vector3f(viewProjectionMatrix.m03() - viewProjectionMatrix.m02(),
+        frustumPlaneNormal.set(viewProjectionMatrix.m03() - viewProjectionMatrix.m02(),
                 viewProjectionMatrix.m13() - viewProjectionMatrix.m12(),
                 viewProjectionMatrix.m23() - viewProjectionMatrix.m22());
         d = viewProjectionMatrix.m33() - viewProjectionMatrix.m32();
-        frustumPlanes[5] = new FrustumPlane(normal, d);
+        frustumPlanes[5].set(frustumPlaneNormal, d);
         frustumPlanes[5].normalize();
     }
 
