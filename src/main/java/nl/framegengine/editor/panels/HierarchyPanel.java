@@ -49,9 +49,9 @@ public class HierarchyPanel extends EditorPanel {
         showContextMenu();
 
         frameCount++;
-        if(SceneManager.getInstance() == null || SceneManager.getInstance().getCurrentScene() == null) return;
+        if(SceneManager.currentScene == null) return;
         if(frameCount > 60){
-            hierarchyObjects = SceneManager.getInstance().getCurrentScene().getRootGameObjects();
+            hierarchyObjects = SceneManager.currentScene.getRootGameObjects();
             frameCount = 0;
         }
 
@@ -124,7 +124,7 @@ public class HierarchyPanel extends EditorPanel {
     }
 
     private void showContextMenu(){
-        if(SceneManager.getInstance() == null || SceneManager.getInstance().getCurrentScene() == null) return;
+        if(SceneManager.currentScene == null) return;
 
         if(ImGui.isWindowHovered() && ImGui.isMouseReleased(ImGuiMouseButton.Right)){
             if(currentlySelectedGameObject != null){
@@ -172,7 +172,7 @@ public class HierarchyPanel extends EditorPanel {
                     ImGui.closeCurrentPopup();
                 }
                 if (ImGui.menuItem("Sphere")) {
-                    if(SceneManager.getInstance() != null && SceneManager.getInstance().getCurrentScene() != null){
+                    if(SceneManager.currentScene != null){
                         GameObject sphereObject = new GameObject("Sphere");
                         Set<MeshMaterialSet> meshMaterialSets = OBJLoader.loadOBJModel("/models/sphere.obj");
                         sphereObject.addComponent(new RenderComponent(meshMaterialSets));

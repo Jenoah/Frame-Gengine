@@ -102,10 +102,6 @@ public class SceneManager {
         scenes.add(scene);
     }
 
-    public Scene getCurrentScene() {
-        return currentScene;
-    }
-
     public static void setCurrentScene(int sceneIndex) {
         currentScene = scenes.get(sceneIndex);
         fogColor = currentScene.getFogColor();

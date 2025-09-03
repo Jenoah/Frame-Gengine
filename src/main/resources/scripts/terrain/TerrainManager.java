@@ -97,7 +97,7 @@ public class TerrainManager extends Component {
                         .getMeshMaterialSets().iterator().next()
                         .material.setShader(ShaderManager.triplanarShader)
                         .setReflectance(64);
-                SceneManager.getInstance().getCurrentScene().addEntity(chunk.getChunkEntity());
+                SceneManager.currentScene.addEntity(chunk.getChunkEntity());
             }
             processed++;
             it.remove(); // Remove from marchingQueue

@@ -271,7 +271,7 @@ public class GameObject implements IJsonSerializable {
         }
         child.parent = this;
         this.children.add(child);
-        if(SceneManager.getInstance() != null && SceneManager.getInstance().getCurrentScene() != null) SceneManager.getInstance().getCurrentScene().removeFromRoot(child);
+        if(SceneManager.currentScene != null) SceneManager.currentScene.removeFromRoot(child);
         return this;
     }
 
@@ -290,9 +290,9 @@ public class GameObject implements IJsonSerializable {
         this.parent = parent;
         if (parent != null) {
             parent.children.add(this);
-            if(SceneManager.getInstance() != null && SceneManager.getInstance().getCurrentScene() != null) SceneManager.getInstance().getCurrentScene().removeFromRoot(this);
+            if(SceneManager.currentScene != null) SceneManager.currentScene.removeFromRoot(this);
         }else{
-            if(SceneManager.getInstance() != null && SceneManager.getInstance().getCurrentScene() != null) SceneManager.getInstance().getCurrentScene().getRootGameObjects().add(this);
+            if(SceneManager.currentScene != null) SceneManager.currentScene.getRootGameObjects().add(this);
         }
         return this;
     }

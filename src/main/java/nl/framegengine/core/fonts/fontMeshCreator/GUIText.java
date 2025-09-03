@@ -184,7 +184,7 @@ public class GUIText {
 
 	public void setText(String text){
 		this.textString = text;
-		SceneManager.getInstance().getCurrentScene().updateText(this);
+		SceneManager.currentScene.updateText(this);
 		//SceneManager.getInstance().getCurrentScene().removeText(this);
 		//SceneManager.getInstance().getCurrentScene().addText(this);
 	}
