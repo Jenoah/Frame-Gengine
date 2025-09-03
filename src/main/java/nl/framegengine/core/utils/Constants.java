@@ -1,5 +1,6 @@
 package nl.framegengine.core.utils;
 
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -29,6 +30,9 @@ public class Constants {
     public static final Vector4f VECTOR4_BACK = new Vector4f(0, 0, 1, 0);
     public static final Vector4f VECTOR4_ONE = new Vector4f(1, 1, 1, 1);
     public static final Vector4f VECTOR4_ZERO = new Vector4f(0, 0, 0, 0);
+
+    //Quaternions
+    public static final Quaternionf QUATERNION_IDENTITY = new Quaternionf().identity();
 
     //Shadows
     public static final float SHADOW_DISTANCE = 40;

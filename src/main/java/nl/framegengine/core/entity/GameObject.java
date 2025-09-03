@@ -108,6 +108,7 @@ public class GameObject implements IJsonSerializable {
     }
 
     public GameObject translateLocal(Vector3f position){
+        if(position.equals(Constants.VECTOR3_ZERO)) return this;
         this.localPosition.add(position);
         callUpdate();
         return this;
@@ -181,6 +182,7 @@ public class GameObject implements IJsonSerializable {
     }
 
     public GameObject addRotation(Vector3f rotation){
+        if(rotation.equals(Constants.VECTOR3_ZERO)) return this;
         Vector3f radians = new Vector3f(rotation).mul((float) Math.toRadians(1));
 
         localRotation.mul(
@@ -194,6 +196,7 @@ public class GameObject implements IJsonSerializable {
     }
 
     public GameObject addRotation(Quaternionf rotation){
+        if(rotation.equals(Constants.QUATERNION_IDENTITY)) return this;
         localRotation.mul(rotation).normalize();
         callUpdate();
         return this;
@@ -399,13 +402,16 @@ public class GameObject implements IJsonSerializable {
 
     public void callUpdate(){
         this.willUpdate = true;
+        if(parent != null) parent.callUpdate();
     }
 
     protected void onUpdateTransform(){
-        children.forEach(go -> {
-            go.callUpdate();
-            go.onUpdateTransform();
+        if(!willUpdate) return;
+        children.forEach(child -> {
+            child.callUpdate();
+            child.onUpdateTransform();
         });
+        willUpdate = false;
     }
 
     public final float getRadius(){
