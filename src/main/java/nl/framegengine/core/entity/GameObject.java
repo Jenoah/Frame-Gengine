@@ -24,6 +24,7 @@ public class GameObject implements IJsonSerializable {
     private final Vector3f scale = new Vector3f(1f);
     private float radius = 1f;
     private AABB aabb;
+    private final AABB worldAABB = new AABB();
     private final Vector3f center = new Vector3f(0);
     private String guid;
     private boolean isEnabled = true;
@@ -305,7 +306,7 @@ public class GameObject implements IJsonSerializable {
 
     public void update(){
         if(drawDebugWireframe && aabb != null && RenderManager.getInstance() != null){
-            AABB worldAABB = new AABB(getAabb()).offset(getPosition());
+            worldAABB.set(getAabb()).offset(getPosition());
             RenderManager.getInstance().debugCube(worldAABB.getCenter(), getRotation(), worldAABB.getSize());
         }
 
