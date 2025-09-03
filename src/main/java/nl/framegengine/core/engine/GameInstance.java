@@ -44,8 +44,8 @@ public class GameInstance implements ILogic{
     }
 
     @Override
-    public void update(float interval, MouseInput mouseInput) {
-        SceneManager.currentScene.update(mouseInput);
+    public void update(float interval) {
+        SceneManager.currentScene.update();
     }
 
     @Override

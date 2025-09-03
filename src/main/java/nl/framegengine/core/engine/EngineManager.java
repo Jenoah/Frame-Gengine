@@ -14,7 +14,6 @@ public class EngineManager {
     private WindowManager window;
     private GLFWErrorCallback errorCallback;
     private static ILogic gameLogic;
-    private MouseInput mouseInput;
 
     // Consider making these instance fields if multiple EngineManagers are possible
     private double lastLoopTime = 0.0;
@@ -33,9 +32,8 @@ public class EngineManager {
         window.init();
         window.updateProjectionMatrix();
 
-        mouseInput = new MouseInput();
         gameLogic.init();
-        mouseInput.init();
+        MouseInput.init();
         SceneManager.currentScene.postStart();
 
         if(!window.isStandalone()) ImGuiHelper.hideProgressBar();
@@ -89,12 +87,12 @@ public class EngineManager {
     }
 
     private void handleInput() {
-        mouseInput.input();
+        MouseInput.input();
         gameLogic.input();
     }
 
     private void updateGame() {
-        gameLogic.update(deltaTime, mouseInput);
+        gameLogic.update(deltaTime);
     }
 
     private void calculateFps(){
@@ -113,7 +111,7 @@ public class EngineManager {
 
     private void cleanup() {
         Debug.log("Cleaning up...");
-        mouseInput.cleanUp();
+        MouseInput.cleanUp();
         window.cleanUp();
         gameLogic.cleanUp();
         if (errorCallback != null) errorCallback.free();

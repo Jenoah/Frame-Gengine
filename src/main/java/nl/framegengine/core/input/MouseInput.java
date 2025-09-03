@@ -15,24 +15,21 @@ public class MouseInput {
 
     private static boolean lbDown = false;
     private static boolean rbDown = false;
-    private static long windowLong;
-    private static WindowManager window;
 
-    private GLFWCursorPosCallback prevCursorPosCallback;
-    private GLFWMouseButtonCallback prevMouseButtonCallback;
+    private static WindowManager windowManager;
 
-    public MouseInput(){
-        window = WindowManager.getInstance();
-        windowLong = GLFW.glfwGetCurrentContext();
-    }
+    private static GLFWCursorPosCallback prevCursorPosCallback;
+    private static GLFWMouseButtonCallback prevMouseButtonCallback;
 
-    public void init(){
-        prevCursorPosCallback = GLFW.glfwSetCursorPosCallback(this.window.getWindow(), null);
-        prevMouseButtonCallback = GLFW.glfwSetMouseButtonCallback(this.window.getWindow(), null);
+    public static void init(){
+        windowManager = WindowManager.getInstance();
+
+        prevCursorPosCallback = GLFW.glfwSetCursorPosCallback(WindowManager.getInstance().getWindow(), null);
+        prevMouseButtonCallback = GLFW.glfwSetMouseButtonCallback(WindowManager.getInstance().getWindow(), null);
 
         // Now set your own callbacks
-        GLFW.glfwSetCursorPosCallback(this.window.getWindow(), (window, xPos, yPos) -> {
-            if (this.window.getFocus()) {
+        GLFW.glfwSetCursorPosCallback(windowManager.getWindow(), (window, xPos, yPos) -> {
+            if (windowManager.getFocus()) {
                 currentPosition.x = xPos;
                 currentPosition.y = yPos;
             }
@@ -41,8 +38,8 @@ public class MouseInput {
                 prevCursorPosCallback.invoke(window, xPos, yPos);
         });
 
-        GLFW.glfwSetMouseButtonCallback(this.window.getWindow(), (window, button, action, mods) -> {
-            if (this.window.getFocus()) {
+        GLFW.glfwSetMouseButtonCallback(windowManager.getWindow(), (window, button, action, mods) -> {
+            if (WindowManager.getInstance().getFocus()) {
                 lbDown = button == GLFW.GLFW_MOUSE_BUTTON_1 && action == GLFW.GLFW_PRESS;
                 rbDown = button == GLFW.GLFW_MOUSE_BUTTON_2 && action == GLFW.GLFW_PRESS;
             }
@@ -51,7 +48,7 @@ public class MouseInput {
         });
     }
 
-    public void input(){
+    public static void input(){
         mouseDelta.x = 0;
         mouseDelta.y = 0;
 
@@ -84,17 +81,17 @@ public class MouseInput {
         return mouseDelta;
     }
 
-    public void cleanUp(){
-        GLFW.glfwSetCursorPosCallback(window.getWindow(), prevCursorPosCallback);
-        GLFW.glfwSetMouseButtonCallback(window.getWindow(), prevMouseButtonCallback);
+    public static void cleanUp(){
+        GLFW.glfwSetCursorPosCallback(windowManager.getWindow(), prevCursorPosCallback);
+        GLFW.glfwSetMouseButtonCallback(windowManager.getWindow(), prevMouseButtonCallback);
 
         prevCursorPosCallback = null;
         prevMouseButtonCallback = null;
     }
 
     public static Vector2d getMousePositionInViewport(){
-        double mousePositionX = 1.0 / window.getWidth() * currentPosition.x;
-        double mousePositionY = 1.0 / window.getHeight() * currentPosition.y;
+        double mousePositionX = 1.0 / windowManager.getWidth() * currentPosition.x;
+        double mousePositionY = 1.0 / windowManager.getHeight() * currentPosition.y;
 
         return new Vector2d(mousePositionX, mousePositionY);
     }
@@ -104,14 +101,14 @@ public class MouseInput {
     }
 
     public static void hide(){
-        if (GLFW.glfwGetInputMode(windowLong, GLFW.GLFW_CURSOR) != GLFW.GLFW_CURSOR_DISABLED) {
-            GLFW.glfwSetInputMode(windowLong, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
+        if (GLFW.glfwGetInputMode(windowManager.getWindow(), GLFW.GLFW_CURSOR) != GLFW.GLFW_CURSOR_DISABLED) {
+            GLFW.glfwSetInputMode(windowManager.getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
         }
     }
 
     public static void show(){
-        if (GLFW.glfwGetInputMode(windowLong, GLFW.GLFW_CURSOR) != GLFW.GLFW_CURSOR_NORMAL) {
-            GLFW.glfwSetInputMode(windowLong, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
+        if (GLFW.glfwGetInputMode(windowManager.getWindow(), GLFW.GLFW_CURSOR) != GLFW.GLFW_CURSOR_NORMAL) {
+            GLFW.glfwSetInputMode(windowManager.getWindow(), GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_NORMAL);
         }
     }
 }

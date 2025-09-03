@@ -6,7 +6,7 @@ import nl.framegengine.core.rendering.RenderManager;
 public interface ILogic {
     void init() throws Exception;
     void input();
-    void update(float interval, MouseInput mouseInput);
+    void update(float interval);
     void render();
     void cleanUp();
     RenderManager getRenderer();

@@ -301,7 +301,7 @@ public class GameObject implements IJsonSerializable {
         return this.parent;
     }
 
-    public void update(MouseInput mouseInput){
+    public void update(){
         if(drawDebugWireframe && aabb != null && RenderManager.getInstance() != null){
             AABB worldAABB = new AABB(getAabb()).offset(getPosition());
             RenderManager.getInstance().debugCube(worldAABB.getCenter(), getRotation(), worldAABB.getSize());
