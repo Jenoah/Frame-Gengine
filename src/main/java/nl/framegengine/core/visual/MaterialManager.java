@@ -17,27 +17,32 @@ public class MaterialManager {
 
     public static Material loadMaterialByGuid(String guid) throws FileNotFoundException {
         if(guid == null || guid.isBlank()) {
-            //Debug.logError("Material not found with guid " + guid);
             return defaultMaterial;
         }
         if(materials.containsKey(guid)) return materials.get(guid);
         String filePath = ManifestHelper.getPathByGuid(ManifestHelper.manifestFileType.MATERIAL, guid);
-        return loadMaterial(filePath);
+        return loadMaterial(filePath, guid);
     }
 
     public static Material loadMaterial(String filePath) throws FileNotFoundException {
+        return loadMaterial(filePath, "");
+    }
 
+    public static Material loadMaterial(String filePath, String guid) throws FileNotFoundException {
         if(filePath == null || filePath.isBlank()) return defaultMaterial;
 
         File materialFile = new File(filePath);
         if(!materialFile.exists()) materialFile = new File(EngineSettings.currentProjectDirectory + File.separator + filePath);
-        if(!materialFile.exists()) return defaultMaterial;
+        if(!EngineSettings.isCompiled && !materialFile.exists()) {
+            Debug.logError("Material not found at " + materialFile.getPath());
+            return defaultMaterial;
+        }
 
-        String materialGuid = ManifestHelper.getGuidbyPath(ManifestHelper.manifestFileType.MATERIAL, materialFile.getPath());
-        if(materials.containsKey(materialGuid)) return materials.get(materialGuid);
+        if(guid == null || guid.isBlank()) guid = ManifestHelper.getGuidbyPath(ManifestHelper.manifestFileType.MATERIAL, materialFile.getPath());
+        if(materials.containsKey(guid)) return materials.get(guid);
 
         InputStream is = EngineSettings.isCompiled ?
-                MaterialManager.class.getResourceAsStream(filePath) :
+                MaterialManager.class.getResourceAsStream(materialFile.getPath()) :
                 new FileInputStream(materialFile.getPath());
 
         JsonReader reader = Json.createReader(is);
@@ -45,9 +50,9 @@ public class MaterialManager {
 
         Material material = new Material();
         material.deserializeFromJson(materialInfo.toString());
-        material.setGuid(materialGuid);
+        material.setGuid(guid);
 
-        materials.put(materialGuid, material);
+        materials.put(guid, material);
 
         return material;
     }

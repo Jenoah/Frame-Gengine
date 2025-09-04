@@ -58,6 +58,8 @@ public class EngineSettings {
             saveEngineConfig();
             ManifestHelper.updateManifest();
             ManifestHelper.registerManifestListener();
+        }else{
+            ManifestHelper.loadManifest();
         }
 
         Debug.log("Project settings successfully loaded in");
@@ -116,10 +118,8 @@ public class EngineSettings {
 
         if(isCompiled) {
             currentProjectDirectory = "/userresource";
-            Debug.log("Current directory set to " + currentProjectDirectory);
             return;
         }
-
 
         String saveFileContent = FileHelper.readFile(settingsFile.getAbsolutePath());
         if(saveFileContent == null) {

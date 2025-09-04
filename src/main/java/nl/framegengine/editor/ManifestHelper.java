@@ -1,6 +1,7 @@
 package nl.framegengine.editor;
 
 import nl.framegengine.core.callbacks.EventCallback;
+import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.utils.FileHelper;
 import nl.framegengine.core.utils.JsonHelper;
 import org.apache.commons.io.filefilter.FileFilterUtils;
@@ -93,7 +94,7 @@ public class ManifestHelper {
         }
     }
 
-    public static void updateManifest(){
+    public static void loadManifest(){
         File manifestFile = new File(getManifestPath());
 
         textures.clear();
@@ -102,43 +103,48 @@ public class ManifestHelper {
         materials.clear();
         others.clear();
 
-        if(manifestFile.exists()){
-            String manifestFileContent = FileHelper.readFile(manifestFile.getAbsolutePath());
-            if(manifestFileContent != null && !manifestFileContent.isBlank()) {
-                JsonObject manifestInfo = Json.createReader(new StringReader(manifestFileContent)).readObject();
-                manifestInfo.forEach((s, jsonValue) -> {
-                    if(jsonValue.getValueType() == JsonValue.ValueType.ARRAY){
-                        switch (s) {
-                            case "textures" -> jsonValue.asJsonArray().forEach(jsonArrayValue -> {
-                                if (jsonArrayValue.getValueType() == JsonValue.ValueType.OBJECT) {
-                                    textures.add(manifestJsonToHashmapItem(jsonArrayValue.asJsonObject()));
-                                }
-                            });
-                            case "scripts" -> jsonValue.asJsonArray().forEach(jsonArrayValue -> {
-                                if (jsonArrayValue.getValueType() == JsonValue.ValueType.OBJECT) {
-                                    scripts.add(manifestJsonToHashmapItem(jsonArrayValue.asJsonObject()));
-                                }
-                            });
-                            case "levels" -> jsonValue.asJsonArray().forEach(jsonArrayValue -> {
-                                if (jsonArrayValue.getValueType() == JsonValue.ValueType.OBJECT) {
-                                    levels.add(manifestJsonToHashmapItem(jsonArrayValue.asJsonObject()));
-                                }
-                            });
-                            case "materials" -> jsonValue.asJsonArray().forEach(jsonArrayValue -> {
-                                if (jsonArrayValue.getValueType() == JsonValue.ValueType.OBJECT) {
-                                    materials.add(manifestJsonToHashmapItem(jsonArrayValue.asJsonObject()));
-                                }
-                            });
-                            case null, default -> jsonValue.asJsonArray().forEach(jsonArrayValue -> {
-                                if (jsonArrayValue.getValueType() == JsonValue.ValueType.OBJECT) {
-                                    others.add(manifestJsonToHashmapItem(jsonArrayValue.asJsonObject()));
-                                }
-                            });
-                        }
+        String manifestFileContent = FileHelper.readFile(manifestFile.getAbsolutePath());
+        if(manifestFileContent != null && !manifestFileContent.isBlank()) {
+            JsonObject manifestInfo = Json.createReader(new StringReader(manifestFileContent)).readObject();
+            manifestInfo.forEach((s, jsonValue) -> {
+                if(jsonValue.getValueType() == JsonValue.ValueType.ARRAY){
+                    switch (s) {
+                        case "textures" -> jsonValue.asJsonArray().forEach(jsonArrayValue -> {
+                            if (jsonArrayValue.getValueType() == JsonValue.ValueType.OBJECT) {
+                                textures.add(manifestJsonToHashmapItem(jsonArrayValue.asJsonObject()));
+                            }
+                        });
+                        case "scripts" -> jsonValue.asJsonArray().forEach(jsonArrayValue -> {
+                            if (jsonArrayValue.getValueType() == JsonValue.ValueType.OBJECT) {
+                                scripts.add(manifestJsonToHashmapItem(jsonArrayValue.asJsonObject()));
+                            }
+                        });
+                        case "levels" -> jsonValue.asJsonArray().forEach(jsonArrayValue -> {
+                            if (jsonArrayValue.getValueType() == JsonValue.ValueType.OBJECT) {
+                                levels.add(manifestJsonToHashmapItem(jsonArrayValue.asJsonObject()));
+                            }
+                        });
+                        case "materials" -> jsonValue.asJsonArray().forEach(jsonArrayValue -> {
+                            if (jsonArrayValue.getValueType() == JsonValue.ValueType.OBJECT) {
+                                materials.add(manifestJsonToHashmapItem(jsonArrayValue.asJsonObject()));
+                            }
+                        });
+                        case null, default -> jsonValue.asJsonArray().forEach(jsonArrayValue -> {
+                            if (jsonArrayValue.getValueType() == JsonValue.ValueType.OBJECT) {
+                                others.add(manifestJsonToHashmapItem(jsonArrayValue.asJsonObject()));
+                            }
+                        });
                     }
-                });
-            }
+                }
+            });
+            Debug.log("Loaded in " + (textures.size() + scripts.size() + levels.size() + materials.size() + others.size()) + " data entries");
+        }else{
+            Debug.logError("Manifest file empty");
         }
+    }
+
+    public static void updateManifest(){
+        loadManifest();
 
         JsonObjectBuilder jsonManifestContent = Json.createObjectBuilder();
         JsonArrayBuilder textureArray = Json.createArrayBuilder();
@@ -312,11 +318,13 @@ public class ManifestHelper {
         AtomicReference<String> path = new AtomicReference<>();
 
         List<HashMap<String, String>> typeArray = getOfType(fileType);
-        typeArray.forEach(map -> {
+        for (HashMap<String, String> map : typeArray) {
             if(map.get("guid").equals(guid)){
                 path.set(map.get("path"));
+                break;
             }
-        });
+        }
+
         return path.get();
     }
 

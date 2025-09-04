@@ -124,7 +124,7 @@ tasks.register('buildStandaloneJar', Jar) {
 
 
     manifest {
-        attributes('Main-Class': 'nl.framegengine.core.Launcher')
+        attributes('Main-Class': 'nl.framegengine.core.engine.Launcher')
     }
 
     from sourceSets.main.output
@@ -164,7 +164,7 @@ tasks.register('buildGame', Exec) {
     args    '--name', appName,
             '--input', layout.buildDirectory.dir("libs").get().asFile.absolutePath,
             '--main-jar', 'FrameGengineGame-1.0.jar',
-            '--main-class', 'nl.framegengine.core.Launcher',
+            '--main-class', 'nl.framegengine.core.engine.Launcher',
             '--type', fileType,  // 'app-image' or 'dmg' for Mac, 'exe' for Windows installer, etc.
             '--dest', dest,
             '--app-content', "\"${gameBuildTmpDir.absolutePath}\"",
