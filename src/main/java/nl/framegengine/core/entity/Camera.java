@@ -179,7 +179,7 @@ public class Camera extends GameObject {
 
     public void setAsMain(){
         mainCamera = this;
-        if(RenderManager.getInstance() != null) RenderManager.getInstance().setRenderCamera(mainCamera);
+        RenderManager.setRenderCamera(mainCamera);
     }
 
     @Override

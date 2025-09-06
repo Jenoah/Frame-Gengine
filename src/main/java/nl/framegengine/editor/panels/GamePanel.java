@@ -61,7 +61,7 @@ public class GamePanel extends EditorPanel {
         if(showStats){
             ImGui.setCursorPos(8, 48);
             ImGui.pushTextWrapPos(sizeX / 2f);
-            ImGui.text("Stats: " + RenderManager.getInstance().getMetrics());
+            ImGui.text("Stats: " + RenderManager.getMetrics());
             ImGui.popTextWrapPos();
         }
     }
@@ -124,16 +124,16 @@ public class GamePanel extends EditorPanel {
 
     public void toggleStats(){
         showStats = !showStats;
-        if(RenderManager.getInstance() != null) RenderManager.getInstance().recordMetrics(showStats);
+        RenderManager.recordMetrics(showStats);
     }
 
     public void enableStats(){
         showStats = true;
-        if(RenderManager.getInstance() != null) RenderManager.getInstance().recordMetrics(true);
+        RenderManager.recordMetrics(true);
     }
 
     public void disableStats(){
         showStats = false;
-        if(RenderManager.getInstance() != null) RenderManager.getInstance().recordMetrics(false);
+        RenderManager.recordMetrics(false);
     }
 }

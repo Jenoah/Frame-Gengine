@@ -22,40 +22,24 @@ import org.lwjgl.opengl.GL11;
 import static org.lwjgl.opengl.GL11.glViewport;
 
 public class RenderManager {
-    private final WindowManager window;
-    private ComponentRenderer componentRenderer;
-    public ShadowRenderer shadowRenderer;
-    private GuiRenderer guiRenderer;
-    private FontRenderer fontRenderer;
-    private FrameBuffer frameBuffer;
-    private FrameBuffer editorBuffer;
-    private SkyboxRenderer skyboxRenderer;
-    private DebugRenderer debugRenderer;
-    private final RenderMetrics metrics;
-    private boolean recordMetrics = false;
+    private static WindowManager window;
+    private static ComponentRenderer componentRenderer;
+    public static ShadowRenderer shadowRenderer;
+    private static GuiRenderer guiRenderer;
+    private static FontRenderer fontRenderer;
+    private static FrameBuffer frameBuffer;
+    private static FrameBuffer editorBuffer;
+    private static SkyboxRenderer skyboxRenderer;
+    private static DebugRenderer debugRenderer;
+    private static RenderMetrics metrics;
+    private static boolean recordMetrics = false;
     public static float aspectRatio = 1.77f;
-    private Camera renderCamera = null;
+    private static Camera renderCamera = null;
 
-    private static RenderManager instance = null;
+    public static void init() throws Exception {
+        if(window == null && WindowManager.getInstance() != null) window = WindowManager.getInstance();
+        if(metrics == null) metrics = new RenderMetrics();
 
-    public RenderManager() {
-        window = WindowManager.getInstance();
-        metrics = new RenderMetrics();
-        instance = this;
-    }
-
-    public static synchronized void createInstance() {
-        if (instance != null) {
-            throw new IllegalStateException("RenderManager already initialized");
-        }
-        instance = new RenderManager();
-    }
-
-    public static RenderManager getInstance() {
-        return instance;
-    }
-
-    public void init() throws Exception {
         componentRenderer = new ComponentRenderer();
         shadowRenderer = new ShadowRenderer();
 
@@ -72,7 +56,7 @@ public class RenderManager {
         PostProcessing.init();
     }
 
-    public void render(Scene currentScene){
+    public static void render(Scene currentScene){
         if (recordMetrics) metrics.frameStart();
 
         if(window.isResize()){
@@ -123,11 +107,11 @@ public class RenderManager {
         if (recordMetrics) metrics.frameEnd();
     }
 
-    public void clear(){
+    public static void clear(){
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
     }
 
-    public void cleanUp(){
+    public static void cleanUp(){
         PostProcessing.cleanUp();
         componentRenderer.cleanUp();
         frameBuffer.cleanUp();
@@ -137,11 +121,10 @@ public class RenderManager {
         skyboxRenderer.cleanUp();
         shadowRenderer.cleanUp();
         debugRenderer.cleanUp();
-        instance = null;
         renderCamera = null;
     }
 
-    private void regenerateFrameBuffer(){
+    private static void regenerateFrameBuffer(){
         frameBuffer = new FrameBuffer(window.getWidth(), window.getHeight(), FrameBuffer.DEPTH_RENDER_BUFFER);
         if(!window.isStandalone()){
             editorBuffer = new FrameBuffer(window.getWidth(), window.getHeight(), FrameBuffer.NONE);
@@ -149,56 +132,55 @@ public class RenderManager {
         }
     }
 
-    public void queueRender(RenderComponent renderComponent){
+    public static void queueRender(RenderComponent renderComponent){
         componentRenderer.queue(renderComponent);
         shadowRenderer.queue(renderComponent);
     }
 
-    public void debugCube(Vector3f position, Vector3f size){
+    public static void debugCube(Vector3f position, Vector3f size){
         debugRenderer.drawCube(position, size);
     }
 
-    public void debugCube(Vector3f position, Quaternionf rotation, Vector3f size){
+    public static void debugCube(Vector3f position, Quaternionf rotation, Vector3f size){
         debugRenderer.drawCube(position, rotation, size);
     }
 
-    public void debugCube(Vector3f position){
+    public static void debugCube(Vector3f position){
         debugRenderer.drawCube(position, Constants.VECTOR3_ONE);
     }
 
-    public void debugCube(Vector3f position, Quaternionf rotation){
+    public static void debugCube(Vector3f position, Quaternionf rotation){
         debugRenderer.drawCube(position, rotation, Constants.VECTOR3_ONE);
     }
 
-    public void dequeueRender(RenderComponent renderComponent){
+    public static void dequeueRender(RenderComponent renderComponent){
         componentRenderer.dequeue(renderComponent);
         shadowRenderer.dequeue(renderComponent);
     }
 
-    public void setRenderCamera(Camera renderCamera){
+    public static void setRenderCamera(Camera renderCamera){
         shadowRenderer.setMainCamera(renderCamera);
         componentRenderer.setMainCamera(renderCamera);
         skyboxRenderer.setMainCamera(renderCamera);
         debugRenderer.setMainCamera(renderCamera);
     }
 
-    public void recordMetrics(boolean recordState){
-        this.recordMetrics = recordState;
+    public static void recordMetrics(boolean recordState){
+        recordMetrics = recordState;
         if(recordMetrics){
-            componentRenderer.setMetrics(this.metrics);
-            shadowRenderer.setMetrics(this.metrics);
-            guiRenderer.setMetrics(this.metrics);
-            fontRenderer.setMetrics(this.metrics);
-            skyboxRenderer.setMetrics(this.metrics);
+            componentRenderer.setMetrics(metrics);
+            shadowRenderer.setMetrics(metrics);
+            guiRenderer.setMetrics(metrics);
+            fontRenderer.setMetrics(metrics);
+            skyboxRenderer.setMetrics(metrics);
         }
         componentRenderer.recordMetrics(recordMetrics);
         shadowRenderer.recordMetrics(recordMetrics);
         guiRenderer.recordMetrics(recordMetrics);
         fontRenderer.recordMetrics(recordMetrics);
-        skyboxRenderer.setMetrics(this.metrics);
     }
 
-    public String getMetrics() {
+    public static String getMetrics() {
         return recordMetrics ? metrics.getMetrics() : "Metrics not recorded";
     }
 }

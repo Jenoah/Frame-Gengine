@@ -305,9 +305,9 @@ public class GameObject implements IJsonSerializable {
     }
 
     public void update(){
-        if(drawDebugWireframe && aabb != null && RenderManager.getInstance() != null){
+        if(drawDebugWireframe && aabb != null){
             worldAABB.set(getAabb()).offset(getPosition());
-            RenderManager.getInstance().debugCube(worldAABB.getCenter(), getRotation(), worldAABB.getSize());
+            RenderManager.debugCube(worldAABB.getCenter(), getRotation(), worldAABB.getSize());
         }
 
         if(!isEnabled || components.isEmpty()) return;

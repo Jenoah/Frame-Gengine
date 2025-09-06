@@ -98,11 +98,11 @@ public class RenderComponent extends Component {
     }
 
     private void queueRender() {
-        RenderManager.getInstance().queueRender(this);
+        RenderManager.queueRender(this);
     }
 
     private void dequeueRender() {
-        RenderManager.getInstance().dequeueRender(this);
+        RenderManager.dequeueRender(this);
     }
 
     private void calculateRadius() {

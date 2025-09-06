@@ -10,20 +10,16 @@ import nl.framegengine.core.rendering.RenderManager;
 import java.io.File;
 
 public class GameInstance implements ILogic{
-    private final RenderManager renderer;
     private final WindowManager window;
 
     public GameInstance(){
-        RenderManager.createInstance();
-        renderer = RenderManager.getInstance();
         window = WindowManager.getInstance();
-        SceneManager.getInstance();
     }
 
     @Override
     public void init() throws Exception {
         Debug.log("Initiating game...");
-        renderer.init();
+        RenderManager.init();
         EngineSettings.loadSettings();
 
         Scene level = SceneManager.loadScene(EngineSettings.currentProjectDirectory + File.separator + EngineSettings.currentLevelPath);
@@ -49,16 +45,12 @@ public class GameInstance implements ILogic{
 
     @Override
     public void render() {
-        renderer.render(SceneManager.currentScene);
+        RenderManager.render(SceneManager.currentScene);
     }
 
     @Override
     public void cleanUp() {
-        renderer.cleanUp();
+        RenderManager.cleanUp();
         SceneManager.cleanUp();
-    }
-
-    public RenderManager getRenderer(){
-        return renderer;
     }
 }
