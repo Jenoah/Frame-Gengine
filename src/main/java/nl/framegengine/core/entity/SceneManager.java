@@ -25,17 +25,7 @@ public class SceneManager {
     public static float fogDensity = 0.01f;
     public static float fogGradient = 15f;
 
-    private static SceneManager instance = null;
     public static ComponentLoader componentLoader;
-
-    public static synchronized SceneManager getInstance()
-    {
-        if (instance == null) {
-            instance = new SceneManager();
-        }
-
-        return instance;
-    }
 
     public static Scene loadScene(String filePath) throws Exception {
         if(componentLoader == null){
@@ -112,7 +102,6 @@ public class SceneManager {
 
     public static void cleanUp(){
         currentScene.cleanUp();
-        instance = null;
     }
 
     //TODO: Move underlying method to Scenes SerializeToJson function
