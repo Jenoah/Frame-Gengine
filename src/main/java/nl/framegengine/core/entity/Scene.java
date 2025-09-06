@@ -14,6 +14,7 @@ import nl.framegengine.core.lighting.SpotLight;
 import nl.framegengine.core.shaders.ShaderManager;
 import nl.framegengine.core.shaders.SimpleLitShader;
 import nl.framegengine.core.utils.JsonHelper;
+import nl.framegengine.editor.EngineSettings;
 import org.joml.Vector3f;
 
 import javax.json.Json;
@@ -56,12 +57,16 @@ public class Scene implements IJsonSerializable {
     public void postStart() { }
 
     public void update() {
-        for (GameObject rootGameObject : rootGameObjects.stream().toList()) {
-            rootGameObject.onUpdateTransform();
-        }
+        updateRootGameObjectTransforms();
 
         for (GameObject gameObject : gameObjects.stream().toList()) {
             gameObject.update();
+        }
+    }
+
+    public void updateRootGameObjectTransforms(){
+        for (GameObject rootGameObject : rootGameObjects.stream().toList()) {
+            rootGameObject.onUpdateTransform();
         }
     }
 
