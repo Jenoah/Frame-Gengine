@@ -80,16 +80,16 @@ public class SceneManager {
         }
     }
 
-    public List<Scene> getScenes() {
+    public static List<Scene> getScenes() {
         return scenes;
     }
 
-    public void setScenes(List<Scene> scenes) {
-        this.scenes = scenes;
+    public static void setScenes(List<Scene> scenes) {
+        SceneManager.scenes = scenes;
     }
 
     public static void addScene(Scene scene){
-        scenes.add(scene);
+        if(!scenes.contains(scene)) scenes.add(scene);
     }
 
     public static void setCurrentScene(int sceneIndex) {
