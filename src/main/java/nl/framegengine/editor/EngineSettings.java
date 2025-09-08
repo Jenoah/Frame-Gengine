@@ -39,6 +39,7 @@ public class EngineSettings {
 
     public static void loadSettings() {
         if (!isCompiled && (currentProjectDirectory.isEmpty() || !new File(currentProjectDirectory).exists())) return;
+        Debug.log("Loading in engine settings");
         String saveFileContent = FileHelper.readFile(currentProjectDirectory + settingsFileName);
 
         if(saveFileContent == null) {

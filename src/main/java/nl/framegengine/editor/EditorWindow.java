@@ -158,6 +158,6 @@ public class EditorWindow {
     }
 
     public void setEditorLayout(EditorLayout editorLayout){
-        this.editorLayout = editorLayout;
+        EditorWindow.editorLayout = editorLayout;
     }
 }

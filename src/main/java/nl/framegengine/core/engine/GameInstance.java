@@ -22,14 +22,17 @@ public class GameInstance implements ILogic{
         RenderManager.init();
         EngineSettings.loadSettings();
 
-        Scene level = SceneManager.loadScene(EngineSettings.currentProjectDirectory + File.separator + EngineSettings.currentLevelPath);
-
+        Debug.log("Loading window settings");
         window.setClearColor(0, 0, 0, 0);
         window.setWindowIcon("textures/FrameGengine_icon.png");
 
+        Scene level = SceneManager.loadScene(EngineSettings.currentProjectDirectory + File.separator + EngineSettings.currentLevelPath);
+
+        Debug.log("Adding scene to SceneManager");
         SceneManager.addScene(level);
         SceneManager.setCurrentScene(0);
 
+        Debug.log("Updating shaders with scene settings");
         ShaderManager.updateGenericUniforms();
     }
 

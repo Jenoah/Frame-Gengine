@@ -1,5 +1,6 @@
 package nl.framegengine.core.rendering;
 
+import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.rendering.renderers.ComponentRenderer;
 import nl.framegengine.core.rendering.renderers.DebugRenderer;
 import nl.framegengine.core.rendering.renderers.PostProcessing;
@@ -37,6 +38,7 @@ public class RenderManager {
     private static Camera renderCamera = null;
 
     public static void init() throws Exception {
+        Debug.log("Initializing RenderManager");
         if(window == null && WindowManager.getInstance() != null) window = WindowManager.getInstance();
         if(metrics == null) metrics = new RenderMetrics();
 

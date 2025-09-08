@@ -28,11 +28,14 @@ public class SceneManager {
     public static ComponentLoader componentLoader;
 
     public static Scene loadScene(String filePath) throws Exception {
+        Debug.log("Loading in scene at " + filePath);
         if(componentLoader == null){
+            Debug.log("Loading in components");
             URL inputResourceUrl = new File(EngineSettings.currentProjectDirectory).toURI().toURL();
             URL compiledResourceUrl = new File(EngineSettings.currentProjectDirectory + File.separator + "/.compiled").toURI().toURL();
 
             componentLoader = new ComponentLoader(inputResourceUrl.toURI().getPath(), compiledResourceUrl.toURI().getPath());
+            Debug.log("Components loaded");
         }
 
         Scene scene = new Scene();
@@ -47,6 +50,7 @@ public class SceneManager {
         JsonObject sceneInfo = reader.readObject();
         scene.deserializeFromJson(sceneInfo.toString());
 
+        Debug.log("Loading in scene game objects");
         scene.getGameObjects().forEach(go -> {
             for (Component component : go.components.stream().toList()) {
                 component.initiate();
@@ -54,6 +58,7 @@ public class SceneManager {
             if(go instanceof Light light) tryAddLight(light, scene);
             go.callUpdate();
         });
+        Debug.log("Loading scene settings");
         scene.updateLights();
         scene.setFogColor(scene.getFogColor());
         scene.setFogDensity(scene.getFogDensity());
