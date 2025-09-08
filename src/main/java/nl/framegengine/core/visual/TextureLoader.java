@@ -26,7 +26,7 @@ public class TextureLoader {
     private static boolean isNormalMap = false;
 
     public static int loadTexture(String fileName){
-        String textureGUID = ManifestHelper.getGuidbyPath(ManifestHelper.manifestFileType.TEXTURE, fileName);
+        String textureGUID = ManifestHelper.getGuidByPath(ManifestHelper.manifestFileType.TEXTURE, fileName);
         if(textures.containsKey(textureGUID)){
             return textures.get(textureGUID);
         }

@@ -38,7 +38,7 @@ public class MaterialManager {
             return defaultMaterial;
         }
 
-        if(guid == null || guid.isBlank()) guid = ManifestHelper.getGuidbyPath(ManifestHelper.manifestFileType.MATERIAL, materialFile.getPath());
+        if(guid == null || guid.isBlank()) guid = ManifestHelper.getGuidByPath(ManifestHelper.manifestFileType.MATERIAL, materialFile.getPath());
         if(materials.containsKey(guid)) return materials.get(guid);
 
         InputStream is = EngineSettings.isCompiled ?
