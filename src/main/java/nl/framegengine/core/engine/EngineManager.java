@@ -20,6 +20,7 @@ public class EngineManager {
     private float fpsUpdateTimer = 0.0f;
     private static int fps = 0;
     private static float deltaTime = 0.0f;
+    private static int currentFrameCount = 0;
 
     private static final float MIN_DELTA_TIME = 1.0f / 10000f; // 1ms minimum, adjust as needed
 
@@ -96,11 +97,11 @@ public class EngineManager {
     }
 
     private void calculateFps(){
-        fpsUpdateTimer += deltaTime;
-
-        if (fpsUpdateTimer >= 1.0f) {
-            fps = Math.round(1f / getDeltaTime());
-            fpsUpdateTimer = 0.0f;
+        currentFrameCount++;
+        if (getCurrentTime() - fpsUpdateTimer >= 1f) {
+            fps = currentFrameCount;
+            currentFrameCount = 0;
+            fpsUpdateTimer += 1f;
         }
     }
 
