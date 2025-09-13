@@ -12,11 +12,12 @@ public class FontShader extends Shader {
         super();
     }
 
-    public void init() throws Exception {
+    public Shader init() throws Exception {
         loadVertexShaderFromFile("/shaders/GUI/fonts/fontGeneric.vs");
         loadFragmentShaderFromFile("/shaders/GUI/fonts/fontGeneric.fs");
         link();
         super.init();
+        return this;
     }
 
     @Override

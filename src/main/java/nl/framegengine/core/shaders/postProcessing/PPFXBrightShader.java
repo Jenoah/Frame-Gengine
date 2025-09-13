@@ -9,11 +9,12 @@ public class PPFXBrightShader extends Shader {
         super();
     }
 
-    public void init() throws Exception {
+    public Shader init() throws Exception {
         loadVertexShaderFromFile("/shaders/postProcessing/ppfxGeneric.vs");
         loadFragmentShaderFromFile("/shaders/postProcessing/ppfxBrightFilter.fs");
         link();
         super.init();
+        return this;
     }
 
     @Override

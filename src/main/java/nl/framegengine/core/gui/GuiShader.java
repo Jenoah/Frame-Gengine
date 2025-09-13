@@ -10,11 +10,12 @@ public class GuiShader extends Shader {
         super();
     }
 
-    public void init() throws Exception {
+    public Shader init() throws Exception {
         loadVertexShaderFromFile("/shaders/GUI/guiGeneric.vs");
         loadFragmentShaderFromFile("/shaders/GUI/guiGeneric.fs");
         link();
         super.init();
+        return this;
     }
 
     @Override

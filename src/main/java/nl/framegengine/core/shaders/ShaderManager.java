@@ -11,18 +11,12 @@ public class ShaderManager {
 
     static {
         try {
-            litShader = new SimpleLitShader();
-            litShader.init();
-            pbrShader = new PBRShader();
-            pbrShader.init();
-            unlitShader = new UnlitShader();
-            unlitShader.init();
-            billboardShader = new BillboardShader();
-            billboardShader.init();
-            terrainShader = new TerrainShader();
-            terrainShader.init();
-            triplanarShader = new TriplanarShader();
-            triplanarShader.init();
+            litShader = (SimpleLitShader) new SimpleLitShader().init();
+            pbrShader = (PBRShader) new PBRShader().init();
+            unlitShader = (UnlitShader) new UnlitShader().init();
+            billboardShader = (BillboardShader) new BillboardShader().init();
+            terrainShader = (TerrainShader) new TerrainShader().init();
+            triplanarShader = (TriplanarShader) new TriplanarShader().init();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

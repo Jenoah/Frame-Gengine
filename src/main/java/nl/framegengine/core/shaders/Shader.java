@@ -34,11 +34,12 @@ public class Shader {
         window = WindowManager.getInstance();
     }
 
-    public void init() throws Exception {
+    public Shader init() throws Exception {
         if(vertexShaderID == 0 || fragmentShaderID == 0){
             throw new Exception("Shaders not initialized");
         }
         createRequiredUniforms();
+        return this;
     }
 
     public Shader init(String vertexShader, String fragmentShader) throws Exception {

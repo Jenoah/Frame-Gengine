@@ -9,11 +9,12 @@ public class PPFXVerticalBlurShader extends Shader {
         super();
     }
 
-    public void init() throws Exception {
+    public Shader init() throws Exception {
         loadVertexShaderFromFile("/shaders/postProcessing/ppfxVerticalBlur.vs");
         loadFragmentShaderFromFile("/shaders/postProcessing/ppfxBlur.fs");
         link();
         super.init();
+        return this;
     }
 
     @Override

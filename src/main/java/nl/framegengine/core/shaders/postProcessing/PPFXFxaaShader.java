@@ -8,11 +8,12 @@ public class PPFXFxaaShader extends Shader {
         super();
     }
 
-    public void init() throws Exception {
+    public Shader init() throws Exception {
         loadVertexShaderFromFile("/shaders/postProcessing/ppfxGeneric.vs");
         loadFragmentShaderFromFile("/shaders/postProcessing/ppfxFxaa.fs");
         link();
         super.init();
+        return this;
     }
 
     @Override

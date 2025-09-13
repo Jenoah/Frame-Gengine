@@ -11,11 +11,12 @@ public class SkyboxShader extends Shader {
         super();
     }
 
-    public void init() throws Exception {
+    public Shader init() throws Exception {
         loadVertexShaderFromFile("/shaders/skybox/skyboxGeneric.vs");
         loadFragmentShaderFromFile("/shaders/skybox/skyboxGeneric.fs");
         link();
         super.init();
+        return this;
     }
 
     @Override
