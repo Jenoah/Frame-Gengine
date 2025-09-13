@@ -1,9 +1,7 @@
 package nl.framegengine.core.entity;
 
-import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.engine.WindowManager;
 import nl.framegengine.core.rendering.utils.FrustumPlane;
-import nl.framegengine.core.rendering.RenderManager;
 import nl.framegengine.core.utils.AABB;
 import nl.framegengine.core.utils.ObjectPool;
 import org.joml.Matrix4f;
@@ -12,7 +10,7 @@ import org.joml.Vector3f;
 
 public class Camera extends GameObject {
 
-    public static Camera mainCamera = null;
+    private static Camera mainCamera = null;
 
     private final Matrix4f viewProjectionMatrix = new Matrix4f();
     private final Matrix4f viewMatrix = new Matrix4f();
@@ -177,9 +175,8 @@ public class Camera extends GameObject {
         return this.viewMatrix;
     }
 
-    public void setAsMain(){
-        mainCamera = this;
-        RenderManager.setRenderCamera(mainCamera);
+    public static Camera getMainCamera(){
+        return SceneManager.currentScene == null ? null : SceneManager.currentScene.getMainCamera();
     }
 
     @Override

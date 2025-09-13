@@ -25,13 +25,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class Scene implements IJsonSerializable {
-    private final List<GameObject> gameObjects;
-    private final List<GameObject> rootGameObjects;
-    private final List<GuiObject> guiObjects;
-    private final Map<FontType, List<GUIText>> textObjects;
-    private Vector3f fogColor = new Vector3f(1);
-    private float fogDensity = 0.01f;
-    private float fogGradient = 15f;
+    protected final List<GameObject> gameObjects;
+    protected final List<GameObject> rootGameObjects;
+    protected final List<GuiObject> guiObjects;
+    protected final Map<FontType, List<GUIText>> textObjects;
+    protected Vector3f fogColor = new Vector3f(1);
+    protected float fogDensity = 0.01f;
+    protected float fogGradient = 15f;
+    protected Camera mainCamera = null;
 
     //Lighting
     private Vector3f ambientLight;
@@ -54,7 +55,12 @@ public class Scene implements IJsonSerializable {
 
     public void init() { }
 
-    public void postStart() { }
+    public void postStart() {
+        Debug.log("Setting main camera to " + getLevelName() + "'s camera (" + mainCamera.getName() + ")");
+        RenderManager.setRenderCamera(mainCamera);
+        mainCamera.callUpdate();
+        mainCamera.onUpdateTransform();
+    }
 
     public void update() {
         updateRootGameObjectTransforms();
@@ -147,6 +153,15 @@ public class Scene implements IJsonSerializable {
                 }
             }
         }
+    }
+
+    public void setMainCamera(Camera camera){
+        mainCamera = camera;
+        Debug.log("Setting scene (" + getLevelName() + ") to camera (" + mainCamera.getName() + ")");
+    }
+
+    public Camera getMainCamera(){
+        return mainCamera;
     }
 
     public void updateLights(){
@@ -301,6 +316,7 @@ public class Scene implements IJsonSerializable {
 
         gameObjects.forEach(go -> {
             if(go.getParent() == null) rootGameObjects.add(go);
+            if(mainCamera == null && go instanceof Camera camera) setMainCamera(camera);
         });
     }
 

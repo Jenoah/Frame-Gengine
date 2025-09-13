@@ -42,7 +42,7 @@ public class TerrainManager extends Component {
         terrainGeneration.setSurfaceFeatureSamples(8);
 
         Utils.setNoiseSeed(123);
-        playerCamera = Camera.mainCamera;
+        playerCamera = Camera.getMainCamera();
 
         Set<MeshMaterialSet> treeMeshMaterialSet = OBJLoader.loadOBJModel("/models/birch.obj");
         treeMeshMaterialSet.forEach((meshMaterialSet -> meshMaterialSet.mesh.generateUVs()));
