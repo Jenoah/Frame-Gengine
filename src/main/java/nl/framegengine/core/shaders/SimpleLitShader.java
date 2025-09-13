@@ -208,9 +208,9 @@ public class SimpleLitShader extends Shader {
         bind();
 
         //Fog
-        this.setUniform("fogColor", SceneManager.currentScene.getFogColor());
-        this.setUniform("fogDensity", SceneManager.currentScene.getFogDensity());
-        this.setUniform("fogGradient", SceneManager.currentScene.getFogGradient());
+        this.setUniform("fogColor", SceneManager.currentScene != null ? SceneManager.currentScene.getFogColor() : Constants.AMBIENT_COLOR);
+        this.setUniform("fogDensity", SceneManager.currentScene != null ? SceneManager.currentScene.getFogDensity() : 0.025f);
+        this.setUniform("fogGradient", SceneManager.currentScene != null ? SceneManager.currentScene.getFogGradient() : 10f);
 
         //Shadows
         this.setUniform("shadowDistance", Constants.SHADOW_DISTANCE);

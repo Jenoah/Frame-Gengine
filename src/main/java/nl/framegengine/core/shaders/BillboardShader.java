@@ -2,6 +2,7 @@ package nl.framegengine.core.shaders;
 
 import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.entity.SceneManager;
+import nl.framegengine.core.utils.Constants;
 import nl.framegengine.core.visual.MeshMaterialSet;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -46,9 +47,9 @@ public class BillboardShader extends Shader{
         bind();
 
         //Fog
-        this.setUniform("fogColor", SceneManager.currentScene.getFogColor());
-        this.setUniform("fogDensity", SceneManager.currentScene.getFogDensity());
-        this.setUniform("fogGradient", SceneManager.currentScene.getFogGradient());
+        this.setUniform("fogColor", SceneManager.currentScene != null ? SceneManager.currentScene.getFogColor() : Constants.AMBIENT_COLOR);
+        this.setUniform("fogDensity", SceneManager.currentScene != null ? SceneManager.currentScene.getFogDensity() : 0.025f);
+        this.setUniform("fogGradient", SceneManager.currentScene != null ? SceneManager.currentScene.getFogGradient() : 10f);
 
         //Camera
         setUniform("projectionMatrix", window.getProjectionMatrix());

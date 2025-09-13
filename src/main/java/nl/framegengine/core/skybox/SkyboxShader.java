@@ -3,6 +3,7 @@ package nl.framegengine.core.skybox;
 import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.shaders.Shader;
+import nl.framegengine.core.utils.Constants;
 import org.joml.Matrix4f;
 
 public class SkyboxShader extends Shader {
@@ -36,6 +37,6 @@ public class SkyboxShader extends Shader {
 
         setUniform("viewMatrix", viewMatrix);
         setUniform("projectionMatrix", projectionMatrix);
-        setUniform("fogColor", SceneManager.fogColor);
+        setUniform("fogColor", SceneManager.currentScene != null ? SceneManager.currentScene.getFogColor() : Constants.AMBIENT_COLOR);
     }
 }
