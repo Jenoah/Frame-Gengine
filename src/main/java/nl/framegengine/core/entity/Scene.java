@@ -11,16 +11,21 @@ import nl.framegengine.core.gui.GuiObject;
 import nl.framegengine.core.lighting.DirectionalLight;
 import nl.framegengine.core.lighting.PointLight;
 import nl.framegengine.core.lighting.SpotLight;
+import nl.framegengine.core.rendering.RenderManager;
 import nl.framegengine.core.shaders.ShaderManager;
 import nl.framegengine.core.shaders.SimpleLitShader;
+import nl.framegengine.core.utils.FileHelper;
+import nl.framegengine.core.utils.IJsonSerializable;
 import nl.framegengine.core.utils.JsonHelper;
+import nl.framegengine.core.visual.ModelManager;
 import nl.framegengine.editor.EngineSettings;
 import org.joml.Vector3f;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
+import javax.json.*;
+import javax.json.stream.JsonGenerator;
+import java.io.File;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
@@ -35,10 +40,10 @@ public class Scene implements IJsonSerializable {
     protected Camera mainCamera = null;
 
     //Lighting
-    private Vector3f ambientLight;
-    private PointLight[] pointLights = new PointLight[0];
-    private SpotLight[] spotLights = new SpotLight[0];
-    private DirectionalLight directionalLight;
+    protected Vector3f ambientLight;
+    protected PointLight[] pointLights = new PointLight[0];
+    protected SpotLight[] spotLights = new SpotLight[0];
+    protected DirectionalLight directionalLight;
 
     protected final WindowManager windowManager;
 
@@ -116,7 +121,6 @@ public class Scene implements IJsonSerializable {
         addGameObject(entity);
         if (!entity.getComponents().isEmpty()) entity.getComponents().forEach(Component::initiate);
     }
-
 
     public void addGameObject(GameObject gameObject) {
         if (gameObjects.contains(gameObject)) return;
@@ -320,9 +324,33 @@ public class Scene implements IJsonSerializable {
         });
     }
 
+    public void saveScene(){
+        Map<String, Boolean> config = new HashMap<>();
+        config.put(JsonGenerator.PRETTY_PRINTING, true);
+        JsonWriterFactory jsonWriterFactory = Json.createWriterFactory(config);
+
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = jsonWriterFactory.createWriter(stringWriter);
+        jsonWriter.write(this.serializeToJson());
+
+        FileHelper.writeToFile(stringWriter.toString(), EngineSettings.currentProjectDirectory + File.separator + EngineSettings.currentLevelPath);
+    }
+
     @Override
     public JsonObject serializeToJson() {
-        return null;
+        JsonObjectBuilder sceneInfo = Json.createObjectBuilder();
+        sceneInfo.add("levelName", this.getLevelName());
+        sceneInfo.add("fogGradient", this.getFogGradient());
+        sceneInfo.add("fogDensity", this.getFogDensity());
+        sceneInfo.add("fogColor", JsonHelper.vector3ToJsonObject(this.getFogColor()));
+
+        JsonArrayBuilder sceneGoInfo = Json.createArrayBuilder();
+        this.getGameObjects().forEach(go -> {
+            sceneGoInfo.add(go.serializeToJson());
+        });
+        sceneInfo.add("gameObjects", sceneGoInfo);
+
+        return sceneInfo.build();
     }
 
     @Override

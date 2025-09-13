@@ -1,22 +1,24 @@
 package nl.framegengine.core.entity;
 
-import nl.framegengine.editor.EngineSettings;
 import nl.framegengine.core.components.Component;
+import nl.framegengine.core.components.ComponentLoader;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.lighting.DirectionalLight;
 import nl.framegengine.core.lighting.Light;
 import nl.framegengine.core.lighting.PointLight;
 import nl.framegengine.core.lighting.SpotLight;
-import nl.framegengine.core.components.ComponentLoader;
-import nl.framegengine.core.utils.JsonHelper;
+import nl.framegengine.editor.EngineSettings;
 import org.joml.Vector3f;
 
-import javax.json.*;
-import javax.json.stream.JsonGenerator;
-import java.io.*;
-
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SceneManager {
     private static List<Scene> scenes = new ArrayList<>();
@@ -107,30 +109,5 @@ public class SceneManager {
 
     public static void cleanUp(){
         currentScene.cleanUp();
-    }
-
-    //TODO: Move underlying method to Scenes SerializeToJson function
-    public static String sceneToJson(Scene scene){
-        JsonObjectBuilder sceneInfo = Json.createObjectBuilder();
-        sceneInfo.add("levelName", scene.getLevelName());
-        sceneInfo.add("fogGradient", scene.getFogGradient());
-        sceneInfo.add("fogDensity", scene.getFogDensity());
-        sceneInfo.add("fogColor", JsonHelper.vector3ToJsonObject(scene.getFogColor()));
-
-        JsonArrayBuilder sceneGoInfo = Json.createArrayBuilder();
-        scene.getGameObjects().forEach(go -> {
-            sceneGoInfo.add(go.serializeToJson());
-        });
-        sceneInfo.add("gameObjects", sceneGoInfo);
-
-        Map<String, Boolean> config = new HashMap<>();
-        config.put(JsonGenerator.PRETTY_PRINTING, true);
-        JsonWriterFactory jsonWriterFactory = Json.createWriterFactory(config);
-
-        StringWriter stringWriter = new StringWriter();
-        JsonWriter jsonWriter = jsonWriterFactory.createWriter(stringWriter);
-        jsonWriter.write(sceneInfo.build());
-
-        return stringWriter.toString();
     }
 }
