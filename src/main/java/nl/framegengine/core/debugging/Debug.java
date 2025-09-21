@@ -38,7 +38,7 @@ public class Debug {
         System.out.println(debugMessage);
     }
 
-    public static List<LogEntry> GetLog(){
+    public static List<LogEntry> getLog(){
         return logHistory;
     }
 
@@ -48,6 +48,11 @@ public class Debug {
         public LogEntry(List<ConsoleColors> segments) {
             this.segments = segments;
         }
+    }
+
+    public static void clearLogs(){
+        logHistory.clear();
+        Debug.log("Cleared log");
     }
 
 }
