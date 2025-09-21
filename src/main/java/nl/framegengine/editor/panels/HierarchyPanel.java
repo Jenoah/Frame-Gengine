@@ -54,6 +54,7 @@ public class HierarchyPanel extends EditorPanel {
             hierarchyObjects = SceneManager.currentScene.getRootGameObjects();
             frameCount = 0;
         }
+        if(hierarchyObjects == null) return;
 
         ImGui.setWindowFontScale(1.1f);
 
@@ -166,6 +167,15 @@ public class HierarchyPanel extends EditorPanel {
                     if(SceneManager.currentScene != null){
                         GameObject cubeObject = new GameObject("Cube");
                         Set<MeshMaterialSet> meshMaterialSets = OBJLoader.loadOBJModel("/models/cube.obj");
+                        cubeObject.addComponent(new RenderComponent(meshMaterialSets));
+                        SceneManager.currentScene.addEntity(cubeObject);
+                    }
+                    ImGui.closeCurrentPopup();
+                }
+                if (ImGui.menuItem("Quad")) {
+                    if(SceneManager.currentScene != null){
+                        GameObject cubeObject = new GameObject("Quad");
+                        Set<MeshMaterialSet> meshMaterialSets = OBJLoader.loadOBJModel("/models/quad.obj");
                         cubeObject.addComponent(new RenderComponent(meshMaterialSets));
                         SceneManager.currentScene.addEntity(cubeObject);
                     }
