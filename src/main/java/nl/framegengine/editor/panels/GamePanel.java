@@ -4,11 +4,13 @@ import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
-import nl.framegengine.core.rendering.RenderManager;
-import nl.framegengine.editor.*;
+import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.engine.EngineManager;
 import nl.framegengine.core.engine.WindowManager;
-import nl.framegengine.core.debugging.Debug;
+import nl.framegengine.core.entity.Scene;
+import nl.framegengine.core.entity.SceneManager;
+import nl.framegengine.core.rendering.RenderManager;
+import nl.framegengine.editor.*;
 
 public class GamePanel extends EditorPanel {
 
@@ -17,6 +19,7 @@ public class GamePanel extends EditorPanel {
     private int aspectHeight = 0;
     private float aspectRatio = 1.7778f;
     private boolean showStats = false;
+    private String editingSceneJson = null;
 
     public GamePanel(int posX, int posY, int sizeX, int sizeY) {
         super(posX, posY, sizeX, sizeY);
@@ -75,23 +78,22 @@ public class GamePanel extends EditorPanel {
     }
 
     public void startGame(){
-        if(EngineSettings.currentLevelPath.isEmpty()){
-            Debug.logError("Cannot start game. No level selected");
-            return;
-        }
-        if(editorGameLauncher == null) {
-            editorGameLauncher = new EditorGameLauncher();
-            ImGuiHelper.showProgressBar("Booting game...");
-            editorGameLauncher.run(sizeX, sizeY - 20);
-        }
+        if(SceneManager.currentScene == null || EngineSettings.isInGame) return;
+
+        ImGuiHelper.showProgressBar("Loading Game");
+        editingSceneJson = SceneManager.currentScene.serializeToJson().toString();
+        Scene gameplayScene = new Scene();
+        gameplayScene.deserializeFromJson(editingSceneJson);
+        gameplayScene.setLevelName(gameplayScene.getLevelName() + " - Gameplay");
+        SceneManager.setCurrentScene(gameplayScene);
+        EngineSettings.isInGame = true;
+        ImGuiHelper.hideProgressBar();
     }
 
     public void stopGame(){
-        disableStats();
-        if(editorGameLauncher != null){
-            editorGameLauncher.stop();
-            editorGameLauncher = null;
-            EditorWindow.getInstance().resetGameFBOID();
+        if(EngineSettings.isInGame){
+            EngineSettings.isInGame = false;
+            SceneManager.setCurrentScene((Scene)new Scene().deserializeFromJson(editingSceneJson));
         }
     }
 
@@ -120,6 +122,19 @@ public class GamePanel extends EditorPanel {
         if(refreshGameInstance && WindowManager.getInstance() != null){
             WindowManager.getInstance().setWindowSize(aspectWidth, aspectHeight);
         }
+    }
+
+    public void startEngine(){
+        if(EngineSettings.currentLevelPath.isEmpty()){
+            Debug.logError("Cannot start game. No level selected");
+            return;
+        }
+        if(editorGameLauncher == null) {
+            ImGuiHelper.showProgressBar("Booting game...");
+            editorGameLauncher = new EditorGameLauncher();
+            editorGameLauncher.run(sizeX, sizeY - 20);
+        }
+
     }
 
     public void toggleStats(){
