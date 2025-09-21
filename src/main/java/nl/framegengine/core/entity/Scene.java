@@ -17,6 +17,7 @@ import nl.framegengine.core.utils.IJsonSerializable;
 import nl.framegengine.core.utils.JsonHelper;
 import nl.framegengine.core.visual.ModelManager;
 import nl.framegengine.editor.EngineSettings;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import javax.json.*;
@@ -37,6 +38,10 @@ public class Scene implements IJsonSerializable {
     protected float fogDensity = 0.01f;
     protected float fogGradient = 15f;
     protected Camera mainCamera = null;
+
+    //Editor camera
+    protected Vector3f editorCameraPosition = new Vector3f(0, 1, 0);
+    protected Quaternionf editorCameraRotation = new Quaternionf();
 
     //Lighting
     protected Vector3f ambientLight;
@@ -66,7 +71,6 @@ public class Scene implements IJsonSerializable {
     }
 
     public void update() {
-        if(!EngineSettings.isInGame) return;
         updateRootGameObjectTransforms();
 
         for (GameObject gameObject : gameObjects.stream().toList()) {
@@ -108,18 +112,7 @@ public class Scene implements IJsonSerializable {
     }
 
     public void addEntity(GameObject entity) {
-        if (entity == null) {
-            return;
-        }
-
-        if (entity.getChildren() != null) {
-            for (GameObject child : entity.getChildren()) {
-                addGameObject(child);
-            }
-        }
-
-        addGameObject(entity);
-        if (!entity.getComponents().isEmpty()) entity.getComponents().forEach(Component::initiate);
+        addEntity(entity, true);
     }
 
     public void addGameObject(GameObject gameObject) {
@@ -143,6 +136,17 @@ public class Scene implements IJsonSerializable {
         this.rootGameObjects.remove(gameObject);
         gameObjects.remove(gameObject);
         gameObject.remove();
+    }
+
+    public GameObject removeGameObject(String name){
+        for (GameObject gameObject : gameObjects) {
+            if(gameObject.getName().equals(name)){
+                removeGameObject(gameObject);
+                return gameObject;
+            }
+        }
+
+        return null;
     }
 
     public void addGUI(GuiObject guiObject) {
@@ -302,6 +306,14 @@ public class Scene implements IJsonSerializable {
         return gameObjects;
     }
 
+    public GameObject getGameObjectByName(String name){
+        for (GameObject gameObject : gameObjects) {
+            if(gameObject.getName().equals(name)) return gameObject;
+        }
+
+        return null;
+    }
+
     public List<GameObject> getRootGameObjects() {
         return gameObjects;
     }
@@ -320,6 +332,8 @@ public class Scene implements IJsonSerializable {
     }
 
     public void saveScene(){
+        removeGameObject(EngineSettings.editorCameraName);
+
         Map<String, Boolean> config = new HashMap<>();
         config.put(JsonGenerator.PRETTY_PRINTING, true);
         JsonWriterFactory jsonWriterFactory = Json.createWriterFactory(config);
@@ -335,6 +349,22 @@ public class Scene implements IJsonSerializable {
         vaoIds.add(vaoId);
     }
 
+    public final Vector3f getEditorCameraPosition() {
+        return editorCameraPosition;
+    }
+
+    public void setEditorCameraPosition(Vector3f editorCameraPosition) {
+        this.editorCameraPosition = editorCameraPosition;
+    }
+
+    public final Quaternionf getEditorCameraRotation() {
+        return editorCameraRotation;
+    }
+
+    public void setEditorCameraRotation(Quaternionf editorCameraRotation) {
+        this.editorCameraRotation = editorCameraRotation;
+    }
+
     @Override
     public JsonObject serializeToJson() {
         JsonObjectBuilder sceneInfo = Json.createObjectBuilder();
@@ -342,6 +372,8 @@ public class Scene implements IJsonSerializable {
         sceneInfo.add("fogGradient", this.getFogGradient());
         sceneInfo.add("fogDensity", this.getFogDensity());
         sceneInfo.add("fogColor", JsonHelper.vector3ToJsonObject(this.getFogColor()));
+        sceneInfo.add("editorCameraPosition", JsonHelper.vector3ToJsonObject(this.editorCameraPosition));
+        sceneInfo.add("editorCameraRotation", JsonHelper.quaternionToJsonObject(this.editorCameraRotation));
 
         JsonArrayBuilder sceneGoInfo = Json.createArrayBuilder();
         this.getGameObjects().forEach(go -> {

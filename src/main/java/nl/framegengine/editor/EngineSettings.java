@@ -19,6 +19,8 @@ public class EngineSettings {
     public static String currentProjectIconGuid = "";
     private static final String settingsFileName = "/.fgsettings";
 
+    public static String editorCameraName = "EditorCamera_";
+
     public static boolean isInGame = false;
     public static boolean isCompiled = false;
 

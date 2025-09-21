@@ -13,6 +13,7 @@ import java.lang.reflect.InvocationTargetException;
 public class Component implements IJsonSerializable {
     protected GameObject root = null;
     protected boolean hasInitiated = false;
+    public boolean runInEditor = false;
 
     //TODO: MAKE isEnabled LOOK AT THE isEnabled STATE OF THE root
     public boolean isEnabled = true;

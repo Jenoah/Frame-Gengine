@@ -4,9 +4,12 @@ import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
+import nl.framegengine.core.components.ScenePreviewCameraControls;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.engine.EngineManager;
 import nl.framegengine.core.engine.WindowManager;
+import nl.framegengine.core.entity.Camera;
+import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.entity.Scene;
 import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.rendering.RenderManager;
@@ -81,6 +84,7 @@ public class GamePanel extends EditorPanel {
         if(SceneManager.currentScene == null || EngineSettings.isInGame) return;
 
         ImGuiHelper.showProgressBar("Loading Game");
+        removeEditorCamera();
         editingSceneJson = SceneManager.currentScene.serializeToJson().toString();
         Scene gameplayScene = new Scene();
         gameplayScene.deserializeFromJson(editingSceneJson);
@@ -94,7 +98,29 @@ public class GamePanel extends EditorPanel {
         if(EngineSettings.isInGame){
             EngineSettings.isInGame = false;
             SceneManager.setCurrentScene((Scene)new Scene().deserializeFromJson(editingSceneJson));
+            addEditorCamera();
         }
+    }
+
+    private void addEditorCamera(){
+        if(SceneManager.currentScene == null) return;
+        Camera editorCamera = new Camera();
+        editorCamera.setPosition(SceneManager.currentScene.getEditorCameraPosition());
+        editorCamera.setRotation(SceneManager.currentScene.getEditorCameraRotation());
+        editorCamera.setName(EngineSettings.editorCameraName);
+        editorCamera.addComponent(new ScenePreviewCameraControls());
+        editorCamera.setShowInEditor(false);
+        SceneManager.currentScene.addEntity(editorCamera);
+        RenderManager.setRenderCamera(editorCamera);
+    }
+
+    private void removeEditorCamera(){
+        if(SceneManager.currentScene == null) return;
+        GameObject editorCamera = SceneManager.currentScene.getGameObjectByName(EngineSettings.editorCameraName);
+        if(editorCamera == null) return;
+        SceneManager.currentScene.setEditorCameraPosition(editorCamera.getPosition());
+        SceneManager.currentScene.setEditorCameraRotation(editorCamera.getRotation());
+        SceneManager.currentScene.removeGameObject(editorCamera);
     }
 
     public void setAspectRatio(float aspectRatio){
@@ -133,6 +159,7 @@ public class GamePanel extends EditorPanel {
             ImGuiHelper.showProgressBar("Booting game...");
             editorGameLauncher = new EditorGameLauncher();
             editorGameLauncher.run(sizeX, sizeY - 20);
+            if(!EngineSettings.isInGame) addEditorCamera();
         }
 
     }

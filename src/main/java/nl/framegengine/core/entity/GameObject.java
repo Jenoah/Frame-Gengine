@@ -9,6 +9,7 @@ import nl.framegengine.core.utils.AABB;
 import nl.framegengine.core.utils.Constants;
 import nl.framegengine.core.utils.JsonHelper;
 import nl.framegengine.core.utils.ObjectPool;
+import nl.framegengine.editor.EngineSettings;
 import org.joml.*;
 import org.joml.Math;
 
@@ -29,6 +30,7 @@ public class GameObject implements IJsonSerializable {
     private String guid;
     private boolean isEnabled = true;
     private boolean isStatic = false;
+    private boolean showInEditor = true;
     protected boolean drawDebugWireframe = false;
 
     private static final Dictionary<String, GameObject> instancedObjects = new Hashtable<>();
@@ -311,7 +313,9 @@ public class GameObject implements IJsonSerializable {
         }
 
         if(!isEnabled || components.isEmpty()) return;
-        for(Component component : components) component.update();
+        for(Component component : components){
+            if(EngineSettings.isInGame || component.runInEditor) component.update();
+        }
     }
 
     public boolean isEnabled() {
@@ -485,6 +489,14 @@ public class GameObject implements IJsonSerializable {
             SceneManager.currentScene.removeFromRoot(this);
             SceneManager.currentScene.removeGameObject(this);
         }
+    }
+
+    public boolean isShowInEditor() {
+        return showInEditor;
+    }
+
+    public void setShowInEditor(boolean showInEditor) {
+        this.showInEditor = showInEditor;
     }
 
     @Override

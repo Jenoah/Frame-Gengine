@@ -24,14 +24,14 @@ import static org.lwjgl.opengl.GL11.glViewport;
 
 public class RenderManager {
     private static WindowManager window;
-    private static ComponentRenderer componentRenderer;
-    private static ShadowRenderer shadowRenderer;
-    private static GuiRenderer guiRenderer;
-    private static FontRenderer fontRenderer;
+    private static final ComponentRenderer componentRenderer = new ComponentRenderer();
+    private static final ShadowRenderer shadowRenderer = new ShadowRenderer();
+    private static final GuiRenderer guiRenderer = new GuiRenderer();
+    private static final FontRenderer fontRenderer = new FontRenderer();
+    private static final DebugRenderer debugRenderer = new DebugRenderer();
     private static FrameBuffer frameBuffer;
     private static FrameBuffer editorBuffer;
     private static SkyboxRenderer skyboxRenderer;
-    private static DebugRenderer debugRenderer;
     private static RenderMetrics metrics;
     private static boolean recordMetrics = false;
     private static boolean showWireframe = false;
@@ -41,13 +41,7 @@ public class RenderManager {
         if(window == null && WindowManager.getInstance() != null) window = WindowManager.getInstance();
         if(metrics == null) metrics = new RenderMetrics();
 
-        componentRenderer = new ComponentRenderer();
-        shadowRenderer = new ShadowRenderer();
-
-        guiRenderer = new GuiRenderer();
-        fontRenderer = new FontRenderer();
         skyboxRenderer = new SkyboxRenderer(new String[]{"textures/skyboxes/clouds1/right.png", "textures/skyboxes/clouds1/left.png", "textures/skyboxes/clouds1/top.png", "textures/skyboxes/clouds1/bottom.png", "textures/skyboxes/clouds1/back.png", "textures/skyboxes/clouds1/front.png"});
-        debugRenderer = new DebugRenderer();
         componentRenderer.init();
         shadowRenderer.init();
         debugRenderer.init();
