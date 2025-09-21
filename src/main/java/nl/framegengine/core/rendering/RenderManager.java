@@ -35,8 +35,6 @@ public class RenderManager {
     private static RenderMetrics metrics;
     private static boolean recordMetrics = false;
     private static boolean showWireframe = false;
-    private static float aspectRatio = 1.77f;
-    private static Camera renderCamera = null;
 
     public static void init() throws Exception {
         Debug.log("Initializing RenderManager");
@@ -68,12 +66,6 @@ public class RenderManager {
             window.setResize(false);
             window.updateProjectionMatrix();
             PostProcessing.updateResolution();
-            aspectRatio = (float)window.getWidth() / (float)window.getHeight();
-        }
-
-        if(renderCamera == null){
-            renderCamera = Camera.mainCamera;
-            setRenderCamera(renderCamera);
         }
 
         shadowRenderer.render(currentScene);
@@ -124,7 +116,6 @@ public class RenderManager {
         skyboxRenderer.cleanUp();
         shadowRenderer.cleanUp();
         debugRenderer.cleanUp();
-        renderCamera = null;
     }
 
     private static void regenerateFrameBuffer(){
@@ -138,6 +129,11 @@ public class RenderManager {
     public static void queueRender(RenderComponent renderComponent){
         componentRenderer.queue(renderComponent);
         shadowRenderer.queue(renderComponent);
+    }
+
+    public static void dequeueRender(RenderComponent renderComponent){
+        componentRenderer.dequeue(renderComponent);
+        shadowRenderer.dequeue(renderComponent);
     }
 
     public static void debugCube(Vector3f position, Vector3f size){
@@ -154,11 +150,6 @@ public class RenderManager {
 
     public static void debugCube(Vector3f position, Quaternionf rotation){
         debugRenderer.drawCube(position, rotation, Constants.VECTOR3_ONE);
-    }
-
-    public static void dequeueRender(RenderComponent renderComponent){
-        componentRenderer.dequeue(renderComponent);
-        shadowRenderer.dequeue(renderComponent);
     }
 
     public static void setRenderCamera(Camera renderCamera){

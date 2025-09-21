@@ -1,5 +1,7 @@
 package nl.framegengine.editor;
 
+import nl.framegengine.editor.panels.GamePanel;
+
 public class EditorLauncher{
     public static void main(String[] args){
         EngineSettings.loadEngineConfig();
@@ -8,6 +10,7 @@ public class EditorLauncher{
         EditorWindow editorWindow = new EditorWindow();
         editorWindow.init();
         editorWindow.setEditorLayout(new EditorLayout());
+        EditorWindow.editorLayout.getEditorPanelOfType(GamePanel.class).startEngine();
         editorWindow.run();
         editorWindow.cleanUp();
         System.exit(0);

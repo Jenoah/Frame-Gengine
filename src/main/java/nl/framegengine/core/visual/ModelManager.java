@@ -15,6 +15,11 @@ public class ModelManager {
         return new Model(mesh);
     }
 
+    public static Model loadModel(Mesh mesh){
+        meshes.put(mesh.getVaoID(), mesh);
+        return new Model(mesh);
+    }
+
     public static Set<MeshMaterialSet> loadModel(OBJObject objObject){
         Set<MeshMaterialSet> meshMaterialSets = new HashSet<>();
 
@@ -60,19 +65,32 @@ public class ModelManager {
         return mesh.getVaoID();
     }
 
-    public static void addMesh(Mesh mesh){
+    public static Mesh addMesh(Mesh mesh){
         if(!meshes.containsKey(mesh.getVaoID())) meshes.put(mesh.getVaoID(), mesh);
+        return mesh;
     }
 
     public static void unloadModel(int modelID){
-        meshes.get(modelID).cleanUp();
+        if(meshes.containsKey(modelID)) meshes.get(modelID).cleanUp();
         meshes.remove(modelID);
     }
 
+    public static void unloadMeshId(int meshId){
+        meshes.remove(meshId);
+    }
+
     public static void cleanUp(){
-        for(Mesh mesh: meshes.values()){
+        for(Mesh mesh: meshes.values().stream().toList()){
             mesh.cleanUp();
         }
         TextureLoader.cleanUp();
+    }
+
+    public static void cleanUp(List<Integer> vaoIDs){
+        vaoIDs.forEach(integer -> {
+            Mesh mesh = meshes.get(integer);
+            if(mesh != null) mesh.cleanUp();
+            meshes.remove(integer);
+        });
     }
 }

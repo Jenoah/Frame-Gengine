@@ -1,5 +1,6 @@
 package nl.framegengine.core.modelLoaders;
 
+import nl.framegengine.core.visual.Mesh;
 import nl.framegengine.core.visual.ModelManager;
 import nl.framegengine.core.visual.Model;
 
@@ -7,6 +8,10 @@ public class PrimitiveLoader {
     private static float textureScale = 1f;
 
     public static Model getQuad(){
+        return ModelManager.loadModel(getQuadMesh());
+    }
+
+    public static Mesh getQuadMesh(){
         float[] vertices = new float[]{
                 -0.5f,  -0.5f, 0.0f, // Top-left
                 0.5f,  -0.5f, 0.0f, // Top-right
@@ -36,10 +41,10 @@ public class PrimitiveLoader {
 
         textureScale = 1;
 
-        return ModelManager.loadModel(vertices, textureCoords, indices, normals);
+        return ModelManager.addMesh(new Mesh(vertices, textureCoords, indices, normals));
     }
 
-    public static Model getQuadRotated(){
+    public static Mesh getQuadRotatedMesh(){
         float[] vertices = new float[]{
                 0.0f,  0.5f, 0.5f, // Top-left
                 0.0f,  0.5f, -0.5f, // Top-right
@@ -57,10 +62,10 @@ public class PrimitiveLoader {
                 0, 2, 3  // Second triangle (bottom-left)
         };
         float[] normals = new float[]{
-                0.0f, 0.0f, 1.0f, // Top-left
-                0.0f, 0.0f, 1.0f, // Top-right
-                0.0f, 0.0f, 1.0f, // Bottom-right
-                0.0f, 0.0f, 1.0f  // Bottom-left
+                1.0f, 0.0f, 0.0f, // Top-left
+                1.0f, 0.0f, 0.0f, // Top-right
+                1.0f, 0.0f, 0.0f, // Bottom-right
+                1.0f, 0.0f, 0.0f  // Bottom-left
         };
 
         for (int i = 0; i < textureCoords.length; i++) {
@@ -69,7 +74,11 @@ public class PrimitiveLoader {
 
         textureScale = 1;
 
-        return ModelManager.loadModel(vertices, textureCoords, indices, normals);
+        return ModelManager.addMesh(new Mesh(vertices, textureCoords, indices, normals));
+    }
+
+    public static Model getQuadRotated(){
+        return ModelManager.loadModel(getQuadRotatedMesh());
     }
 
     public static Model getQuad(float textureScale){

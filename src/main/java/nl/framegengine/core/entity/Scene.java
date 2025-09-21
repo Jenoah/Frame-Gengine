@@ -1,9 +1,7 @@
 package nl.framegengine.core.entity;
 
-import nl.framegengine.core.utils.IJsonSerializable;
-import nl.framegengine.core.visual.ModelManager;
-import nl.framegengine.core.engine.WindowManager;
 import nl.framegengine.core.components.Component;
+import nl.framegengine.core.engine.WindowManager;
 import nl.framegengine.core.fonts.fontMeshCreator.FontType;
 import nl.framegengine.core.fonts.fontMeshCreator.GUIText;
 import nl.framegengine.core.fonts.fontMeshCreator.TextMeshData;
@@ -34,6 +32,7 @@ public class Scene implements IJsonSerializable {
     protected final List<GameObject> rootGameObjects;
     protected final List<GuiObject> guiObjects;
     protected final Map<FontType, List<GUIText>> textObjects;
+    protected final List<Integer> vaoIds = new ArrayList<>();
     protected Vector3f fogColor = new Vector3f(1);
     protected float fogDensity = 0.01f;
     protected float fogGradient = 15f;
@@ -61,13 +60,13 @@ public class Scene implements IJsonSerializable {
     public void init() { }
 
     public void postStart() {
-        Debug.log("Setting main camera to " + getLevelName() + "'s camera (" + mainCamera.getName() + ")");
         RenderManager.setRenderCamera(mainCamera);
         mainCamera.callUpdate();
         mainCamera.onUpdateTransform();
     }
 
     public void update() {
+        if(!EngineSettings.isInGame) return;
         updateRootGameObjectTransforms();
 
         for (GameObject gameObject : gameObjects.stream().toList()) {
@@ -83,13 +82,14 @@ public class Scene implements IJsonSerializable {
 
     public void handleInput() { }
 
+    public void cleanComponents(){ getGameObjects().forEach(GameObject::cleanUp); }
+
     public void cleanUp() {
-        ModelManager.cleanUp();
-        getGameObjects().forEach(GameObject::cleanUp);
+        ModelManager.cleanUp(vaoIds);
+        cleanComponents();
         gameObjects.clear();
         rootGameObjects.clear();
         guiObjects.clear();
-        rootGameObjects.clear();
     }
 
     public void addEntity(GameObject entity, boolean intitiateComponents){
@@ -159,14 +159,9 @@ public class Scene implements IJsonSerializable {
         }
     }
 
-    public void setMainCamera(Camera camera){
-        mainCamera = camera;
-        Debug.log("Setting scene (" + getLevelName() + ") to camera (" + mainCamera.getName() + ")");
-    }
+    public void setMainCamera(Camera camera){ mainCamera = camera; }
 
-    public Camera getMainCamera(){
-        return mainCamera;
-    }
+    public Camera getMainCamera(){ return mainCamera; }
 
     public void updateLights(){
         for (SimpleLitShader s : Arrays.asList(ShaderManager.litShader, ShaderManager.triplanarShader, ShaderManager.pbrShader))
@@ -334,6 +329,10 @@ public class Scene implements IJsonSerializable {
         jsonWriter.write(this.serializeToJson());
 
         FileHelper.writeToFile(stringWriter.toString(), EngineSettings.currentProjectDirectory + File.separator + EngineSettings.currentLevelPath);
+    }
+
+    public void addVaoId(int vaoId){
+        vaoIds.add(vaoId);
     }
 
     @Override

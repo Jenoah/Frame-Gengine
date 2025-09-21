@@ -479,6 +479,7 @@ public class Mesh implements IJsonSerializable {
         GL30.glDeleteBuffers(vertexVBOID);
         GL30.glDeleteBuffers(triangleVBOID);
         GL30.glDeleteBuffers(uvVBOID);
+        ModelManager.unloadMeshId(vaoID);
     }
 
     public boolean hasTangents(){

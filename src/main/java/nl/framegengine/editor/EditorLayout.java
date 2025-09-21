@@ -71,4 +71,14 @@ public class EditorLayout {
         }
         ImGui.endMainMenuBar();
     }
+
+    @SuppressWarnings("unchecked")
+    public <C extends EditorPanel> C getEditorPanelOfType(Class<C> editorPanelClass) {
+        for (EditorPanel c : editorPanels) {
+            if (editorPanelClass.isInstance(c)) {
+                return (C) c;
+            }
+        }
+        return null;
+    }
 }

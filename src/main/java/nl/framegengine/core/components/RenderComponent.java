@@ -1,16 +1,17 @@
 package nl.framegengine.core.components;
 
-import nl.framegengine.core.utils.IJsonSerializable;
 import nl.framegengine.core.entity.GameObject;
-import nl.framegengine.core.visual.Material;
-import nl.framegengine.core.visual.Mesh;
+import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.modelLoaders.OBJLoader.OBJLoader;
-import nl.framegengine.core.visual.MeshMaterialSet;
 import nl.framegengine.core.rendering.RenderManager;
 import nl.framegengine.core.shaders.ShaderManager;
 import nl.framegengine.core.utils.AABB;
 import nl.framegengine.core.utils.Constants;
+import nl.framegengine.core.utils.IJsonSerializable;
 import nl.framegengine.core.utils.JsonHelper;
+import nl.framegengine.core.visual.Material;
+import nl.framegengine.core.visual.Mesh;
+import nl.framegengine.core.visual.MeshMaterialSet;
 import org.joml.Vector3f;
 
 import javax.json.Json;
@@ -48,8 +49,12 @@ public class RenderComponent extends Component {
     }
 
     public void addMesh(Mesh mesh) {
-        meshMaterialSets.add(new MeshMaterialSet(mesh, new Material(ShaderManager.pbrShader)).setRoot(this.getRoot()));
-        if(!meshPaths.contains(mesh.getMeshPath())) meshPaths.add(mesh.getMeshPath());
+        meshMaterialSets.add(new MeshMaterialSet(mesh, new Material(ShaderManager.getDefaultShader())).setRoot(this.getRoot()));
+        if(!mesh.getMeshPath().isBlank() && !meshPaths.contains(mesh.getMeshPath())) meshPaths.add(mesh.getMeshPath());
+        if(hasInitiated){
+            dequeueRender();
+            queueRender();
+        }
     }
 
     public void addMeshes(Set<MeshMaterialSet> meshMaterialSets) {
@@ -59,11 +64,19 @@ public class RenderComponent extends Component {
             if(!meshPaths.contains(meshMaterialSet.getMesh().getMeshPath())) meshPaths.add(meshMaterialSet.getMesh().getMeshPath());
         });
         this.meshMaterialSets.addAll(localMeshMaterialSets);
+        if(hasInitiated){
+            dequeueRender();
+            queueRender();
+        }
     }
 
     public void addMesh(Mesh mesh, Material material) {
         meshMaterialSets.add(new MeshMaterialSet(mesh, material).setRoot(this.getRoot()));
         if(!meshPaths.contains(mesh.getMeshPath())) meshPaths.add(mesh.getMeshPath());
+        if(hasInitiated){
+            dequeueRender();
+            queueRender();
+        }
     }
 
     public void addMesh(MeshMaterialSet meshMaterialSet) {
@@ -93,7 +106,10 @@ public class RenderComponent extends Component {
     public Component setRoot(GameObject root) {
         super.setRoot(root);
 
-        meshMaterialSets.forEach((MeshMaterialSet) -> MeshMaterialSet.setRoot(root));
+        meshMaterialSets.forEach((meshMaterialSet) -> {
+            meshMaterialSet.setRoot(root);
+            SceneManager.currentScene.addVaoId(meshMaterialSet.getMesh().getVaoID());
+        });
         return this;
     }
 
@@ -160,13 +176,26 @@ public class RenderComponent extends Component {
     public void cleanUp() {
         super.cleanUp();
         meshMaterialSets.forEach(mms -> mms.getMesh().cleanUp());
+        disable();
     }
 
     @Override
     public JsonObject serializeToJson() {
         List<String> ignoredKeys = new ArrayList<>();
         ignoredKeys.add("hasInitiated");
-        if(meshPaths.isEmpty()) ignoredKeys.add("meshPaths");
+        boolean hasMeshPaths = !meshPaths.isEmpty();
+        if(hasMeshPaths){
+            for (String meshPath : meshPaths) {
+                if(meshPath.isBlank()){
+                    hasMeshPaths = false;
+                    break;
+                }
+            }
+        }
+        if(!hasMeshPaths){
+            ignoredKeys.add("meshPaths");
+            ignoredKeys.add("meshMaterialSets");
+        }
 
         return JsonHelper.objectToJson(this, ignoredKeys.toArray(new String[0]));
     }
@@ -182,14 +211,11 @@ public class RenderComponent extends Component {
             throw new RuntimeException(e);
         }
 
-        /* */
-
         if(!meshMaterialSets.isEmpty()){
             Mesh mesh = meshMaterialSets.stream().findFirst().get().getMesh();
             float uvScale = mesh.getUvScale();
             String meshPath = mesh.getMeshPath();
             Material mat = meshMaterialSets.stream().findFirst().get().material;
-            mesh = null;
             meshMaterialSets.clear();
             if(meshPath.isEmpty() || meshPath.isBlank()){
                 return this;
@@ -204,7 +230,6 @@ public class RenderComponent extends Component {
             meshMaterialSets.addAll(mms);
         }
 
-         /**/
 
         return this;
     }

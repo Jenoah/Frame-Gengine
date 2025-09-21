@@ -6,7 +6,9 @@ import nl.framegengine.core.utils.FileHelper;
 import nl.framegengine.core.utils.JsonHelper;
 import nl.framegengine.core.visual.MaterialManager;
 
-import javax.json.*;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import java.io.*;
 import java.util.concurrent.CompletableFuture;
 
@@ -15,9 +17,10 @@ public class EngineSettings {
     public static String currentLevelPath = "";
     public static String currentProjectName = "Unknown project";
     public static String currentProjectIconGuid = "";
-
-    public static boolean isCompiled = false;
     private static final String settingsFileName = "/.fgsettings";
+
+    public static boolean isInGame = false;
+    public static boolean isCompiled = false;
 
     public static void saveSettings(){
         //Project settings
@@ -33,8 +36,7 @@ public class EngineSettings {
         MaterialManager.saveMaterials();
 
         //Current scene
-        if(SceneManager.currentScene != null)
-            FileHelper.writeToFile(SceneManager.sceneToJson(SceneManager.currentScene), currentProjectDirectory + File.separator + currentLevelPath);
+        if(SceneManager.currentScene != null) SceneManager.currentScene.saveScene();
     }
 
     public static void loadSettings() {
@@ -119,6 +121,7 @@ public class EngineSettings {
 
         if(isCompiled) {
             currentProjectDirectory = "/userresource";
+            isInGame = true;
             return;
         }
 

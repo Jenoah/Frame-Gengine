@@ -8,7 +8,6 @@ import nl.framegengine.core.lighting.Light;
 import nl.framegengine.core.lighting.PointLight;
 import nl.framegengine.core.lighting.SpotLight;
 import nl.framegengine.editor.EngineSettings;
-import org.joml.Vector3f;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -23,9 +22,6 @@ import java.util.List;
 public class SceneManager {
     private static List<Scene> scenes = new ArrayList<>();
     public static Scene currentScene = null;
-    public static Vector3f fogColor = new Vector3f(1);
-    public static float fogDensity = 0.01f;
-    public static float fogGradient = 15f;
 
     public static ComponentLoader componentLoader;
 
@@ -52,12 +48,16 @@ public class SceneManager {
         JsonObject sceneInfo = reader.readObject();
         scene.deserializeFromJson(sceneInfo.toString());
 
+        return scene;
+    }
+
+    private static void initScene(Scene scene){
         Debug.log("Loading in scene game objects");
         scene.getGameObjects().forEach(go -> {
+            if(go instanceof Light light) tryAddLight(light, scene);
             for (Component component : go.components.stream().toList()) {
                 component.initiate();
             }
-            if(go instanceof Light light) tryAddLight(light, scene);
             go.callUpdate();
         });
         Debug.log("Loading scene settings");
@@ -65,8 +65,6 @@ public class SceneManager {
         scene.setFogColor(scene.getFogColor());
         scene.setFogDensity(scene.getFogDensity());
         scene.setFogGradient(scene.getFogGradient());
-
-        return scene;
     }
 
     private static void tryAddLight(Light lightObject, Scene scene){
@@ -100,11 +98,26 @@ public class SceneManager {
     }
 
     public static void setCurrentScene(int sceneIndex) {
-        currentScene = scenes.get(sceneIndex);
-        fogColor = currentScene.getFogColor();
-        fogDensity = currentScene.getFogDensity();
-        fogGradient = currentScene.getFogGradient();
-        Debug.log("Loading " + currentScene.getLevelName());
+        setCurrentScene(scenes.get(sceneIndex));
+    }
+
+    public static void setCurrentScene(Scene scene){
+        setCurrentScene(scene, true);
+    }
+
+    public static void setCurrentScene(Scene scene, boolean cleanup){
+        if(currentScene != null && cleanup){
+            Debug.log("Cleaning scene " + currentScene.getLevelName());
+            currentScene.cleanUp();
+        }
+        currentScene = scene;
+        Debug.log("Loading in " + currentScene.getLevelName());
+        initScene(scene);
+        Debug.log("Starting scene");
+        currentScene.postStart();
+        Debug.log("Updating scene lights");
+        currentScene.updateLights();
+        Debug.log("Scene loaded in");
     }
 
     public static void cleanUp(){

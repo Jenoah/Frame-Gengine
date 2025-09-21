@@ -82,8 +82,8 @@ public class EditorWindow {
         int width = (int)(referenceWidth / windowScaleX);
         int height = (int)(referenceHeight / windowScaleY);
 
-        this.windowWidth = referenceWidth;
-        this.windowHeight = referenceHeight;
+        windowWidth = referenceWidth;
+        windowHeight = referenceHeight;
 
         if(editorLayout != null) editorLayout.recalculatePanels();
 

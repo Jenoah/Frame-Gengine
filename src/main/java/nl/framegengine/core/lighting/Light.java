@@ -2,11 +2,14 @@ package nl.framegengine.core.lighting;
 
 import nl.framegengine.core.components.RenderComponent;
 import nl.framegengine.core.entity.GameObject;
-import nl.framegengine.core.visual.Material;
-import nl.framegengine.core.visual.Texture;
 import nl.framegengine.core.modelLoaders.PrimitiveLoader;
 import nl.framegengine.core.shaders.ShaderManager;
+import nl.framegengine.core.utils.IJsonSerializable;
 import nl.framegengine.core.utils.JsonHelper;
+import nl.framegengine.core.visual.Material;
+import nl.framegengine.core.visual.Mesh;
+import nl.framegengine.core.visual.MeshMaterialSet;
+import nl.framegengine.core.visual.Texture;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -93,17 +96,15 @@ public class Light extends GameObject {
         if(!isShowingProxy){
             boolean isPointLight = this instanceof PointLight;
             Material proxyMaterial = new Material(isPointLight ? ShaderManager.billboardShader : ShaderManager.unlitShader);
+            proxyMaterial.castShadow(false).receiveShadows(false);
             String texturePath = this instanceof PointLight ? "textures/light.png": "textures/lightDirection.png";
             proxyMaterial.setAlbedoTexture(new Texture(texturePath, false, !isPointLight)).setDoubleSided(true).setTransparent(true);
             proxyMaterial.setDiffuseColor(new Vector4f(color.x, color.y, color.z, 1f));
-            if(getComponent(RenderComponent.class) != null){
-                RenderComponent renderComponent = getComponent(RenderComponent.class);
-                renderComponent.addMesh(isPointLight ? PrimitiveLoader.getQuad().getMesh() : PrimitiveLoader.getQuadRotated().getMesh(), proxyMaterial);
-            }else {
-                RenderComponent renderComponent = new RenderComponent(isPointLight ? PrimitiveLoader.getQuad().getMesh() : PrimitiveLoader.getQuadRotated().getMesh(), proxyMaterial);
-                this.addComponent(renderComponent);
-                renderComponent.initiate();
-            }
+            Mesh proxyMesh = isPointLight ? PrimitiveLoader.getQuadMesh() : PrimitiveLoader.getQuadRotatedMesh();
+
+            MeshMaterialSet mms = new MeshMaterialSet(proxyMesh, proxyMaterial);
+            addComponent(new RenderComponent(mms));
+
             isShowingProxy = true;
         }
 
@@ -113,5 +114,11 @@ public class Light extends GameObject {
     @Override
     public JsonObject serializeToJson() {
         return JsonHelper.objectToJson(this, new String[]{"isShowingProxy"});
+    }
+
+    public IJsonSerializable deserializeFromJson(String json) {
+        super.deserializeFromJson(json);
+        if(getComponent(RenderComponent.class) != null) removeComponent(getComponent(RenderComponent.class));
+        return this;
     }
 }
