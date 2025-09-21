@@ -25,6 +25,8 @@ public class ComponentRenderer implements IRenderer {
     private RenderMetrics metrics;
     private boolean recordMetrics = false;
 
+    private boolean wireframeMode = false;
+
     @Override
     public void init() throws Exception {  }
 
@@ -41,6 +43,8 @@ public class ComponentRenderer implements IRenderer {
         shader.bind();
         shader.render(mainCamera);
 
+        if(wireframeMode) GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
+
         meshMaterialSetList.forEach(meshMaterialSet -> {
             if (!meshMaterialSet.getRoot().isEnabled() || !mainCamera.isInFrustumAABB(meshMaterialSet.getRoot())) return;
             if (recordMetrics) metrics.recordStateChange();
@@ -48,6 +52,8 @@ public class ComponentRenderer implements IRenderer {
             bind(meshMaterialSet);
             prepareShadow(meshMaterialSet);
             shader.prepare(meshMaterialSet, mainCamera);
+
+
 
             if (recordMetrics) metrics.recordDrawCall();
             if(meshMaterialSet.getMesh().isInstanced()){
@@ -59,6 +65,8 @@ public class ComponentRenderer implements IRenderer {
 
             unbind();
         });
+
+        if(wireframeMode) GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
         shader.unbind();
     }
 
@@ -173,5 +181,9 @@ public class ComponentRenderer implements IRenderer {
 
     public void setMainCamera(Camera camera){
         this.mainCamera = camera;
+    }
+
+    public void setWireframeMode(boolean wireframeMode){
+        this.wireframeMode = wireframeMode;
     }
 }
