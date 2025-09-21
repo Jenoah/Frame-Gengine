@@ -38,4 +38,8 @@ public class ShaderManager {
         if(billboardShader.getClass().getName().equals(qualifiedClassName)) return billboardShader;
         return pbrShader;
     }
+
+    public static Shader getDefaultShader(){
+        return pbrShader;
+    }
 }

@@ -24,7 +24,7 @@ public class MeshMaterialSet implements IJsonSerializable {
 
     public MeshMaterialSet(Mesh mesh) {
         this.mesh = mesh;
-        this.material = new Material(ShaderManager.pbrShader);
+        this.material = new Material(ShaderManager.getDefaultShader());
     }
 
     public Mesh getMesh(){
@@ -70,7 +70,7 @@ public class MeshMaterialSet implements IJsonSerializable {
             Debug.logError("Error loading in data: " + e.getMessage());
         }
         if(this.material == null) this.material = MaterialManager.defaultMaterial;
-        if(this.material.shader == null) this.material.shader = ShaderManager.pbrShader;
+        if(this.material.shader == null) this.material.shader = ShaderManager.getDefaultShader();
         return this;
     }
 }

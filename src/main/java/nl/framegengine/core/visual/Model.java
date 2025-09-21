@@ -12,7 +12,7 @@ public class Model {
 
     public Model(Mesh mesh){
         this.mesh = mesh;
-        this.material.add(new Material(ShaderManager.pbrShader));
+        this.material.add(new Material(ShaderManager.getDefaultShader()));
         this.vertexMaterialRange.put(mesh.getTriangles(), 0);
         //this.material = new Material(ShaderManager.litShader);
     }

@@ -267,7 +267,7 @@ public class Material implements IJsonSerializable {
         }
 
         if(guid == null || guid.isBlank()) setGuid();
-        if(shader == null) shader = ShaderManager.pbrShader;
+        if(shader == null) shader = ShaderManager.getDefaultShader();
         return this;
     }
 }

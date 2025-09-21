@@ -44,7 +44,7 @@ public class OBJLoader {
                 case "o":
                     objName = tokens[1];
                     currentModel = new OBJModel();
-                    currentModel.setMaterial(new Material(ShaderManager.pbrShader));
+                    currentModel.setMaterial(new Material(ShaderManager.getDefaultShader()));
                     objObject.addObjModel(currentModel);
                     break;
                 case "mtllib":
@@ -55,7 +55,7 @@ public class OBJLoader {
                     if(mtlInfo.containsKey(tokens[1])){
                         currentModel.setMaterial(mtlInfo.get(tokens[1]));
                     }else{
-                        currentModel.setMaterial(new Material(ShaderManager.pbrShader));
+                        currentModel.setMaterial(new Material(ShaderManager.getDefaultShader()));
                     }
                     objObject.addObjModel(currentModel);
                     break;
@@ -82,7 +82,7 @@ public class OBJLoader {
                 case "f":
                     if (currentModel == null) {
                         currentModel = new OBJModel();
-                        currentModel.setMaterial(new Material(ShaderManager.pbrShader));
+                        currentModel.setMaterial(new Material(ShaderManager.getDefaultShader()));
                         objObject.addObjModel(currentModel);
                     }
 
@@ -125,7 +125,7 @@ public class OBJLoader {
         // If still no model was created, create a default one
         if (objObject.getObjModels().isEmpty()) {
             currentModel = new OBJModel();
-            currentModel.setMaterial(new Material(ShaderManager.pbrShader));
+            currentModel.setMaterial(new Material(ShaderManager.getDefaultShader()));
             objObject.addObjModel(currentModel);
         }
 
@@ -184,7 +184,7 @@ public class OBJLoader {
             String[] tokens = line.split("\\s+");
             switch (tokens[0]) {
                 case "newmtl":
-                    currentMaterial = new Material(ShaderManager.pbrShader);
+                    currentMaterial = new Material(ShaderManager.getDefaultShader());
                     mtlMaterials.put(tokens[1], currentMaterial);
                     break;
                 case "Kd":
