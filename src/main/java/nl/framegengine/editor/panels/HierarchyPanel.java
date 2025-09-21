@@ -61,7 +61,8 @@ public class HierarchyPanel extends EditorPanel {
         ImGui.pushStyleColor(ImGuiCol.Button, standardButtonBackgroundColor);
         ImGui.pushStyleColor(ImGuiCol.ButtonHovered, hoverButtonBackgroundColor);
         ImGui.pushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0f, 0.5f);
-        hierarchyObjects.forEach(go -> {
+        for (GameObject go : hierarchyObjects) {
+            if(!go.isShowInEditor()) break;
             String goLabel = go.getName() + "##" + go.getGuid();
             if(go.getParent() == null) {
                 if(currentlySelectedGameObject == go){
@@ -110,7 +111,7 @@ public class HierarchyPanel extends EditorPanel {
                     ImGui.popStyleColor();
                 });
             }
-        });
+        }
         ImGui.popStyleColor(2);
         ImGui.popStyleVar();
 
