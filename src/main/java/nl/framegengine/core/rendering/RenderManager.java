@@ -25,7 +25,7 @@ import static org.lwjgl.opengl.GL11.glViewport;
 public class RenderManager {
     private static WindowManager window;
     private static ComponentRenderer componentRenderer;
-    public static ShadowRenderer shadowRenderer;
+    private static ShadowRenderer shadowRenderer;
     private static GuiRenderer guiRenderer;
     private static FontRenderer fontRenderer;
     private static FrameBuffer frameBuffer;
@@ -34,7 +34,8 @@ public class RenderManager {
     private static DebugRenderer debugRenderer;
     private static RenderMetrics metrics;
     private static boolean recordMetrics = false;
-    public static float aspectRatio = 1.77f;
+    private static boolean showWireframe = false;
+    private static float aspectRatio = 1.77f;
     private static Camera renderCamera = null;
 
     public static void init() throws Exception {
@@ -184,5 +185,14 @@ public class RenderManager {
 
     public static String getMetrics() {
         return recordMetrics ? metrics.getMetrics() : "Metrics not recorded";
+    }
+
+    public static void setWireframeMode(boolean wireframeMode){
+        showWireframe = wireframeMode;
+        if(componentRenderer != null) componentRenderer.setWireframeMode(showWireframe);
+    }
+
+    public static void toggleWireframe(){
+        setWireframeMode(!showWireframe);
     }
 }

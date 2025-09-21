@@ -136,4 +136,8 @@ public class GamePanel extends EditorPanel {
         showStats = false;
         RenderManager.recordMetrics(false);
     }
+
+    public void toggleWireframe(){
+        RenderManager.toggleWireframe();
+    }
 }

@@ -23,7 +23,7 @@ public class ControlPanel extends EditorPanel {
     public void renderFrame() {
         int buttonWidth = 64;
         int buttonHeight = 32; // Height for buttons
-        int buttonCount = 3;
+        int buttonCount = 4;
         int comboWidth = ImGuiHelper.calculateTextWidth(aspectRatios) + 32;
         int spacing = 20;
 
@@ -46,6 +46,11 @@ public class ControlPanel extends EditorPanel {
 
         if (ImGui.button("Stats", buttonWidth, buttonHeight)) {
             if (gamePanel != null) gamePanel.toggleStats();
+        }
+        ImGui.sameLine(0, spacing);
+
+        if (ImGui.button("Wireframe", buttonWidth, buttonHeight)) {
+            if (gamePanel != null) gamePanel.toggleWireframe();
         }
         ImGui.sameLine(0, spacing);
 
