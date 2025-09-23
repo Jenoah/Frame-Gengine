@@ -153,6 +153,10 @@ public class RenderManager {
         debugRenderer.setMainCamera(renderCamera);
     }
 
+    public static Camera getRenderCamera(){
+        return componentRenderer.getMainCamera();
+    }
+
     public static void recordMetrics(boolean recordState){
         recordMetrics = recordState;
         if(recordMetrics){

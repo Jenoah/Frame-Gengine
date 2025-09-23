@@ -185,6 +185,8 @@ public class ComponentRenderer implements IRenderer {
         this.mainCamera = camera;
     }
 
+    public Camera getMainCamera() { return this.mainCamera; }
+
     public void setWireframeMode(boolean wireframeMode){
         this.wireframeMode = wireframeMode;
     }

@@ -4,7 +4,7 @@ import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
-import nl.framegengine.core.components.ScenePreviewCameraControls;
+import nl.framegengine.editor.sceneComponents.ScenePreviewCameraControls;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.engine.EngineManager;
 import nl.framegengine.core.engine.WindowManager;
@@ -14,6 +14,7 @@ import nl.framegengine.core.entity.Scene;
 import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.rendering.RenderManager;
 import nl.framegengine.editor.*;
+import nl.framegengine.editor.sceneComponents.SelectSceneObjects;
 
 public class GamePanel extends EditorPanel {
 
@@ -109,6 +110,7 @@ public class GamePanel extends EditorPanel {
         editorCamera.setRotation(SceneManager.currentScene.getEditorCameraRotation());
         editorCamera.setName(EngineSettings.editorCameraName);
         editorCamera.addComponent(new ScenePreviewCameraControls());
+        editorCamera.addComponent(new SelectSceneObjects());
         editorCamera.setShowInEditor(false);
         SceneManager.currentScene.addEntity(editorCamera);
         RenderManager.setRenderCamera(editorCamera);

@@ -1,5 +1,6 @@
-package nl.framegengine.core.components;
+package nl.framegengine.editor.sceneComponents;
 
+import nl.framegengine.core.components.Component;
 import nl.framegengine.core.engine.EngineManager;
 import nl.framegengine.core.engine.WindowManager;
 import nl.framegengine.core.entity.GameObject;
@@ -11,7 +12,7 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 
-public class ScenePreviewCameraControls extends Component{
+public class ScenePreviewCameraControls extends Component {
     private WindowManager windowManager;
 
     private final Vector3f moveDelta = new Vector3f();

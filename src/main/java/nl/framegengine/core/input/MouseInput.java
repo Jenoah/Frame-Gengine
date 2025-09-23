@@ -89,11 +89,11 @@ public class MouseInput {
         prevMouseButtonCallback = null;
     }
 
-    public static Vector2d getMousePositionInViewport(){
-        double mousePositionX = 1.0 / windowManager.getWidth() * currentPosition.x;
-        double mousePositionY = 1.0 / windowManager.getHeight() * currentPosition.y;
+    public static Vector2f getMousePositionInViewport(){
+        float mousePositionX = (float) (1.0f / windowManager.getWidth() * currentPosition.x);
+        float mousePositionY = (float) (1.0f / windowManager.getHeight() * currentPosition.y);
 
-        return new Vector2d(mousePositionX, mousePositionY);
+        return new Vector2f(mousePositionX, mousePositionY);
     }
 
     public static Vector2d getMousePositionInPixels(){

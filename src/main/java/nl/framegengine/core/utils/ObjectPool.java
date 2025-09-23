@@ -1,8 +1,6 @@
 package nl.framegengine.core.utils;
 
-import org.joml.Quaternionf;
-import org.joml.Vector2f;
-import org.joml.Vector3f;
+import org.joml.*;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -25,7 +23,9 @@ public class ObjectPool<T> {
         pool.offer(obj);
     }
 
+    public static final ObjectPool<Vector4f> VECTOR4F_POOL = new ObjectPool<>(Vector4f::new);
     public static final ObjectPool<Vector3f> VECTOR3F_POOL = new ObjectPool<>(Vector3f::new);
     public static final ObjectPool<Vector2f> VECTOR2F_POOL = new ObjectPool<>(Vector2f::new);
     public static final ObjectPool<Quaternionf> QUATERNIONF_OBJECT_POOL = new ObjectPool<>(Quaternionf::new);
+    public static final ObjectPool<Matrix4f> MATRIX4F_OBJECT_POOL = new ObjectPool<>(Matrix4f::new);
 }
