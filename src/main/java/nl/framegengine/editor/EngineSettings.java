@@ -20,6 +20,8 @@ public class EngineSettings {
     private static final String settingsFileName = "/.fgsettings";
 
     public static String editorCameraName = "EditorCamera_";
+    public static String editorGizmoName = "Gizmo_";
+
 
     public static boolean isInGame = false;
     public static boolean isCompiled = false;

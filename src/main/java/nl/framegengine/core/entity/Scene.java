@@ -1,6 +1,5 @@
 package nl.framegengine.core.entity;
 
-import nl.framegengine.core.components.Component;
 import nl.framegengine.core.engine.WindowManager;
 import nl.framegengine.core.fonts.fontMeshCreator.FontType;
 import nl.framegengine.core.fonts.fontMeshCreator.GUIText;
@@ -33,7 +32,7 @@ public class Scene implements IJsonSerializable {
     protected final List<GameObject> rootGameObjects;
     protected final List<GuiObject> guiObjects;
     protected final Map<FontType, List<GUIText>> textObjects;
-    protected final List<Integer> vaoIds = new ArrayList<>();
+    protected final Set<Integer> vaoIds = new HashSet<>();
     protected Vector3f fogColor = new Vector3f(1);
     protected float fogDensity = 0.01f;
     protected float fogGradient = 15f;
@@ -108,7 +107,12 @@ public class Scene implements IJsonSerializable {
         }
 
         addGameObject(entity);
-        if(intitiateComponents && !entity.getComponents().isEmpty()) entity.getComponents().forEach(Component::initiate);
+        if(intitiateComponents && !entity.getComponents().isEmpty()){
+            entity.getComponents().forEach(component -> {
+                if(component.getRoot() == null) component.setRoot(entity);
+                component.initiate();
+            });
+        }
     }
 
     public void addEntity(GameObject entity) {
@@ -347,6 +351,14 @@ public class Scene implements IJsonSerializable {
 
     public void addVaoId(int vaoId){
         vaoIds.add(vaoId);
+    }
+
+    public boolean hasVaoId(int vaoId){
+        return vaoIds.contains(vaoId);
+    }
+
+    public void removeVaoId(int vaoId){
+        vaoIds.remove(vaoId);
     }
 
     public final Vector3f getEditorCameraPosition() {

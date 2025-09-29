@@ -1,5 +1,6 @@
 package nl.framegengine.core.components;
 
+import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.modelLoaders.OBJLoader.OBJLoader;
@@ -48,26 +49,17 @@ public class RenderComponent extends Component {
         addMeshes(meshMaterialSets);
     }
 
-    public void addMesh(Mesh mesh) {
-        meshMaterialSets.add(new MeshMaterialSet(mesh, new Material(ShaderManager.getDefaultShader())).setRoot(this.getRoot()));
-        if(!mesh.getMeshPath().isBlank() && !meshPaths.contains(mesh.getMeshPath())) meshPaths.add(mesh.getMeshPath());
-        if(hasInitiated){
-            dequeueRender();
-            queueRender();
-        }
+    public void addMeshes(Set<MeshMaterialSet> meshMaterialSets) {
+        meshMaterialSets.forEach(this::addMesh);
     }
 
-    public void addMeshes(Set<MeshMaterialSet> meshMaterialSets) {
-        Set<MeshMaterialSet> localMeshMaterialSets = new HashSet<>(meshMaterialSets);
-        localMeshMaterialSets.forEach(meshMaterialSet -> {
-            meshMaterialSet.setRoot(this.getRoot());
-            if(!meshPaths.contains(meshMaterialSet.getMesh().getMeshPath())) meshPaths.add(meshMaterialSet.getMesh().getMeshPath());
-        });
-        this.meshMaterialSets.addAll(localMeshMaterialSets);
-        if(hasInitiated){
-            dequeueRender();
-            queueRender();
-        }
+    public void addMesh(MeshMaterialSet meshMaterialSet) {
+        addMesh(meshMaterialSet.getMesh(), meshMaterialSet.material);
+    }
+
+    public void addMesh(Mesh mesh) {
+        addMesh(mesh, new Material(ShaderManager.getDefaultShader()));
+
     }
 
     public void addMesh(Mesh mesh, Material material) {
@@ -77,11 +69,6 @@ public class RenderComponent extends Component {
             dequeueRender();
             queueRender();
         }
-    }
-
-    public void addMesh(MeshMaterialSet meshMaterialSet) {
-        meshMaterialSets.add(meshMaterialSet.setRoot(this.getRoot()));
-        if(!meshPaths.contains(meshMaterialSet.getMesh().getMeshPath())) meshPaths.add(meshMaterialSet.getMesh().getMeshPath());
     }
 
     public Set<MeshMaterialSet> getMeshMaterialSets() {
@@ -108,6 +95,7 @@ public class RenderComponent extends Component {
 
         meshMaterialSets.forEach((meshMaterialSet) -> {
             meshMaterialSet.setRoot(root);
+            Debug.log("Setting root for " + root.getName());
             SceneManager.currentScene.addVaoId(meshMaterialSet.getMesh().getVaoID());
         });
         return this;
@@ -124,6 +112,10 @@ public class RenderComponent extends Component {
     private void calculateRadius() {
         float maxRadius = 0;
         for (MeshMaterialSet meshMaterialSet : meshMaterialSets) {
+            if(meshMaterialSet.getMesh() == null){
+                Debug.logError("Mesh is null");
+                return;
+            }
             for (Vector3f vertex : meshMaterialSet.getMesh().getVertices()) {
                 float distance = vertex.distance(Constants.VECTOR3_ZERO);
                 if (distance > maxRadius) {

@@ -1,10 +1,14 @@
 package nl.framegengine.core.visual;
 
+import nl.framegengine.core.debugging.Debug;
+import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.modelLoaders.OBJLoader.OBJObject;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ModelManager {
     private static final HashMap<Integer, Mesh> meshes = new HashMap<>();
@@ -76,6 +80,7 @@ public class ModelManager {
     }
 
     public static void unloadMeshId(int meshId){
+        if(SceneManager.currentScene != null) SceneManager.currentScene.removeVaoId(meshId);
         meshes.remove(meshId);
     }
 
@@ -86,11 +91,16 @@ public class ModelManager {
         TextureLoader.cleanUp();
     }
 
-    public static void cleanUp(List<Integer> vaoIDs){
-        vaoIDs.forEach(integer -> {
-            Mesh mesh = meshes.get(integer);
+    public static void cleanUp(Set<Integer> vaoIDs){
+        Set<Integer> cleanedVaoIds = new HashSet<>(vaoIDs.size());
+
+        for (Integer vaoId : vaoIDs.stream().toList()) {
+            Debug.log("Cleaning Vao ID of " + vaoId);
+            if(cleanedVaoIds.contains(vaoId)) continue;
+            Mesh mesh = meshes.get(vaoId);
             if(mesh != null) mesh.cleanUp();
-            meshes.remove(integer);
-        });
+            cleanedVaoIds.add(vaoId);
+            meshes.remove(vaoId);
+        };
     }
 }

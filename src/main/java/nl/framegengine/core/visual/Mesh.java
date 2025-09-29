@@ -1,5 +1,6 @@
 package nl.framegengine.core.visual;
 
+import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.utils.IJsonSerializable;
 import nl.framegengine.core.utils.Constants;
 import nl.framegengine.core.debugging.Debug;
@@ -459,6 +460,7 @@ public class Mesh implements IJsonSerializable {
     }
 
     public void cleanUp(){
+        if(SceneManager.currentScene == null || !SceneManager.currentScene.hasVaoId(vaoID)) return;
         GL30.glDeleteVertexArrays(vaoID);
 
         vertices = null;
@@ -479,6 +481,7 @@ public class Mesh implements IJsonSerializable {
         GL30.glDeleteBuffers(vertexVBOID);
         GL30.glDeleteBuffers(triangleVBOID);
         GL30.glDeleteBuffers(uvVBOID);
+        Debug.log("Cleaning VAO ID " + vaoID);
         ModelManager.unloadMeshId(vaoID);
     }
 

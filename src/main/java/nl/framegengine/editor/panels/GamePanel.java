@@ -4,7 +4,7 @@ import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
-import nl.framegengine.editor.sceneComponents.ScenePreviewCameraControls;
+import nl.framegengine.core.components.RenderComponent;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.engine.EngineManager;
 import nl.framegengine.core.engine.WindowManager;
@@ -15,9 +15,16 @@ import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.input.MouseInput;
 import nl.framegengine.core.modelLoaders.OBJLoader.OBJLoader;
 import nl.framegengine.core.rendering.RenderManager;
+import nl.framegengine.core.shaders.ShaderManager;
+import nl.framegengine.core.utils.Constants;
+import nl.framegengine.core.visual.MeshMaterialSet;
+import nl.framegengine.core.visual.Texture;
+import nl.framegengine.core.visual.TextureLoader;
 import nl.framegengine.editor.*;
 import nl.framegengine.editor.sceneComponents.ScenePreviewCameraControls;
 import nl.framegengine.editor.sceneComponents.SelectSceneObjects;
+
+import java.util.Set;
 
 public class GamePanel extends EditorPanel {
 
@@ -89,6 +96,7 @@ public class GamePanel extends EditorPanel {
 
         ImGuiHelper.showProgressBar("Loading Game");
         removeEditorCamera();
+        removeGizmo();
         editingSceneJson = SceneManager.currentScene.serializeToJson().toString();
         Scene gameplayScene = new Scene();
         gameplayScene.deserializeFromJson(editingSceneJson);
@@ -102,6 +110,7 @@ public class GamePanel extends EditorPanel {
         if(EngineSettings.isInGame){
             EngineSettings.isInGame = false;
             SceneManager.setCurrentScene((Scene)new Scene().deserializeFromJson(editingSceneJson));
+            addGizmo();
             addEditorCamera();
         }
     }
@@ -121,6 +130,22 @@ public class GamePanel extends EditorPanel {
         RenderManager.setRenderCamera(editorCamera);
     }
 
+    private void addGizmo(){
+        if(SceneManager.currentScene == null) return;
+        GameObject gizmo = new GameObject(EngineSettings.editorGizmoName);
+        gizmo.setScale(0.5f);
+        gizmo.translateLocal(Constants.VECTOR3_UP);
+        Set<MeshMaterialSet> gizmoMms = OBJLoader.loadOBJModel("/models/gizmo.obj", new Texture(TextureLoader.loadTexture("textures/color_palette.png", true)));
+        gizmoMms.forEach(mms -> {
+            mms.material.setShader(ShaderManager.unlitShader);
+        });
+        RenderComponent renderComponent = new RenderComponent(gizmoMms);
+
+        gizmo.addComponent(renderComponent);
+        gizmo.setShowInEditor(false);
+        SceneManager.currentScene.addEntity(gizmo);
+    }
+
     private void removeEditorCamera(){
         if(SceneManager.currentScene == null) return;
         GameObject editorCamera = SceneManager.currentScene.getGameObjectByName(EngineSettings.editorCameraName);
@@ -128,6 +153,15 @@ public class GamePanel extends EditorPanel {
         SceneManager.currentScene.setEditorCameraPosition(editorCamera.getPosition());
         SceneManager.currentScene.setEditorCameraRotation(editorCamera.getRotation());
         SceneManager.currentScene.removeGameObject(editorCamera);
+    }
+
+    private void removeGizmo(){
+        if(SceneManager.currentScene == null) return;
+        GameObject gizmo = SceneManager.currentScene.getGameObjectByName(EngineSettings.editorGizmoName);
+        if(gizmo == null) return;
+        Debug.log("Removing gizmo from " + SceneManager.currentScene.getLevelName());
+        SceneManager.currentScene.removeGameObject(gizmo);
+        //TODO: Fix gizmo not unloading mesh properly
     }
 
     public void setAspectRatio(float aspectRatio){
@@ -167,7 +201,10 @@ public class GamePanel extends EditorPanel {
             ImGuiHelper.showProgressBar("Booting game...");
             editorGameLauncher = new EditorGameLauncher();
             editorGameLauncher.run(sizeX, sizeY - 20);
-            if(!EngineSettings.isInGame) addEditorCamera();
+            if(!EngineSettings.isInGame){
+                addGizmo();
+                addEditorCamera();
+            }
         }
 
     }
