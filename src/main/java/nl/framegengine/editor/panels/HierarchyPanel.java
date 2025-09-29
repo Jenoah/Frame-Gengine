@@ -44,6 +44,11 @@ public class HierarchyPanel extends EditorPanel {
         buttonSize = new ImVec2(sizeX, 20);
     }
 
+    public void setCurrentlySelectedGameObject(GameObject currentlySelectedGameObject){
+        this.currentlySelectedGameObject = currentlySelectedGameObject;
+        infoPanel.setCurrentlySelectedObject(currentlySelectedGameObject);
+    }
+
     @Override
     public void renderFrame() {
         showContextMenu();
@@ -68,20 +73,17 @@ public class HierarchyPanel extends EditorPanel {
                 if(currentlySelectedGameObject == go){
                     ImGui.pushStyleColor(ImGuiCol.Text, selectedButtonTextColor);
                     if(ImGui.button(goLabel, buttonSize)){
-                        infoPanel.setCurrentlySelectedObject(go);
-                        currentlySelectedGameObject = go;
+                        setCurrentlySelectedGameObject(go);
                     }
                 }else if(!go.isEnabled()){
                     ImGui.pushStyleColor(ImGuiCol.Text, inactiveButtonTextColor);
                     if(ImGui.button(goLabel, buttonSize)){
-                        infoPanel.setCurrentlySelectedObject(go);
-                        currentlySelectedGameObject = go;
+                        setCurrentlySelectedGameObject(go);
                     }
                 }else{
                     ImGui.pushStyleColor(ImGuiCol.Text, activeButtonTextColor);
                     if(ImGui.button(goLabel, buttonSize)){
-                        infoPanel.setCurrentlySelectedObject(go);
-                        currentlySelectedGameObject = go;
+                        setCurrentlySelectedGameObject(go);
                     }
                 }
 
@@ -92,20 +94,17 @@ public class HierarchyPanel extends EditorPanel {
                     if(currentlySelectedGameObject == child){
                         ImGui.pushStyleColor(ImGuiCol.Text, selectedButtonTextColor);
                         if(ImGui.button("- " + childLabel, buttonSize)){
-                            infoPanel.setCurrentlySelectedObject(child);
-                            currentlySelectedGameObject = child;
+                            setCurrentlySelectedGameObject(child);
                         }
                     }else if(!child.isEnabled()){
                         ImGui.pushStyleColor(ImGuiCol.Text, inactiveButtonTextColor);
                         if(ImGui.button("- " + childLabel, buttonSize)){
-                            infoPanel.setCurrentlySelectedObject(child);
-                            currentlySelectedGameObject = child;
+                            setCurrentlySelectedGameObject(child);
                         }
                     }else{
                         ImGui.pushStyleColor(ImGuiCol.Text, activeButtonTextColor);
                         if(ImGui.button("- " + childLabel, buttonSize)){
-                            infoPanel.setCurrentlySelectedObject(child);
-                            currentlySelectedGameObject = child;
+                            setCurrentlySelectedGameObject(child);
                         }
                     }
                     ImGui.popStyleColor();
@@ -116,8 +115,7 @@ public class HierarchyPanel extends EditorPanel {
         ImGui.popStyleVar();
 
         if(ImGui.isWindowHovered() && !ImGui.isAnyItemHovered() && ImGui.isMouseReleased(ImGuiMouseButton.Left)){
-            infoPanel.setCurrentlySelectedObject(null);
-            currentlySelectedGameObject = null;
+            setCurrentlySelectedGameObject(null);
         }
     }
 

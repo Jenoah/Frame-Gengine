@@ -12,8 +12,11 @@ import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.entity.Scene;
 import nl.framegengine.core.entity.SceneManager;
+import nl.framegengine.core.input.MouseInput;
+import nl.framegengine.core.modelLoaders.OBJLoader.OBJLoader;
 import nl.framegengine.core.rendering.RenderManager;
 import nl.framegengine.editor.*;
+import nl.framegengine.editor.sceneComponents.ScenePreviewCameraControls;
 import nl.framegengine.editor.sceneComponents.SelectSceneObjects;
 
 public class GamePanel extends EditorPanel {
@@ -110,7 +113,9 @@ public class GamePanel extends EditorPanel {
         editorCamera.setRotation(SceneManager.currentScene.getEditorCameraRotation());
         editorCamera.setName(EngineSettings.editorCameraName);
         editorCamera.addComponent(new ScenePreviewCameraControls());
-        editorCamera.addComponent(new SelectSceneObjects());
+        editorCamera.addComponent(new SelectSceneObjects(editorCamera,
+                SceneManager.currentScene.getGameObjectByName(EngineSettings.editorGizmoName),
+                EditorWindow.getEditorLayout().getEditorPanelOfType(HierarchyPanel.class)));
         editorCamera.setShowInEditor(false);
         SceneManager.currentScene.addEntity(editorCamera);
         RenderManager.setRenderCamera(editorCamera);
