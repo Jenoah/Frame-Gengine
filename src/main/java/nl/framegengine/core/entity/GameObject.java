@@ -441,6 +441,7 @@ public class GameObject implements IJsonSerializable {
 
     public void setAabb(AABB aabb) {
         this.aabb = aabb;
+        aabb.setParentObject(this);
     }
 
     public final String getName() {

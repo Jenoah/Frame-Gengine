@@ -15,30 +15,54 @@ public class DebugEntity {
 
     public DebugEntity(Vector3f position, Vector3f scale){
         this.position = position;
-        this.scale = scale;
+        this.scale.set(scale);
+    }
+
+    public DebugEntity(Vector3f position, float scale){
+        this.position = position;
+        this.scale.set(scale);
     }
 
     public DebugEntity(Vector3f position, Quaternionf rotation){
         this.position = position;
-        this.rotation = rotation;
+        this.rotation.set(rotation);
     }
 
     public DebugEntity(Vector3f position, Quaternionf rotation, Vector3f scale){
         this.position = position;
-        this.rotation = rotation;
-        this.scale = scale;
+        this.rotation.set(rotation);
+        this.scale.set(scale);
+    }
+
+    public DebugEntity(Vector3f position, Quaternionf rotation, float scale){
+        this.position = position;
+        this.rotation.set(rotation);
+        this.scale.set(scale);
     }
 
     public DebugEntity(Vector3f position, Vector3f scale, DebugShape shape){
         this.position = position;
-        this.scale = scale;
+        this.scale.set(scale);
+        this.shape = shape;
+    }
+
+    public DebugEntity(Vector3f position, float scale, DebugShape shape){
+        this.position = position;
+        this.scale.set(scale);
         this.shape = shape;
     }
 
     public DebugEntity(Vector3f position, Quaternionf rotation, Vector3f scale, DebugShape shape){
         this.position = position;
-        this.rotation = rotation;
-        this.scale = scale;
+        this.rotation.set(rotation);
+        this.scale.set(scale);
+        this.shape = shape;
+    }
+
+    public DebugEntity(Vector3f position, Quaternionf rotation, float scale, DebugShape shape){
+        this.position = position;
+        this.rotation.set(rotation);
+        this.scale.set(scale);
         this.shape = shape;
     }
 
@@ -49,7 +73,7 @@ public class DebugEntity {
 
     public DebugEntity(Vector3f position, Quaternionf rotation, DebugShape shape){
         this.position = position;
-        this.rotation = rotation;
+        this.rotation.set(rotation);
         this.shape = shape;
     }
 

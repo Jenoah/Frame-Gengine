@@ -2,11 +2,14 @@ package nl.framegengine.core.rendering.renderers;
 
 import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.entity.GameObject;
+import nl.framegengine.core.utils.Calculus;
+import nl.framegengine.core.utils.Constants;
 import nl.framegengine.core.visual.Mesh;
 import nl.framegengine.core.modelLoaders.PrimitiveLoader;
 import nl.framegengine.core.shaders.DebugShader;
 import nl.framegengine.core.utils.DebugEntity;
 import nl.framegengine.core.visual.MeshMaterialSet;
+import org.joml.Math;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
@@ -87,8 +90,28 @@ public class DebugRenderer implements IRenderer {
         debugEntities.add(new DebugEntity(position, size, DebugEntity.DebugShape.CUBE));
     }
 
+    public void drawCube(Vector3f position, float size){
+        debugEntities.add(new DebugEntity(position, size, DebugEntity.DebugShape.CUBE));
+    }
+
     public void drawCube(Vector3f position, Quaternionf rotation, Vector3f size){
         debugEntities.add(new DebugEntity(position, rotation, size, DebugEntity.DebugShape.CUBE));
+    }
+
+    public void drawLine(Vector3f startPoint, Vector3f endPoint){
+        Vector3f centerPoint = new Vector3f();
+        centerPoint.x = Math.lerp(startPoint.x, endPoint.x, 0.5f);
+        centerPoint.y = Math.lerp(startPoint.y, endPoint.y, 0.5f);
+        centerPoint.z = Math.lerp(startPoint.z, endPoint.z, 0.5f);
+
+        Vector3f difference = Calculus.subtractVectors(startPoint, endPoint);
+        float length = difference.length();
+        Vector3f direction = difference.normalize();
+
+        if(direction.lengthSquared() <= 0.01) direction.set(0, 0, -1);
+        Quaternionf lookDirection = new Quaternionf().rotateTo(new Vector3f(Constants.VECTOR3_FORWARD), direction);
+
+        debugEntities.add(new DebugEntity(centerPoint, lookDirection, new Vector3f(0.025f, 0.025f, length)));
     }
 
     public void setMainCamera(Camera camera){
