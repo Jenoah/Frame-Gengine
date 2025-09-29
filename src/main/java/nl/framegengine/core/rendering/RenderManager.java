@@ -134,6 +134,10 @@ public class RenderManager {
         debugRenderer.drawCube(position, size);
     }
 
+    public static void debugCube(Vector3f position, float size){
+        debugRenderer.drawCube(position, size);
+    }
+
     public static void debugCube(Vector3f position, Quaternionf rotation, Vector3f size){
         debugRenderer.drawCube(position, rotation, size);
     }
@@ -144,6 +148,10 @@ public class RenderManager {
 
     public static void debugCube(Vector3f position, Quaternionf rotation){
         debugRenderer.drawCube(position, rotation, Constants.VECTOR3_ONE);
+    }
+
+    public static void debugLine(Vector3f startPoint, Vector3f endPoint){
+        debugRenderer.drawLine(startPoint, endPoint);
     }
 
     public static void setRenderCamera(Camera renderCamera){

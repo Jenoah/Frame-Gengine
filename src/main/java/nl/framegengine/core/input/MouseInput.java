@@ -1,6 +1,8 @@
 package nl.framegengine.core.input;
 
+import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.engine.WindowManager;
+import nl.framegengine.editor.EngineSettings;
 import org.joml.Vector2d;
 import org.joml.Vector2f;
 import org.lwjgl.glfw.GLFW;
@@ -10,8 +12,9 @@ import org.lwjgl.glfw.GLFWMouseButtonCallback;
 public class MouseInput {
 
     private static final Vector2d previousPosition = new Vector2d(-1);
-    private static final Vector2d currentPosition = new Vector2d(-1);
+    private static final Vector2f currentPosition = new Vector2f(-1);
     private static final Vector2f mouseDelta = new Vector2f(0);
+    private static final Vector2f mouseOffset = new Vector2f(0);
 
     private static boolean lbDown = false;
     private static boolean rbDown = false;
@@ -30,8 +33,13 @@ public class MouseInput {
         // Now set your own callbacks
         GLFW.glfwSetCursorPosCallback(windowManager.getWindow(), (window, xPos, yPos) -> {
             if (windowManager.getFocus()) {
-                currentPosition.x = xPos;
-                currentPosition.y = yPos;
+                if(!EngineSettings.isCompiled){
+                    currentPosition.x = (float) xPos - mouseOffset.x;
+                    currentPosition.y = (float) yPos - mouseOffset.y;
+                }else {
+                    currentPosition.x = (float) xPos;
+                    currentPosition.y = (float) yPos;
+                }
             }
             // Call previous callback if set
             if (prevCursorPosCallback != null)
@@ -46,6 +54,12 @@ public class MouseInput {
             if (prevMouseButtonCallback != null)
                 prevMouseButtonCallback.invoke(window, button, action, mods);
         });
+    }
+
+    public static void setMouseOffset(int x, int y){
+        Debug.log("Mouse offset set to " + x + " and " + y);
+
+        mouseOffset.set(x, y);
     }
 
     public static void input(){
@@ -96,7 +110,7 @@ public class MouseInput {
         return new Vector2f(mousePositionX, mousePositionY);
     }
 
-    public static Vector2d getMousePositionInPixels(){
+    public static Vector2f getMousePositionInPixels(){
         return currentPosition;
     }
 

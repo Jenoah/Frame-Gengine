@@ -132,6 +132,7 @@ public class GamePanel extends EditorPanel {
 
     public void recalculateResolution(){
         recalculateResolution(false);
+        MouseInput.setMouseOffset(posX, posY);
     }
 
     public void recalculateResolution(boolean refreshGameInstance) {
