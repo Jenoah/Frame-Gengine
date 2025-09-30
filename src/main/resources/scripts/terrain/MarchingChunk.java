@@ -1,7 +1,7 @@
 package nl.framegengine.customScripts;
 
 import nl.framegengine.core.visual.ModelManager;
-import nl.framegengine.core.components.RenderComponent;
+import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.visual.Material;

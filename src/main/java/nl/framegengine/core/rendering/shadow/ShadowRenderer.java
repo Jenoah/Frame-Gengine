@@ -1,7 +1,7 @@
 package nl.framegengine.core.rendering.shadow;
 
 import nl.framegengine.core.entity.Camera;
-import nl.framegengine.core.components.RenderComponent;
+import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.debugging.RenderMetrics;
 import nl.framegengine.core.entity.GameObject;

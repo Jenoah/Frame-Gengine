@@ -2,7 +2,7 @@ package nl.framegengine.customScripts;
 
 import nl.framegengine.core.engine.EngineManager;
 import nl.framegengine.core.components.Component;
-import nl.framegengine.core.components.RenderComponent;
+import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.entity.SceneManager;

@@ -8,7 +8,7 @@ import nl.framegengine.core.rendering.shadow.ShadowRenderer;
 import nl.framegengine.core.rendering.utils.FrameBuffer;
 import nl.framegengine.editor.EditorWindow;
 import nl.framegengine.core.entity.Camera;
-import nl.framegengine.core.components.RenderComponent;
+import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.debugging.RenderMetrics;
 import nl.framegengine.core.fonts.fontRendering.FontRenderer;
 import nl.framegengine.core.gui.GuiRenderer;

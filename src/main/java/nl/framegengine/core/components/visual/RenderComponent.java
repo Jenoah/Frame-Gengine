@@ -1,5 +1,6 @@
-package nl.framegengine.core.components;
+package nl.framegengine.core.components.visual;
 
+import nl.framegengine.core.components.Component;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.entity.SceneManager;

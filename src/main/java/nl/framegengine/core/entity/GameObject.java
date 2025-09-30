@@ -2,7 +2,7 @@ package nl.framegengine.core.entity;
 
 import nl.framegengine.core.utils.IJsonSerializable;
 import nl.framegengine.core.components.Component;
-import nl.framegengine.core.components.RenderComponent;
+import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.rendering.RenderManager;
 import nl.framegengine.core.utils.AABB;

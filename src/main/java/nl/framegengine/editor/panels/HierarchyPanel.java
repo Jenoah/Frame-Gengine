@@ -6,7 +6,7 @@ import imgui.ImVec4;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiStyleVar;
-import nl.framegengine.core.components.RenderComponent;
+import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.lighting.DirectionalLight;
 import nl.framegengine.core.lighting.PointLight;

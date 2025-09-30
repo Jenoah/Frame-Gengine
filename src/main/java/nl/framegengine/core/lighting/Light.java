@@ -1,6 +1,6 @@
 package nl.framegengine.core.lighting;
 
-import nl.framegengine.core.components.RenderComponent;
+import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.modelLoaders.PrimitiveLoader;
 import nl.framegengine.core.shaders.ShaderManager;
