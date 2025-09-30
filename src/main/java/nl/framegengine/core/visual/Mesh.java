@@ -481,7 +481,6 @@ public class Mesh implements IJsonSerializable {
         GL30.glDeleteBuffers(vertexVBOID);
         GL30.glDeleteBuffers(triangleVBOID);
         GL30.glDeleteBuffers(uvVBOID);
-        Debug.log("Cleaning VAO ID " + vaoID);
         ModelManager.unloadMeshId(vaoID);
     }
 

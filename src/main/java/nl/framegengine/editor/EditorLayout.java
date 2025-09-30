@@ -22,6 +22,7 @@ public class EditorLayout {
 
         ((HierarchyPanel)editorPanels[0]).setInfoPanel(((InfoPanel)editorPanels[3]));
         ((ControlPanel)editorPanels[5]).setGamePanel((GamePanel)editorPanels[1]);
+        ((GamePanel)editorPanels[1]).setHierarchyPanel((HierarchyPanel)editorPanels[0]);
         gameSettingsPopupPanel.updateTextureList();
     }
 

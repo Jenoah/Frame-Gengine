@@ -6,6 +6,7 @@ import imgui.ImVec4;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiStyleVar;
+import nl.framegengine.core.components.constraint.DirectConstraint;
 import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.lighting.DirectionalLight;
@@ -32,6 +33,7 @@ public class HierarchyPanel extends EditorPanel {
     private final ImVec4 hoverButtonBackgroundColor = new ImVec4(0f, 0f, 0f, 1f);
     private InfoPanel infoPanel;
     private GameObject currentlySelectedGameObject = null;
+    private GameObject gizmo = null;
 
     private int frameCount = 0;
     private List<GameObject> hierarchyObjects;
@@ -47,6 +49,11 @@ public class HierarchyPanel extends EditorPanel {
     public void setCurrentlySelectedGameObject(GameObject currentlySelectedGameObject){
         this.currentlySelectedGameObject = currentlySelectedGameObject;
         infoPanel.setCurrentlySelectedObject(currentlySelectedGameObject);
+        if(gizmo != null && currentlySelectedGameObject != null && currentlySelectedGameObject != gizmo){
+            gizmo.setPosition(currentlySelectedGameObject.getPosition());
+            gizmo.getComponent(DirectConstraint.class).setConnectedObject(currentlySelectedGameObject);
+        }
+
     }
 
     @Override
@@ -232,5 +239,9 @@ public class HierarchyPanel extends EditorPanel {
             }
             ImGui.endPopup();
         }
+    }
+
+    public void setGizmo(GameObject gizmo){
+        this.gizmo = gizmo;
     }
 }

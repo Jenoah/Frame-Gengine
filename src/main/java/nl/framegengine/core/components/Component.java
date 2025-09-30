@@ -22,6 +22,7 @@ public class Component implements IJsonSerializable {
         if(hasInitiated) return;
         hasInitiated = true;
     }
+
     public void update(){}
 
     public GameObject getRoot(){

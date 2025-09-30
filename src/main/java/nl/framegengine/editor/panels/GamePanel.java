@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
+import nl.framegengine.core.components.constraint.DirectConstraint;
 import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.engine.EngineManager;
@@ -34,6 +35,7 @@ public class GamePanel extends EditorPanel {
     private float aspectRatio = 1.7778f;
     private boolean showStats = false;
     private String editingSceneJson = null;
+    private HierarchyPanel hierarchyPanel = null;
 
     public GamePanel(int posX, int posY, int sizeX, int sizeY) {
         super(posX, posY, sizeX, sizeY);
@@ -123,7 +125,6 @@ public class GamePanel extends EditorPanel {
         editorCamera.setName(EngineSettings.editorCameraName);
         editorCamera.addComponent(new ScenePreviewCameraControls());
         editorCamera.addComponent(new SelectSceneObjects(editorCamera,
-                SceneManager.currentScene.getGameObjectByName(EngineSettings.editorGizmoName),
                 EditorWindow.getEditorLayout().getEditorPanelOfType(HierarchyPanel.class)));
         editorCamera.setShowInEditor(false);
         SceneManager.currentScene.addEntity(editorCamera);
@@ -138,11 +139,18 @@ public class GamePanel extends EditorPanel {
         Set<MeshMaterialSet> gizmoMms = OBJLoader.loadOBJModel("/models/gizmo.obj", new Texture(TextureLoader.loadTexture("textures/color_palette.png", true)));
         gizmoMms.forEach(mms -> {
             mms.material.setShader(ShaderManager.unlitShader);
+            mms.material.setOnTop(true);
+            mms.material.castShadow(false);
+            mms.material.receiveShadows(false);
         });
         RenderComponent renderComponent = new RenderComponent(gizmoMms);
+        DirectConstraint directConstraint = new DirectConstraint();
+        directConstraint.runInEditor = true;
+        if(hierarchyPanel != null) hierarchyPanel.setGizmo(gizmo);
 
         gizmo.addComponent(renderComponent);
-        gizmo.setShowInEditor(false);
+        gizmo.addComponent(directConstraint);
+        //gizmo.setShowInEditor(false);
         SceneManager.currentScene.addEntity(gizmo);
     }
 
@@ -160,6 +168,7 @@ public class GamePanel extends EditorPanel {
         GameObject gizmo = SceneManager.currentScene.getGameObjectByName(EngineSettings.editorGizmoName);
         if(gizmo == null) return;
         Debug.log("Removing gizmo from " + SceneManager.currentScene.getLevelName());
+        if(hierarchyPanel != null) hierarchyPanel.setGizmo(null);
         SceneManager.currentScene.removeGameObject(gizmo);
         //TODO: Fix gizmo not unloading mesh properly
     }
@@ -226,5 +235,9 @@ public class GamePanel extends EditorPanel {
 
     public void toggleWireframe(){
         RenderManager.toggleWireframe();
+    }
+
+    public void setHierarchyPanel(HierarchyPanel hierarchyPanel){
+        this.hierarchyPanel = hierarchyPanel;
     }
 }

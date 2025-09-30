@@ -39,6 +39,7 @@ public class GameObject implements IJsonSerializable {
     private GameObject parent;
 
     protected boolean willUpdate = false;
+    private boolean hasUpdated = false;
     private boolean isRemoving = false;
 
     protected final Set<Component> components = new HashSet<>();
@@ -316,6 +317,8 @@ public class GameObject implements IJsonSerializable {
         for(Component component : components){
             if(EngineSettings.isInGame || component.runInEditor) component.update();
         }
+
+        hasUpdated = false;
     }
 
     public boolean isEnabled() {
@@ -407,6 +410,7 @@ public class GameObject implements IJsonSerializable {
 
     public void callUpdate(){
         this.willUpdate = true;
+        this.hasUpdated = true;
         if(parent != null) parent.callUpdate();
     }
 
@@ -498,6 +502,10 @@ public class GameObject implements IJsonSerializable {
 
     public void setShowInEditor(boolean showInEditor) {
         this.showInEditor = showInEditor;
+    }
+
+    public final boolean hasUpdated(){
+        return hasUpdated;
     }
 
     @Override

@@ -88,7 +88,7 @@ public class Scene implements IJsonSerializable {
     public void cleanComponents(){ getGameObjects().forEach(GameObject::cleanUp); }
 
     public void cleanUp() {
-        ModelManager.cleanUp(vaoIds);
+        ModelManager.cleanUp();
         cleanComponents();
         gameObjects.clear();
         rootGameObjects.clear();
@@ -96,9 +96,7 @@ public class Scene implements IJsonSerializable {
     }
 
     public void addEntity(GameObject entity, boolean intitiateComponents){
-        if (entity == null) {
-            return;
-        }
+        if (entity == null) { return; }
 
         if (entity.getChildren() != null) {
             for (GameObject child : entity.getChildren()) {

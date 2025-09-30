@@ -86,9 +86,12 @@ public class ModelManager {
 
     public static void cleanUp(){
         for(Mesh mesh: meshes.values().stream().toList()){
+            meshes.remove(mesh.getVaoID());
             mesh.cleanUp();
         }
-        TextureLoader.cleanUp();
+
+        //TODO: Unload textures not used ATM
+        //TextureLoader.cleanUp();
     }
 
     public static void cleanUp(Set<Integer> vaoIDs){

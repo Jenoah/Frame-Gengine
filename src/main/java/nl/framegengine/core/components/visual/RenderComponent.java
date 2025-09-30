@@ -96,7 +96,6 @@ public class RenderComponent extends Component {
 
         meshMaterialSets.forEach((meshMaterialSet) -> {
             meshMaterialSet.setRoot(root);
-            Debug.log("Setting root for " + root.getName());
             SceneManager.currentScene.addVaoId(meshMaterialSet.getMesh().getVaoID());
         });
         return this;
