@@ -31,6 +31,7 @@ public class Material implements IJsonSerializable {
     protected boolean castShadow = true;
     protected boolean receiveShadows = true;
     protected boolean isTransparent;
+    protected boolean isOnTop = false;
 
     protected Shader shader;
     protected String guid;
@@ -150,6 +151,11 @@ public class Material implements IJsonSerializable {
         return this;
     }
 
+    public Material setOnTop(boolean isOnTop){
+        this.isOnTop = isOnTop;
+        return this;
+    }
+
     public Material setGuid(){
         if(guid == null || guid.isBlank()) return setGuid(String.valueOf(java.util.UUID.randomUUID()));
         return this;
@@ -217,6 +223,8 @@ public class Material implements IJsonSerializable {
     public final boolean receiveShadows(){ return receiveShadows; }
 
     public final boolean isTransparent() { return isTransparent; }
+
+    public final boolean isOnTop() { return isOnTop; }
 
     public final String getGuid(){ return guid; }
 

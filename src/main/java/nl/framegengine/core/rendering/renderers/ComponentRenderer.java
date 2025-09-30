@@ -24,8 +24,8 @@ public class ComponentRenderer implements IRenderer {
 
     private RenderMetrics metrics;
     private boolean recordMetrics = false;
-
     private boolean wireframeMode = false;
+    private boolean isRenderingOnTop = false;
 
     @Override
     public void init() throws Exception {  }
@@ -36,6 +36,8 @@ public class ComponentRenderer implements IRenderer {
 
         sortedRenderObjects.forEach(this::renderPass);
         sortedTransparentRenderObjects.forEach(this::renderPass);
+
+        GL11.glDepthRange(0, 1.0);
     }
 
     private void renderPass(Shader shader, List<MeshMaterialSet> meshMaterialSetList){
@@ -53,7 +55,14 @@ public class ComponentRenderer implements IRenderer {
             prepareShadow(meshMaterialSet);
             shader.prepare(meshMaterialSet, mainCamera);
 
-
+            if(meshMaterialSet.material.isOnTop() != isRenderingOnTop){
+                isRenderingOnTop = meshMaterialSet.material.isOnTop();
+                if(isRenderingOnTop) {
+                    GL11.glDepthRange(0, 0.01);
+                }else{
+                    GL11.glDepthRange(0.01, 1.0);
+                }
+            }
 
             if (recordMetrics) metrics.recordDrawCall();
             if(meshMaterialSet.getMesh().isInstanced()){
