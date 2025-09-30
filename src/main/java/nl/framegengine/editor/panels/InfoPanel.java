@@ -90,6 +90,7 @@ public class InfoPanel extends EditorPanel {
                 if (ImGui.inputFloat(field.getName() + "##" + field.hashCode(), ImFl)) {
                     field.setAccessible(true);
                     field.set(drawingObject, ImFl.floatValue());
+                    if(drawingObject instanceof GameObject go) go.callUpdate();
                 }
             }
             case String str -> {
@@ -97,6 +98,7 @@ public class InfoPanel extends EditorPanel {
                 if (ImGui.inputText(field.getName() + "##" + field.hashCode(), imStr)) {
                     field.setAccessible(true);
                     field.set(drawingObject, imStr.get());
+                    if(drawingObject instanceof GameObject go) go.callUpdate();
                 }
             }
             case Integer integer -> {
@@ -104,6 +106,7 @@ public class InfoPanel extends EditorPanel {
                 if (ImGui.inputInt(field.getName() + "##" + field.hashCode(), imInteger)) {
                     field.setAccessible(true);
                     field.set(drawingObject, imInteger.get());
+                    if(drawingObject instanceof GameObject go) go.callUpdate();
                 }
             }
             case Boolean bool -> {
@@ -111,6 +114,7 @@ public class InfoPanel extends EditorPanel {
                 if (ImGui.checkbox(field.getName() + "##" + field.hashCode(), imBool)) {
                     field.setAccessible(true);
                     field.set(drawingObject, imBool.get());
+                    if(drawingObject instanceof GameObject go) go.callUpdate();
                 }
             }
             case Vector3f vector -> {
@@ -119,6 +123,7 @@ public class InfoPanel extends EditorPanel {
                     vector.set(vec3Array[0], vec3Array[1], vec3Array[2]);
                     field.setAccessible(true);
                     field.set(drawingObject, vector);
+                    if(drawingObject instanceof GameObject go) go.callUpdate();
                 }
             }
             case Vector4f vector -> {
@@ -127,6 +132,7 @@ public class InfoPanel extends EditorPanel {
                     vector.set(vec4Array[0], vec4Array[1], vec4Array[2], vec4Array[3]);
                     field.setAccessible(true);
                     field.set(drawingObject, vector);
+                    if(drawingObject instanceof GameObject go) go.callUpdate();
                 }
             }
             case Quaternionf quaternion -> {
@@ -135,6 +141,7 @@ public class InfoPanel extends EditorPanel {
                     quaternion.set(quaternionArray[0], quaternionArray[1], quaternionArray[2], quaternionArray[3]);
                     field.setAccessible(true);
                     field.set(drawingObject, quaternion);
+                    if(drawingObject instanceof GameObject go) go.callUpdate();
                 }
             }
             case Texture texture -> {
