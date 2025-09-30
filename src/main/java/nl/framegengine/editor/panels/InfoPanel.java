@@ -8,13 +8,13 @@ import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import imgui.type.ImString;
 import nl.framegengine.core.debugging.Debug;
+import nl.framegengine.core.entity.GameObject;
+import nl.framegengine.core.utils.ClassHelper;
+import nl.framegengine.core.utils.FileHelper;
 import nl.framegengine.core.visual.Material;
 import nl.framegengine.core.visual.Texture;
 import nl.framegengine.core.visual.TextureLoader;
-import nl.framegengine.core.utils.FileHelper;
 import nl.framegengine.editor.EditorPanel;
-import nl.framegengine.core.entity.GameObject;
-import nl.framegengine.core.utils.ClassHelper;
 import nl.framegengine.editor.ImGuiHelper;
 import nl.framegengine.editor.ManifestHelper;
 import org.joml.Quaternionf;
@@ -22,8 +22,10 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import java.lang.reflect.Field;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 public class InfoPanel extends EditorPanel {
 
@@ -85,35 +87,35 @@ public class InfoPanel extends EditorPanel {
         switch (objectValue) {
             case Float f -> {
                 ImFloat ImFl = new ImFloat(f);
-                if (ImGui.inputFloat(field.getName(), ImFl)) {
+                if (ImGui.inputFloat(field.getName() + "##" + field.hashCode(), ImFl)) {
                     field.setAccessible(true);
                     field.set(drawingObject, ImFl.floatValue());
                 }
             }
             case String str -> {
                 ImString imStr = new ImString(str);
-                if (ImGui.inputText(field.getName(), imStr)) {
+                if (ImGui.inputText(field.getName() + "##" + field.hashCode(), imStr)) {
                     field.setAccessible(true);
                     field.set(drawingObject, imStr.get());
                 }
             }
             case Integer integer -> {
                 ImInt imInteger = new ImInt(integer);
-                if (ImGui.inputInt(field.getName(), imInteger)) {
+                if (ImGui.inputInt(field.getName() + "##" + field.hashCode(), imInteger)) {
                     field.setAccessible(true);
                     field.set(drawingObject, imInteger.get());
                 }
             }
             case Boolean bool -> {
                 ImBoolean imBool = new ImBoolean(bool);
-                if (ImGui.checkbox(field.getName(), imBool)) {
+                if (ImGui.checkbox(field.getName() + "##" + field.hashCode(), imBool)) {
                     field.setAccessible(true);
                     field.set(drawingObject, imBool.get());
                 }
             }
             case Vector3f vector -> {
                 float[] vec3Array = new float[]{vector.x, vector.y, vector.z};
-                if (ImGui.inputFloat3(field.getName(), vec3Array)) {
+                if (ImGui.inputFloat3(field.getName() + "##" + field.hashCode(), vec3Array)) {
                     vector.set(vec3Array[0], vec3Array[1], vec3Array[2]);
                     field.setAccessible(true);
                     field.set(drawingObject, vector);
@@ -121,7 +123,7 @@ public class InfoPanel extends EditorPanel {
             }
             case Vector4f vector -> {
                 float[] vec4Array = new float[]{vector.x, vector.y, vector.z, vector.w};
-                if (ImGui.inputFloat4(field.getName(), vec4Array)) {
+                if (ImGui.inputFloat4(field.getName() + "##" + field.hashCode(), vec4Array)) {
                     vector.set(vec4Array[0], vec4Array[1], vec4Array[2], vec4Array[3]);
                     field.setAccessible(true);
                     field.set(drawingObject, vector);
@@ -129,7 +131,7 @@ public class InfoPanel extends EditorPanel {
             }
             case Quaternionf quaternion -> {
                 float[] quaternionArray = new float[]{quaternion.x, quaternion.y, quaternion.z, quaternion.w};
-                if (ImGui.inputFloat4(field.getName(), quaternionArray)) {
+                if (ImGui.inputFloat4(field.getName() + "##" + field.hashCode(), quaternionArray)) {
                     quaternion.set(quaternionArray[0], quaternionArray[1], quaternionArray[2], quaternionArray[3]);
                     field.setAccessible(true);
                     field.set(drawingObject, quaternion);
@@ -147,10 +149,8 @@ public class InfoPanel extends EditorPanel {
             case Set<?> set -> {
                 if(!set.isEmpty()) {
                     if(ImGui.collapsingHeader(field.getName())) {
-                        AtomicInteger idx = new AtomicInteger();
-                        idx.set(1);
                         set.forEach(setItem -> {
-                            if(ImGui.collapsingHeader(setItem.getClass().getSimpleName() + "##" + idx + currentlySelectedObject.getGuid())) {
+                            if(ImGui.collapsingHeader(setItem.getClass().getSimpleName() + "##" + setItem.hashCode() + currentlySelectedObject.getGuid())) {
                                 drawObject(setItem);
                             }
                         });
