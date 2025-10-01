@@ -100,7 +100,7 @@ public class Scene implements IJsonSerializable {
 
         if (entity.getChildren() != null) {
             for (GameObject child : entity.getChildren()) {
-                addGameObject(child);
+                addEntity(child);
             }
         }
 
