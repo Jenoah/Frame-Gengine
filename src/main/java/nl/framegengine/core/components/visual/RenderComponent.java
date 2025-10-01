@@ -159,6 +159,12 @@ public class RenderComponent extends Component {
     }
 
     @Override
+    public void enable() {
+        super.enable();
+        queueRender();
+    }
+
+    @Override
     public void disable() {
         super.disable();
         dequeueRender();
