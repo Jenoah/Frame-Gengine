@@ -49,9 +49,14 @@ public class HierarchyPanel extends EditorPanel {
     public void setCurrentlySelectedGameObject(GameObject currentlySelectedGameObject){
         this.currentlySelectedGameObject = currentlySelectedGameObject;
         infoPanel.setCurrentlySelectedObject(currentlySelectedGameObject);
-        if(gizmo != null && currentlySelectedGameObject != null && currentlySelectedGameObject != gizmo){
-            gizmo.setPosition(currentlySelectedGameObject.getPosition());
-            gizmo.getComponent(DirectConstraint.class).setConnectedObject(currentlySelectedGameObject);
+        if(gizmo != null){
+            if(currentlySelectedGameObject != null && currentlySelectedGameObject != gizmo) {
+                gizmo.setEnabled(true);
+                gizmo.setPosition(currentlySelectedGameObject.getPosition());
+                gizmo.getComponent(DirectConstraint.class).setConnectedObject(currentlySelectedGameObject);
+            }else{
+                gizmo.setEnabled(false);
+            }
         }
 
     }

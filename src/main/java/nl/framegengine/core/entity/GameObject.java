@@ -244,6 +244,7 @@ public class GameObject implements IJsonSerializable {
     public GameObject setScale(float scale) {
         this.scale.set(scale);
         if(aabb != null && getComponent(RenderComponent.class) != null) getComponent(RenderComponent.class).calculateAABB();
+        if(!children.isEmpty()) children.forEach(child -> child.setScale(child.getScale().mul(scale)));
 
         callUpdate();
         return this;
@@ -252,6 +253,8 @@ public class GameObject implements IJsonSerializable {
     public GameObject setScale(Vector3f scale) {
         this.scale.set(scale);
         if(aabb != null && getComponent(RenderComponent.class) != null) getComponent(RenderComponent.class).calculateAABB();
+        if(!children.isEmpty()) children.forEach(child -> child.setScale(child.getScale().mul(scale)));
+
         callUpdate();
         return this;
     }
@@ -497,6 +500,8 @@ public class GameObject implements IJsonSerializable {
     }
 
     public boolean isShowInEditor() {
+        if(!showInEditor) return false;
+        if(parent != null) return parent.showInEditor;
         return showInEditor;
     }
 

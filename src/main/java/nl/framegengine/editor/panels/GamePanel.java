@@ -25,7 +25,7 @@ import nl.framegengine.editor.*;
 import nl.framegengine.editor.sceneComponents.ScenePreviewCameraControls;
 import nl.framegengine.editor.sceneComponents.SelectSceneObjects;
 
-import java.util.Set;
+import java.util.List;
 
 public class GamePanel extends EditorPanel {
 
@@ -134,23 +134,33 @@ public class GamePanel extends EditorPanel {
     private void addGizmo(){
         if(SceneManager.currentScene == null) return;
         GameObject gizmo = new GameObject(EngineSettings.editorGizmoName);
-        gizmo.setScale(0.5f);
         gizmo.translateLocal(Constants.VECTOR3_UP);
-        Set<MeshMaterialSet> gizmoMms = OBJLoader.loadOBJModel("/models/gizmo.obj", new Texture(TextureLoader.loadTexture("textures/color_palette.png", true)));
+        List<MeshMaterialSet> gizmoMms = OBJLoader.loadOBJModel("/models/gizmo.obj", new Texture(TextureLoader.loadTexture("textures/color_palette.png", true))).stream().toList();
         gizmoMms.forEach(mms -> {
             mms.material.setShader(ShaderManager.unlitShader);
             mms.material.setOnTop(true);
             mms.material.castShadow(false);
             mms.material.receiveShadows(false);
         });
-        RenderComponent renderComponent = new RenderComponent(gizmoMms);
+        GameObject zAxis = new GameObject("z-axis");
+        GameObject yAxis = new GameObject("y-axis");
+        GameObject xAxis = new GameObject("x-axis");
+
+        zAxis.addComponent(new RenderComponent(gizmoMms.get(0)));
+        xAxis.addComponent(new RenderComponent(gizmoMms.get(1)));
+        yAxis.addComponent(new RenderComponent(gizmoMms.get(2)));
+
+        zAxis.setParent(gizmo);
+        xAxis.setParent(gizmo);
+        yAxis.setParent(gizmo);
+
+        gizmo.setScale(0.5f);
         DirectConstraint directConstraint = new DirectConstraint();
         directConstraint.runInEditor = true;
         if(hierarchyPanel != null) hierarchyPanel.setGizmo(gizmo);
 
-        gizmo.addComponent(renderComponent);
         gizmo.addComponent(directConstraint);
-        //gizmo.setShowInEditor(false);
+        gizmo.setShowInEditor(false);
         SceneManager.currentScene.addEntity(gizmo);
     }
 

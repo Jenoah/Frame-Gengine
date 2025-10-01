@@ -2,6 +2,7 @@ package nl.framegengine.editor.sceneComponents;
 
 import nl.framegengine.core.components.Component;
 import nl.framegengine.core.entity.Camera;
+import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.input.MouseInput;
 import nl.framegengine.core.physics.Raycast;
@@ -33,11 +34,14 @@ public class SelectSceneObjects extends Component {
         super.update();
         if(camera == null) RenderManager.getRenderCamera();
 
-        if(!MouseInput.isLbDown() || SceneManager.currentScene == null) return;
-        SceneManager.currentScene.getGameObjects().forEach(go -> {
+        if(!(MouseInput.isLbClicked() && SceneManager.currentScene != null)) return;
+
+        for (GameObject go : SceneManager.currentScene.getGameObjects()) {
             if(go.isShowInEditor() && Raycast.intersectFromMouse(camera, go)){
                 hierarchyPanel.setCurrentlySelectedGameObject(go);
+                return;
             }
-        });
+        }
+        hierarchyPanel.setCurrentlySelectedGameObject(null);
     }
 }
