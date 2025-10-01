@@ -19,6 +19,12 @@ public class MouseInput {
     private static boolean lbDown = false;
     private static boolean rbDown = false;
 
+    private static boolean lbDownLastFrame = false;
+    private static boolean rbDownLastFrame = false;
+
+    private static boolean lbClicked = false;
+    private static boolean rbClicked = false;
+
     private static WindowManager windowManager;
 
     private static GLFWCursorPosCallback prevCursorPosCallback;
@@ -48,12 +54,14 @@ public class MouseInput {
 
         GLFW.glfwSetMouseButtonCallback(windowManager.getWindow(), (window, button, action, mods) -> {
             if (WindowManager.getInstance().getFocus()) {
+
                 lbDown = button == GLFW.GLFW_MOUSE_BUTTON_1 && action == GLFW.GLFW_PRESS;
                 rbDown = button == GLFW.GLFW_MOUSE_BUTTON_2 && action == GLFW.GLFW_PRESS;
             }
             if (prevMouseButtonCallback != null)
                 prevMouseButtonCallback.invoke(window, button, action, mods);
         });
+
     }
 
     public static void setMouseOffset(int x, int y){
@@ -81,6 +89,12 @@ public class MouseInput {
 
         previousPosition.x = currentPosition.x;
         previousPosition.y = currentPosition.y;
+
+        lbClicked = lbDown && !lbDownLastFrame;
+        rbClicked = rbDown && !rbDownLastFrame;
+
+        lbDownLastFrame = lbDown;
+        rbDownLastFrame = rbDown;
     }
 
     public static boolean isRbDown() {
@@ -89,6 +103,14 @@ public class MouseInput {
 
     public static boolean isLbDown() {
         return lbDown;
+    }
+
+    public static boolean isLbClicked(){
+        return lbClicked;
+    }
+
+    public static boolean isRbClicked(){
+        return rbClicked;
     }
 
     public static Vector2f getMouseDelta() {
