@@ -1,21 +1,22 @@
 package nl.framegengine.core.rendering;
 
+import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.debugging.Debug;
+import nl.framegengine.core.debugging.RenderMetrics;
+import nl.framegengine.core.engine.WindowManager;
+import nl.framegengine.core.entity.Camera;
+import nl.framegengine.core.entity.Scene;
+import nl.framegengine.core.fonts.fontRendering.FontRenderer;
+import nl.framegengine.core.gui.GuiRenderer;
+import nl.framegengine.core.physics.Raycast;
 import nl.framegengine.core.rendering.renderers.ComponentRenderer;
 import nl.framegengine.core.rendering.renderers.DebugRenderer;
 import nl.framegengine.core.rendering.renderers.PostProcessing;
 import nl.framegengine.core.rendering.shadow.ShadowRenderer;
 import nl.framegengine.core.rendering.utils.FrameBuffer;
-import nl.framegengine.editor.EditorWindow;
-import nl.framegengine.core.entity.Camera;
-import nl.framegengine.core.components.visual.RenderComponent;
-import nl.framegengine.core.debugging.RenderMetrics;
-import nl.framegengine.core.fonts.fontRendering.FontRenderer;
-import nl.framegengine.core.gui.GuiRenderer;
-import nl.framegengine.core.engine.WindowManager;
-import nl.framegengine.core.entity.Scene;
 import nl.framegengine.core.skybox.SkyboxRenderer;
 import nl.framegengine.core.utils.Constants;
+import nl.framegengine.editor.EditorWindow;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
@@ -152,6 +153,14 @@ public class RenderManager {
 
     public static void debugLine(Vector3f startPoint, Vector3f endPoint){
         debugRenderer.drawLine(startPoint, endPoint);
+    }
+
+    public static void debugRay(Raycast.Ray ray, float length){
+        debugRenderer.drawRay(ray, length);
+    }
+
+    public static void debugRay(Raycast.Ray ray){
+        debugRenderer.drawRay(ray, 1f);
     }
 
     public static void setRenderCamera(Camera renderCamera){

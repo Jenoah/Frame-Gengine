@@ -2,12 +2,14 @@ package nl.framegengine.core.rendering.renderers;
 
 import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.entity.GameObject;
+import nl.framegengine.core.modelLoaders.PrimitiveLoader;
+import nl.framegengine.core.physics.Raycast;
+import nl.framegengine.core.shaders.DebugShader;
 import nl.framegengine.core.utils.Calculus;
 import nl.framegengine.core.utils.Constants;
-import nl.framegengine.core.visual.Mesh;
-import nl.framegengine.core.modelLoaders.PrimitiveLoader;
-import nl.framegengine.core.shaders.DebugShader;
 import nl.framegengine.core.utils.DebugEntity;
+import nl.framegengine.core.utils.ObjectPool;
+import nl.framegengine.core.visual.Mesh;
 import nl.framegengine.core.visual.MeshMaterialSet;
 import org.joml.Math;
 import org.joml.Quaternionf;
@@ -112,6 +114,23 @@ public class DebugRenderer implements IRenderer {
         Quaternionf lookDirection = new Quaternionf().rotateTo(new Vector3f(Constants.VECTOR3_FORWARD), direction);
 
         debugEntities.add(new DebugEntity(centerPoint, lookDirection, new Vector3f(0.025f, 0.025f, length)));
+    }
+
+    public void drawRay(Raycast.Ray ray, float length){
+        Vector3f endPoint = ObjectPool.VECTOR3F_POOL.obtain();
+        endPoint.set(ray.direction.normalize()).mul(length);
+        endPoint.set(Calculus.addVectors(ray.origin, endPoint));
+
+        Vector3f centerPoint = ObjectPool.VECTOR3F_POOL.obtain();
+        centerPoint.x = Math.lerp(ray.origin.x, endPoint.x, 0.5f);
+        centerPoint.y = Math.lerp(ray.origin.y, endPoint.y, 0.5f);
+        centerPoint.z = Math.lerp(ray.origin.z, endPoint.z, 0.5f);
+
+        Quaternionf lookDirection = new Quaternionf().rotateTo(new Vector3f(Constants.VECTOR3_FORWARD), ray.direction);
+
+        debugEntities.add(new DebugEntity(centerPoint, lookDirection, new Vector3f(0.0125f, 0.0125f, length)));
+        ObjectPool.VECTOR3F_POOL.free(centerPoint);
+        ObjectPool.VECTOR3F_POOL.free(endPoint);
     }
 
     public void setMainCamera(Camera camera){

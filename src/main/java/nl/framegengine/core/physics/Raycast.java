@@ -22,7 +22,7 @@ public class Raycast {
         }
     }
 
-    private static Ray fromCameraByMouse(Camera camera){
+    public static Ray fromCameraByMouse(Camera camera){
         Vector2f mousePosition = new Vector2f(MouseInput.getMousePositionInPixels());
 
         //Convert to normalized coordinates
