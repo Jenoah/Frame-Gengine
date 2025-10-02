@@ -142,12 +142,12 @@ public class GamePanel extends EditorPanel {
             mms.material.castShadow(false);
             mms.material.receiveShadows(false);
         });
-        GameObject zAxis = new GameObject("z-axis");
-        GameObject yAxis = new GameObject("y-axis");
         GameObject xAxis = new GameObject("x-axis");
+        GameObject yAxis = new GameObject("y-axis");
+        GameObject zAxis = new GameObject("z-axis");
 
-        zAxis.addComponent(new RenderComponent(gizmoMms.get(0)));
-        xAxis.addComponent(new RenderComponent(gizmoMms.get(1)));
+        xAxis.addComponent(new RenderComponent(gizmoMms.get(0)));
+        zAxis.addComponent(new RenderComponent(gizmoMms.get(1)));
         yAxis.addComponent(new RenderComponent(gizmoMms.get(2)));
 
         zAxis.setParent(gizmo);
