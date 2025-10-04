@@ -67,8 +67,6 @@ public class MouseInput {
     }
 
     public static void setMouseOffset(int x, int y){
-        Debug.log("Mouse offset set to " + x + " and " + y);
-
         mouseOffset.set(x, y);
     }
 
