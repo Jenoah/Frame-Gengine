@@ -24,6 +24,8 @@ public class MouseInput {
 
     private static boolean lbClicked = false;
     private static boolean rbClicked = false;
+    private static boolean lbReleased = false;
+    private static boolean rbReleased = false;
 
     private static WindowManager windowManager;
 
@@ -93,6 +95,9 @@ public class MouseInput {
         lbClicked = lbDown && !lbDownLastFrame;
         rbClicked = rbDown && !rbDownLastFrame;
 
+        lbReleased = !lbDown && lbDownLastFrame;
+        rbReleased = !rbDown && rbDownLastFrame;
+
         lbDownLastFrame = lbDown;
         rbDownLastFrame = rbDown;
     }
@@ -111,6 +116,14 @@ public class MouseInput {
 
     public static boolean isRbClicked(){
         return rbClicked;
+    }
+
+    public static boolean isLbReleased(){
+        return lbReleased;
+    }
+
+    public static boolean isRbReleased(){
+        return rbReleased;
     }
 
     public static Vector2f getMouseDelta() {
