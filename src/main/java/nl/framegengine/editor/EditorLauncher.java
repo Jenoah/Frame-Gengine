@@ -11,6 +11,7 @@ public class EditorLauncher{
         editorWindow.init();
         editorWindow.setEditorLayout(new EditorLayout());
         EditorWindow.editorLayout.getEditorPanelOfType(GamePanel.class).startEngine();
+        editorWindow.editorLayout.recalculatePanels();
         editorWindow.run();
         editorWindow.cleanUp();
         System.exit(0);
