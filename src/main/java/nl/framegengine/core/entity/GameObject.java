@@ -492,11 +492,14 @@ public class GameObject implements IJsonSerializable {
         for (Component component : components.stream().toList()) {
             removeComponent(component);
         }
+
         GameObject.instancedObjects.remove(guid);
         if(SceneManager.currentScene != null){
             SceneManager.currentScene.removeFromRoot(this);
             SceneManager.currentScene.removeGameObject(this);
         }
+
+        children.forEach(GameObject::remove);
     }
 
     public boolean isShowInEditor() {
