@@ -236,6 +236,7 @@ public class ComponentRenderer implements IRenderer {
     public void queue(RenderComponent renderComponent) {
         if(renderObjects.contains(renderComponent)) return;
         this.renderObjects.add(renderComponent);
+        needsRebatch = true;
         renderComponent.getMeshMaterialSets().forEach(meshMaterialSet -> {
             if(meshMaterialSet.material.isTransparent()){
                 if (!sortedTransparentRenderObjects.containsKey(meshMaterialSet.material.getShader())) {
@@ -259,6 +260,7 @@ public class ComponentRenderer implements IRenderer {
 
     public void dequeue(RenderComponent renderComponent) {
         if(!renderObjects.contains(renderComponent)) return;
+        needsRebatch = true;
         renderComponent.getMeshMaterialSets().forEach(meshMaterialSet -> {
             if(meshMaterialSet.material.isTransparent()){
                 sortedTransparentRenderObjects.get(meshMaterialSet.material.getShader()).remove(meshMaterialSet);
