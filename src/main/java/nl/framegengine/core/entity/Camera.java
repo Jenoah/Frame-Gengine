@@ -179,6 +179,16 @@ public class Camera extends GameObject {
         return SceneManager.currentScene == null ? null : SceneManager.currentScene.getMainCamera();
     }
 
+    public void sortGameObjectsInScene(){
+        if(SceneManager.currentScene == null) return;
+        Vector3f currentCameraPosition = ObjectPool.VECTOR3F_POOL.obtain().set(getPosition());
+        SceneManager.currentScene.getSortedGameObjects().forEach(go -> {
+            go.setRenderCameraSquaredDistance(currentCameraPosition);
+        });
+
+        ObjectPool.VECTOR3F_POOL.free(currentCameraPosition);
+    }
+
     @Override
     protected void onUpdateTransform() {
         super.onUpdateTransform();

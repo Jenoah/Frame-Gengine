@@ -1,8 +1,8 @@
 package nl.framegengine.core.rendering.renderers;
 
-import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.debugging.RenderMetrics;
+import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.shaders.Shader;
 import nl.framegengine.core.shaders.SimpleLitShader;
@@ -42,6 +42,8 @@ public class ComponentRenderer implements IRenderer {
     private boolean lastCullState = true;
     private boolean lastBlendState = false;
 
+    private int frameDelta = 0;
+
     @Override
     public void init() throws Exception {  }
 
@@ -50,11 +52,15 @@ public class ComponentRenderer implements IRenderer {
         if ((sortedRenderObjects.isEmpty() && sortedTransparentRenderObjects.isEmpty()) || mainCamera == null) return;
 
         // Update cached collections if needed
-        if (needsRebatch) { updateRenderBatches();}
+        if(frameDelta > 60){
+            needsRebatch = true;
+            frameDelta = 0;
+        }
+        frameDelta++;
+        if (needsRebatch) { updateRenderBatches(); }
 
         renderPass(cachedSortedEntries);
         renderPass(cachedTransparentEntries);
-        //TODO: Render transparent objects back-to-front based on camera position
 
         // Reset state when done
         if (isRenderingOnTop) {
@@ -69,13 +75,23 @@ public class ComponentRenderer implements IRenderer {
     }
 
     private void updateRenderBatches() {
-        cachedSortedEntries.clear();
-        cachedTransparentEntries.clear();
-
-        cachedSortedEntries.addAll(sortedRenderObjects.entrySet());
-        cachedTransparentEntries.addAll(sortedTransparentRenderObjects.entrySet());
+        sortEntries(sortedRenderObjects, cachedSortedEntries, false);
+        sortEntries(sortedTransparentRenderObjects, cachedTransparentEntries, true);
 
         needsRebatch = false;
+    }
+
+    private List<Map.Entry<Shader, List<MeshMaterialSet>>> sortEntries(Map<Shader, List<MeshMaterialSet>> entryList, List<Map.Entry<Shader, List<MeshMaterialSet>>> outputList, boolean backToFront){
+        outputList.clear();
+
+        for (Map.Entry<Shader, List<MeshMaterialSet>> entry : entryList.entrySet()){
+            List<MeshMaterialSet> list = entry.getValue();
+            list.sort(Comparator.comparingDouble(mms -> mms.getRoot().getRenderCameraSquaredDistance()));
+            if(backToFront) entry.setValue(list.reversed());
+            outputList.add(entry);
+        }
+
+        return outputList;
     }
 
     private void renderPass(List<Map.Entry<Shader, List<MeshMaterialSet>>> batchEntries) {

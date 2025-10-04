@@ -60,6 +60,7 @@ public class SceneManager {
             }
             go.callUpdate();
         });
+        scene.syncSortedGameObjects();
         Debug.log("Loading scene settings");
         scene.updateLights();
         scene.setFogColor(scene.getFogColor());

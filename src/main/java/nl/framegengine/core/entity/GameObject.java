@@ -32,6 +32,7 @@ public class GameObject implements IJsonSerializable {
     private boolean isStatic = false;
     private boolean showInEditor = true;
     protected boolean drawDebugWireframe = false;
+    private float renderCameraSquaredDistance = 0;
 
     private static final Dictionary<String, GameObject> instancedObjects = new Hashtable<>();
 
@@ -522,6 +523,22 @@ public class GameObject implements IJsonSerializable {
 
     public final boolean hasUpdated(){
         return hasUpdated;
+    }
+
+    public final float getRenderCameraSquaredDistance() {
+        return renderCameraSquaredDistance;
+    }
+
+    public void setRenderCameraSquaredDistance(Camera camera) {
+        this.renderCameraSquaredDistance = camera.getPosition().distanceSquared(getPosition());
+    }
+
+    public void setRenderCameraSquaredDistance(Vector3f cameraPosition) {
+        this.renderCameraSquaredDistance = cameraPosition.distanceSquared(getPosition());
+    }
+
+    public void setRenderCameraSquaredDistance(float distanceSquared) {
+        this.renderCameraSquaredDistance = distanceSquared;
     }
 
     @Override

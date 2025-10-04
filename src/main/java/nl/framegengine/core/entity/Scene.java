@@ -29,6 +29,7 @@ import java.util.*;
 
 public class Scene implements IJsonSerializable {
     protected final List<GameObject> gameObjects;
+    protected final List<GameObject> sortedGameObjects;
     protected final List<GameObject> rootGameObjects;
     protected final List<GuiObject> guiObjects;
     protected final Map<FontType, List<GUIText>> textObjects;
@@ -54,6 +55,7 @@ public class Scene implements IJsonSerializable {
 
     public Scene() {
         this.gameObjects = new ArrayList<>();
+        this.sortedGameObjects = new ArrayList<>();
         this.rootGameObjects = new ArrayList<>();
         this.guiObjects = new ArrayList<>();
         this.windowManager = WindowManager.getInstance();
@@ -75,6 +77,9 @@ public class Scene implements IJsonSerializable {
         for (GameObject gameObject : gameObjects.stream().toList()) {
             gameObject.update();
         }
+
+        mainCamera.sortGameObjectsInScene();
+        syncSortedGameObjects();
     }
 
     public void updateRootGameObjectTransforms(){
@@ -91,6 +96,7 @@ public class Scene implements IJsonSerializable {
         ModelManager.cleanUp();
         cleanComponents();
         gameObjects.clear();
+        sortedGameObjects.clear();
         rootGameObjects.clear();
         guiObjects.clear();
     }
@@ -121,6 +127,7 @@ public class Scene implements IJsonSerializable {
         if (gameObjects.contains(gameObject)) return;
 
         gameObjects.add(gameObject);
+        sortedGameObjects.add(gameObject);
         if(gameObject.getParent() == null) this.rootGameObjects.add(gameObject);
 
         if (gameObject.getChildren() != null) {
@@ -130,6 +137,16 @@ public class Scene implements IJsonSerializable {
         }
     }
 
+    public void syncSortedGameObjects(){
+        sortedGameObjects.clear();
+        sortedGameObjects.addAll(gameObjects);
+        sortedGameObjects.sort(Comparator.comparingDouble(GameObject::getRenderCameraSquaredDistance));
+    }
+
+    public List<GameObject> getSortedGameObjects() {
+        return sortedGameObjects;
+    }
+
     public void removeFromRoot(GameObject gameObject){
         this.rootGameObjects.remove(gameObject);
     }
@@ -137,6 +154,7 @@ public class Scene implements IJsonSerializable {
     public void removeGameObject(GameObject gameObject){
         this.rootGameObjects.remove(gameObject);
         gameObjects.remove(gameObject);
+        sortedGameObjects.remove(gameObject);
         gameObject.remove();
     }
 
