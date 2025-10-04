@@ -426,6 +426,14 @@ public class GameObject implements IJsonSerializable {
         willUpdate = false;
     }
 
+    public boolean isSelfOrChild(GameObject objectToCompare){
+        if(objectToCompare == this) return true;
+        for (GameObject child : children) {
+            if(child == objectToCompare) return true;
+        }
+        return false;
+    }
+
     public final float getRadius(){
         return radius;
     }
