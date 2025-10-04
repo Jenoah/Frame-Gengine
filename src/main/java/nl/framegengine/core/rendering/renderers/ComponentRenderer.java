@@ -3,7 +3,6 @@ package nl.framegengine.core.rendering.renderers;
 import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.debugging.RenderMetrics;
 import nl.framegengine.core.entity.Camera;
-import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.shaders.Shader;
 import nl.framegengine.core.shaders.SimpleLitShader;
 import nl.framegengine.core.visual.MeshMaterialSet;
@@ -42,8 +41,6 @@ public class ComponentRenderer implements IRenderer {
     private boolean lastCullState = true;
     private boolean lastBlendState = false;
 
-    private int frameDelta = 0;
-
     @Override
     public void init() throws Exception {  }
 
@@ -52,12 +49,7 @@ public class ComponentRenderer implements IRenderer {
         if ((sortedRenderObjects.isEmpty() && sortedTransparentRenderObjects.isEmpty()) || mainCamera == null) return;
 
         // Update cached collections if needed
-        if(frameDelta > 60){
-            needsRebatch = true;
-            frameDelta = 0;
-        }
-        frameDelta++;
-        if (needsRebatch) { updateRenderBatches(); }
+        if (needsRebatch || mainCamera.hasUpdated()) { updateRenderBatches(); }
 
         renderPass(cachedSortedEntries);
         renderPass(cachedTransparentEntries);
@@ -87,7 +79,7 @@ public class ComponentRenderer implements IRenderer {
         for (Map.Entry<Shader, List<MeshMaterialSet>> entry : entryList.entrySet()){
             List<MeshMaterialSet> list = entry.getValue();
             list.sort(Comparator.comparingDouble(mms -> mms.getRoot().getRenderCameraSquaredDistance()));
-            if(backToFront) entry.setValue(list.reversed());
+            if(backToFront) entry.setValue(list.reversed()); //TODO: This doesn't work and it allocates a new list which is not needed
             outputList.add(entry);
         }
 
@@ -120,11 +112,11 @@ public class ComponentRenderer implements IRenderer {
             }
 
             // Process each mesh material set
-            renderMeshBatch(shader, meshMaterialSetList);
+            renderPass(shader, meshMaterialSetList);
         }
     }
 
-    private void renderMeshBatch(Shader shader, List<MeshMaterialSet> meshMaterialSetList) {
+    private void renderPass(Shader shader, List<MeshMaterialSet> meshMaterialSetList) {
         if(wireframeMode) GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
 
         meshMaterialSetList.forEach(meshMaterialSet -> {
@@ -218,11 +210,6 @@ public class ComponentRenderer implements IRenderer {
             GL20.glDisableVertexAttribArray(i);
         }
         GL30.glBindVertexArray(0);
-    }
-
-    @Override
-    public void prepare(GameObject entity, Camera camera) {
-
     }
 
     @Override

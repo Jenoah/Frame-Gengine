@@ -1,7 +1,6 @@
 package nl.framegengine.core.rendering.renderers;
 
 import nl.framegengine.core.entity.Camera;
-import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.modelLoaders.PrimitiveLoader;
 import nl.framegengine.core.physics.Raycast;
 import nl.framegengine.core.shaders.DebugShader;
@@ -72,11 +71,6 @@ public class DebugRenderer implements IRenderer {
     public void unbind() {
         GL20.glDisableVertexAttribArray(0);
         GL30.glBindVertexArray(0);
-    }
-
-    @Override
-    public void prepare(GameObject entity, Camera camera) {
-
     }
 
     @Override

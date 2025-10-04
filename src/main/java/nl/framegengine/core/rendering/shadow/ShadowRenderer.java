@@ -1,10 +1,9 @@
 package nl.framegengine.core.rendering.shadow;
 
-import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.debugging.RenderMetrics;
-import nl.framegengine.core.entity.GameObject;
+import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.entity.Scene;
 import nl.framegengine.core.rendering.renderers.IRenderer;
 import nl.framegengine.core.shaders.ShadowShader;
@@ -106,9 +105,6 @@ public class ShadowRenderer implements IRenderer {
         for (int i = 5; i <= 8; i++) GL20.glDisableVertexAttribArray(i);
         GL30.glBindVertexArray(0);
     }
-
-    @Override
-    public void prepare(GameObject entity, Camera camera) { }
 
     public void prepare(Vector3f lightDirection, ShadowFrustum shadowFrustum){
         updateOrthoProjectionMatrix();

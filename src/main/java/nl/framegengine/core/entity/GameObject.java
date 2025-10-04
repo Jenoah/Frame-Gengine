@@ -409,7 +409,7 @@ public class GameObject implements IJsonSerializable {
 
     @Override
     public String toString(){
-        return this.getClass().getSimpleName();
+        return getName();
     }
 
     public void callUpdate(){
@@ -534,7 +534,7 @@ public class GameObject implements IJsonSerializable {
     }
 
     public void setRenderCameraSquaredDistance(Vector3f cameraPosition) {
-        this.renderCameraSquaredDistance = cameraPosition.distanceSquared(getPosition());
+        this.renderCameraSquaredDistance = getPosition().distanceSquared(cameraPosition);
     }
 
     public void setRenderCameraSquaredDistance(float distanceSquared) {
