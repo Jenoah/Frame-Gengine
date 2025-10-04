@@ -8,6 +8,17 @@
         "y": 0.75,
         "z": 0.800000011920929
     },
+    "editorCameraPosition": {
+        "x": -2.3030307292938232,
+        "y": 2.0943567752838135,
+        "z": 3.3357186317443848
+    },
+    "editorCameraRotation": {
+        "x": 0.11828263103961945,
+        "y": 0.22129207849502563,
+        "z": 0.027050647884607315,
+        "w": 0.9676296710968018
+    },
     "gameObjects": [
         {
             "class": "nl.framegengine.core.entity.GameObject",
@@ -18,7 +29,6 @@
                 "z": 4.191732406616211
             },
             "guid": "playerGUID",
-            "willUpdate": true,
             "components": [
                 {
                     "class": "nl.framegengine.customScripts.PlayerMovement",
@@ -33,6 +43,11 @@
         {
             "class": "nl.framegengine.core.entity.Camera",
             "parentGuid": "playerGUID",
+            "frustumPlaneNormal": {
+                "x": 0.0000010021030902862549,
+                "y": 0.0000020042061805725098,
+                "z": 0.00001990795135498047
+            },
             "name": "Camera - Player",
             "localPosition": {
                 "x": 0.0,
@@ -58,10 +73,9 @@
             },
             "radius": 1.7320507764816284,
             "guid": "123abc",
-            "willUpdate": true,
             "components": [
                 {
-                    "class": "nl.framegengine.core.components.RenderComponent",
+                    "class": "nl.framegengine.core.components.visual.RenderComponent",
                     "meshPaths": [
                         "/models/cube.obj"
                     ],
@@ -103,23 +117,9 @@
             },
             "radius": 0.7071067690849304,
             "guid": "a75e0e15-8fb5-4076-a16e-48bb7e6c590a",
-            "willUpdate": true,
             "components": [
                 {
-                    "class": "nl.framegengine.core.components.RenderComponent",
-                    "meshPaths": [
-                        ""
-                    ],
-                    "meshMaterialSets": [
-                        {
-                            "class": "nl.framegengine.core.visual.MeshMaterialSet",
-                            "mesh": {
-                                "class": "nl.framegengine.core.visual.Mesh"
-                            },
-                            "root": "a75e0e15-8fb5-4076-a16e-48bb7e6c590a",
-                            "material": ""
-                        }
-                    ],
+                    "class": "nl.framegengine.core.components.visual.RenderComponent",
                     "root": "a75e0e15-8fb5-4076-a16e-48bb7e6c590a"
                 }
             ]
@@ -143,23 +143,9 @@
             },
             "radius": 0.7071067690849304,
             "guid": "e6f5799c-f960-43d5-9090-1c2579e57f3a",
-            "willUpdate": true,
             "components": [
                 {
-                    "class": "nl.framegengine.core.components.RenderComponent",
-                    "meshPaths": [
-                        ""
-                    ],
-                    "meshMaterialSets": [
-                        {
-                            "class": "nl.framegengine.core.visual.MeshMaterialSet",
-                            "mesh": {
-                                "class": "nl.framegengine.core.visual.Mesh"
-                            },
-                            "root": "e6f5799c-f960-43d5-9090-1c2579e57f3a",
-                            "material": ""
-                        }
-                    ],
+                    "class": "nl.framegengine.core.components.visual.RenderComponent",
                     "root": "e6f5799c-f960-43d5-9090-1c2579e57f3a"
                 }
             ]
@@ -185,39 +171,20 @@
             },
             "localRotation": {
                 "x": 0.0,
-                "y": -0.18872706592082977,
+                "y": 0.9241191148757935,
                 "z": 0.0,
-                "w": 0.9820296168327332
+                "w": -0.3821044862270355
             },
             "radius": 0.7071067690849304,
             "guid": "120e15a1-a8ec-4d5f-a53c-16d7a02ab84a",
-            "willUpdate": true,
             "components": [
                 {
-                    "class": "nl.framegengine.customScripts.RotateOnAxis",
-                    "rotationSpeed": 100.0,
+                    "class": "nl.framegengine.core.components.visual.RenderComponent",
                     "root": "120e15a1-a8ec-4d5f-a53c-16d7a02ab84a"
                 },
                 {
                     "class": "nl.framegengine.customScripts.RotateOnAxis",
                     "rotationSpeed": 100.0,
-                    "root": "120e15a1-a8ec-4d5f-a53c-16d7a02ab84a"
-                },
-                {
-                    "class": "nl.framegengine.core.components.RenderComponent",
-                    "meshPaths": [
-                        ""
-                    ],
-                    "meshMaterialSets": [
-                        {
-                            "class": "nl.framegengine.core.visual.MeshMaterialSet",
-                            "mesh": {
-                                "class": "nl.framegengine.core.visual.Mesh"
-                            },
-                            "root": "120e15a1-a8ec-4d5f-a53c-16d7a02ab84a",
-                            "material": ""
-                        }
-                    ],
                     "root": "120e15a1-a8ec-4d5f-a53c-16d7a02ab84a"
                 }
             ]
@@ -243,13 +210,12 @@
             },
             "localRotation": {
                 "x": 0.0,
-                "y": 0.04745529219508171,
+                "y": -0.47125259041786194,
                 "z": 0.0,
-                "w": -0.9988734126091003
+                "w": -0.8819983005523682
             },
             "radius": 0.7071067690849304,
             "guid": "12e9d623-62ef-48fb-a351-69b31061b95b",
-            "willUpdate": true,
             "components": [
                 {
                     "class": "nl.framegengine.customScripts.RotateOnAxis",
@@ -257,25 +223,7 @@
                     "root": "12e9d623-62ef-48fb-a351-69b31061b95b"
                 },
                 {
-                    "class": "nl.framegengine.core.components.RenderComponent",
-                    "meshPaths": [
-                        ""
-                    ],
-                    "meshMaterialSets": [
-                        {
-                            "class": "nl.framegengine.core.visual.MeshMaterialSet",
-                            "mesh": {
-                                "class": "nl.framegengine.core.visual.Mesh"
-                            },
-                            "root": "12e9d623-62ef-48fb-a351-69b31061b95b",
-                            "material": ""
-                        }
-                    ],
-                    "root": "12e9d623-62ef-48fb-a351-69b31061b95b"
-                },
-                {
-                    "class": "nl.framegengine.customScripts.RotateOnAxis",
-                    "rotationSpeed": 25.0,
+                    "class": "nl.framegengine.core.components.visual.RenderComponent",
                     "root": "12e9d623-62ef-48fb-a351-69b31061b95b"
                 }
             ]
@@ -295,10 +243,9 @@
             },
             "radius": 1.7320507764816284,
             "guid": "9ef9c7eb-503c-4cc6-86f4-466ecf70d4fb",
-            "willUpdate": true,
             "components": [
                 {
-                    "class": "nl.framegengine.core.components.RenderComponent",
+                    "class": "nl.framegengine.core.components.visual.RenderComponent",
                     "meshPaths": [
                         "/models/cube.obj"
                     ],
@@ -332,10 +279,9 @@
             },
             "radius": 1.7320507764816284,
             "guid": "fc1e30c6-4539-464c-994d-1086f2e3a396",
-            "willUpdate": true,
             "components": [
                 {
-                    "class": "nl.framegengine.core.components.RenderComponent",
+                    "class": "nl.framegengine.core.components.visual.RenderComponent",
                     "meshPaths": [
                         "/models/cube.obj"
                     ],
@@ -369,10 +315,9 @@
             },
             "radius": 1.7320507764816284,
             "guid": "4bf912ec-1732-4936-ae8f-23343fc32506",
-            "willUpdate": true,
             "components": [
                 {
-                    "class": "nl.framegengine.core.components.RenderComponent",
+                    "class": "nl.framegengine.core.components.visual.RenderComponent",
                     "meshPaths": [
                         "/models/cube.obj"
                     ],
@@ -406,10 +351,9 @@
             },
             "radius": 1.7320507764816284,
             "guid": "62041408-b3aa-4484-a291-caf4966791d7",
-            "willUpdate": true,
             "components": [
                 {
-                    "class": "nl.framegengine.core.components.RenderComponent",
+                    "class": "nl.framegengine.core.components.visual.RenderComponent",
                     "meshPaths": [
                         "/models/cube.obj"
                     ],
@@ -443,7 +387,6 @@
             },
             "radius": 1.7320507764816284,
             "guid": "cf9b76f2-2ea4-42de-aeb5-fa0703ee4c82",
-            "willUpdate": true,
             "components": [
                 {
                     "class": "nl.framegengine.customScripts.MoveWithArrows",
@@ -451,7 +394,7 @@
                     "root": "cf9b76f2-2ea4-42de-aeb5-fa0703ee4c82"
                 },
                 {
-                    "class": "nl.framegengine.core.components.RenderComponent",
+                    "class": "nl.framegengine.core.components.visual.RenderComponent",
                     "meshPaths": [
                         "/models/cube.obj"
                     ],
