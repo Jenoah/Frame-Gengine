@@ -1,6 +1,5 @@
 package nl.framegengine.core.input;
 
-import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.engine.WindowManager;
 import nl.framegengine.editor.EngineSettings;
 import org.joml.Vector2d;
