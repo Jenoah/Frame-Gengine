@@ -5,6 +5,7 @@ import imgui.ImVec2;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import nl.framegengine.core.components.constraint.DirectConstraint;
+import nl.framegengine.core.components.constraint.MoveOnAxis;
 import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.engine.EngineManager;
@@ -22,6 +23,7 @@ import nl.framegengine.core.visual.MeshMaterialSet;
 import nl.framegengine.core.visual.Texture;
 import nl.framegengine.core.visual.TextureLoader;
 import nl.framegengine.editor.*;
+import nl.framegengine.editor.sceneComponents.GizmoMovement;
 import nl.framegengine.editor.sceneComponents.ScenePreviewCameraControls;
 import nl.framegengine.editor.sceneComponents.SelectSceneObjects;
 
@@ -112,12 +114,12 @@ public class GamePanel extends EditorPanel {
         if(EngineSettings.isInGame){
             EngineSettings.isInGame = false;
             SceneManager.setCurrentScene((Scene)new Scene().deserializeFromJson(editingSceneJson));
-            addGizmo();
-            addEditorCamera();
+            GameObject gizmo = addGizmo();
+            addEditorCamera(gizmo);
         }
     }
 
-    private void addEditorCamera(){
+    private void addEditorCamera(GameObject gizmo){
         if(SceneManager.currentScene == null) return;
         Camera editorCamera = new Camera();
         editorCamera.setPosition(SceneManager.currentScene.getEditorCameraPosition());
@@ -125,14 +127,14 @@ public class GamePanel extends EditorPanel {
         editorCamera.setName(EngineSettings.editorCameraName);
         editorCamera.addComponent(new ScenePreviewCameraControls());
         editorCamera.addComponent(new SelectSceneObjects(editorCamera,
-                EditorWindow.getEditorLayout().getEditorPanelOfType(HierarchyPanel.class)));
+                EditorWindow.getEditorLayout().getEditorPanelOfType(HierarchyPanel.class), gizmo));
         editorCamera.setShowInEditor(false);
         SceneManager.currentScene.addEntity(editorCamera);
         RenderManager.setRenderCamera(editorCamera);
     }
 
-    private void addGizmo(){
-        if(SceneManager.currentScene == null) return;
+    private GameObject addGizmo(){
+        if(SceneManager.currentScene == null) return null;
         GameObject gizmo = new GameObject(EngineSettings.editorGizmoName);
         gizmo.translateLocal(Constants.VECTOR3_UP);
         List<MeshMaterialSet> gizmoMms = OBJLoader.loadOBJModel("/models/gizmo.obj", new Texture(TextureLoader.loadTexture("textures/color_palette.png", true))).stream().toList();
@@ -156,12 +158,18 @@ public class GamePanel extends EditorPanel {
 
         gizmo.setScale(0.5f);
         DirectConstraint directConstraint = new DirectConstraint();
+        MoveOnAxis moveGizmoOnAxis = new MoveOnAxis();
+        GizmoMovement gizmoMovement = new GizmoMovement(moveGizmoOnAxis, xAxis, yAxis, zAxis);
         directConstraint.runInEditor = true;
         if(hierarchyPanel != null) hierarchyPanel.setGizmo(gizmo);
 
         gizmo.addComponent(directConstraint);
+        gizmo.addComponent(moveGizmoOnAxis);
+        gizmo.addComponent(gizmoMovement);
         gizmo.setShowInEditor(false);
         SceneManager.currentScene.addEntity(gizmo);
+
+        return gizmo;
     }
 
     private void removeEditorCamera(){
@@ -177,10 +185,8 @@ public class GamePanel extends EditorPanel {
         if(SceneManager.currentScene == null) return;
         GameObject gizmo = SceneManager.currentScene.getGameObjectByName(EngineSettings.editorGizmoName);
         if(gizmo == null) return;
-        Debug.log("Removing gizmo from " + SceneManager.currentScene.getLevelName());
         if(hierarchyPanel != null) hierarchyPanel.setGizmo(null);
-        SceneManager.currentScene.removeGameObject(gizmo);
-        //TODO: Fix gizmo not unloading mesh properly
+        gizmo.remove();
     }
 
     public void setAspectRatio(float aspectRatio){
@@ -189,8 +195,10 @@ public class GamePanel extends EditorPanel {
     }
 
     public void recalculateResolution(){
-        recalculateResolution(false);
-        MouseInput.setMouseOffset(posX, posY);
+        recalculateResolution(true);
+        int offsetX = Math.abs(aspectWidth - sizeX) / 2;
+        int offsetY = Math.abs(aspectHeight - sizeY) / 2;
+        MouseInput.setMouseOffset(posX + offsetX, posY + offsetY);
     }
 
     public void recalculateResolution(boolean refreshGameInstance) {
@@ -221,8 +229,8 @@ public class GamePanel extends EditorPanel {
             editorGameLauncher = new EditorGameLauncher();
             editorGameLauncher.run(sizeX, sizeY - 20);
             if(!EngineSettings.isInGame){
-                addGizmo();
-                addEditorCamera();
+                GameObject gizmo = addGizmo();
+                addEditorCamera(gizmo);
             }
         }
 

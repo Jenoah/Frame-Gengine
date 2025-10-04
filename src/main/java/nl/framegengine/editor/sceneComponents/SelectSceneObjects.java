@@ -10,18 +10,22 @@ import nl.framegengine.core.rendering.RenderManager;
 import nl.framegengine.editor.panels.HierarchyPanel;
 
 public class SelectSceneObjects extends Component {
-    Camera camera;
-    HierarchyPanel hierarchyPanel = null;
+    private Camera camera;
+    private final HierarchyPanel hierarchyPanel;
+    private final GameObject gizmoObject;
 
-    public SelectSceneObjects(HierarchyPanel hierarchyPanel){
+
+    public SelectSceneObjects(HierarchyPanel hierarchyPanel, GameObject gizmoObject){
         runInEditor = true;
         this.hierarchyPanel = hierarchyPanel;
+        this.gizmoObject = gizmoObject;
     }
 
-    public SelectSceneObjects(Camera camera, HierarchyPanel hierarchyPanel){
+    public SelectSceneObjects(Camera camera, HierarchyPanel hierarchyPanel, GameObject gizmoObject){
         runInEditor = true;
         this.camera = camera;
         this.hierarchyPanel = hierarchyPanel;
+        this.gizmoObject = gizmoObject;
     }
 
     @Override
@@ -37,11 +41,13 @@ public class SelectSceneObjects extends Component {
         if(!(MouseInput.isLbClicked() && SceneManager.currentScene != null)) return;
 
         for (GameObject go : SceneManager.currentScene.getGameObjects()) {
-            if(go.isShowInEditor() && Raycast.intersectFromMouse(camera, go)){
+            if((gizmoObject.isSelfOrChild(go) || go.isShowInEditor()) && Raycast.intersectFromMouse(camera, go)){
                 hierarchyPanel.setCurrentlySelectedGameObject(go);
+                gizmoObject.setEnabled(true);
                 return;
             }
         }
         hierarchyPanel.setCurrentlySelectedGameObject(null);
+        gizmoObject.setEnabled(false);
     }
 }

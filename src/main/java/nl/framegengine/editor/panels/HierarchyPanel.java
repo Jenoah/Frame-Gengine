@@ -9,14 +9,14 @@ import imgui.flag.ImGuiStyleVar;
 import nl.framegengine.core.components.constraint.DirectConstraint;
 import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.entity.Camera;
+import nl.framegengine.core.entity.GameObject;
+import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.lighting.DirectionalLight;
 import nl.framegengine.core.lighting.PointLight;
 import nl.framegengine.core.lighting.SpotLight;
 import nl.framegengine.core.modelLoaders.OBJLoader.OBJLoader;
 import nl.framegengine.core.visual.MeshMaterialSet;
 import nl.framegengine.editor.EditorPanel;
-import nl.framegengine.core.entity.GameObject;
-import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.editor.ImGuiHelper;
 import org.joml.Vector3f;
 
@@ -46,19 +46,14 @@ public class HierarchyPanel extends EditorPanel {
         buttonSize = new ImVec2(sizeX, 20);
     }
 
-    public void setCurrentlySelectedGameObject(GameObject currentlySelectedGameObject){
+    public void setCurrentlySelectedGameObject(GameObject currentlySelectedGameObject) {
         this.currentlySelectedGameObject = currentlySelectedGameObject;
         infoPanel.setCurrentlySelectedObject(currentlySelectedGameObject);
-        if(gizmo != null){
-            if(currentlySelectedGameObject != null && currentlySelectedGameObject != gizmo) {
-                gizmo.setEnabled(true);
-                gizmo.setPosition(currentlySelectedGameObject.getPosition());
-                gizmo.getComponent(DirectConstraint.class).setConnectedObject(currentlySelectedGameObject);
-            }else{
-                gizmo.setEnabled(false);
-            }
+        if (gizmo != null && currentlySelectedGameObject != null
+                && !gizmo.isSelfOrChild(currentlySelectedGameObject)) {
+            gizmo.setPosition(currentlySelectedGameObject.getPosition());
+            gizmo.getComponent(DirectConstraint.class).setConnectedObject(currentlySelectedGameObject);
         }
-
     }
 
     @Override
