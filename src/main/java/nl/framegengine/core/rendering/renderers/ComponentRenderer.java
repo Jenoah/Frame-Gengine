@@ -14,9 +14,18 @@ import java.util.*;
 
 public class ComponentRenderer implements IRenderer {
 
-    Set<RenderComponent> renderObjects = new HashSet<>();
-    HashMap<Shader, List<MeshMaterialSet>> sortedRenderObjects = new HashMap<>();
-    HashMap<Shader, List<MeshMaterialSet>> sortedTransparentRenderObjects = new HashMap<>();
+    private final Set<RenderComponent> renderObjects = new LinkedHashSet<>();
+
+    // Using more efficient collection for shader-based batching
+    private final Map<Shader, List<MeshMaterialSet>> sortedRenderObjects = new HashMap<>();
+    private final Map<Shader, List<MeshMaterialSet>> sortedTransparentRenderObjects = new HashMap<>();
+
+    // Caching sorted collections for better iteration performance
+    private final List<Map.Entry<Shader, List<MeshMaterialSet>>> cachedSortedEntries = new ArrayList<>();
+    private final List<Map.Entry<Shader, List<MeshMaterialSet>>> cachedTransparentEntries = new ArrayList<>();
+
+    // Flag to track if cache needs updating
+    private boolean needsRebatch = true;
 
     private Matrix4f shadowSpaceMatrix = new Matrix4f();
     private int shadowMapID = 0;
@@ -27,24 +36,79 @@ public class ComponentRenderer implements IRenderer {
     private boolean wireframeMode = false;
     private boolean isRenderingOnTop = false;
 
+    // Track state changes to minimize redundant OpenGL calls
+    private Shader lastBoundShader = null;
+    private boolean lastWireframeState = false;
+    private boolean lastCullState = true;
+    private boolean lastBlendState = false;
+
     @Override
     public void init() throws Exception {  }
 
     @Override
     public void render() {
-        if (sortedRenderObjects.isEmpty() && sortedTransparentRenderObjects.isEmpty() || mainCamera == null) return;
+        if ((sortedRenderObjects.isEmpty() && sortedTransparentRenderObjects.isEmpty()) || mainCamera == null) return;
 
-        sortedRenderObjects.forEach(this::renderPass);
-        sortedTransparentRenderObjects.forEach(this::renderPass);
+        // Update cached collections if needed
+        if (needsRebatch) { updateRenderBatches();}
 
-        GL11.glDepthRange(0, 1.0);
+        renderPass(cachedSortedEntries);
+        renderPass(cachedTransparentEntries);
+        //TODO: Render transparent objects back-to-front based on camera position
+
+        // Reset state when done
+        if (isRenderingOnTop) {
+            GL11.glDepthRange(0, 1.0);
+            isRenderingOnTop = false;
+        }
+
+        if (lastBoundShader != null) {
+            lastBoundShader.unbind();
+            lastBoundShader = null;
+        }
     }
 
-    private void renderPass(Shader shader, List<MeshMaterialSet> meshMaterialSetList){
-        if (recordMetrics) metrics.recordShaderBind();
-        shader.bind();
-        shader.render(mainCamera);
+    private void updateRenderBatches() {
+        cachedSortedEntries.clear();
+        cachedTransparentEntries.clear();
 
+        cachedSortedEntries.addAll(sortedRenderObjects.entrySet());
+        cachedTransparentEntries.addAll(sortedTransparentRenderObjects.entrySet());
+
+        needsRebatch = false;
+    }
+
+    private void renderPass(List<Map.Entry<Shader, List<MeshMaterialSet>>> batchEntries) {
+        for (Map.Entry<Shader, List<MeshMaterialSet>> entry : batchEntries) {
+            Shader shader = entry.getKey();
+            List<MeshMaterialSet> meshMaterialSetList = entry.getValue();
+
+            if (meshMaterialSetList.isEmpty()) continue;
+
+            // Bind shader only when different from last one
+            if (shader != lastBoundShader) {
+                if (lastBoundShader != null) {
+                    lastBoundShader.unbind();
+                }
+
+                if (recordMetrics) metrics.recordShaderBind();
+                shader.bind();
+                shader.render(mainCamera);
+                lastBoundShader = shader;
+            }
+
+            // Set wireframe state only when needed
+            if (wireframeMode != lastWireframeState) {
+                GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, wireframeMode ? GL11.GL_LINE : GL11.GL_FILL);
+                lastWireframeState = wireframeMode;
+            }
+
+            // Process each mesh material set
+            renderMeshBatch(shader, meshMaterialSetList);
+        }
+    }
+
+    private void renderMeshBatch(Shader shader, List<MeshMaterialSet> meshMaterialSetList) {
         if(wireframeMode) GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
 
         meshMaterialSetList.forEach(meshMaterialSet -> {
@@ -76,13 +140,14 @@ public class ComponentRenderer implements IRenderer {
         });
 
         if(wireframeMode) GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
-        shader.unbind();
     }
 
     public void bind(MeshMaterialSet meshMaterialSet) {
+        // Bind VAO only when necessary
         GL30.glBindVertexArray(meshMaterialSet.getMesh().getVaoID());
         if (recordMetrics) metrics.recordVaoBind();
 
+        // Enable vertex attributes efficiently
         GL20.glEnableVertexAttribArray(0);
         GL20.glEnableVertexAttribArray(1);
         GL20.glEnableVertexAttribArray(2);
@@ -96,13 +161,28 @@ public class ComponentRenderer implements IRenderer {
             GL20.glEnableVertexAttribArray(7);
             GL20.glEnableVertexAttribArray(8);
         }
-        if (meshMaterialSet.material.isDoubleSided()) {
-            GL11.glEnable(GL11.GL_BLEND);
-            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-            GL11.glDisable(GL11.GL_CULL_FACE);
-        } else {
-            GL11.glDisable(GL11.GL_BLEND);
-            GL11.glEnable(GL11.GL_CULL_FACE);
+
+        // Only change blend/cull state when needed
+        boolean needsBlend = meshMaterialSet.material.isDoubleSided();
+        if (needsBlend != lastBlendState) {
+            if (needsBlend) {
+                GL11.glEnable(GL11.GL_BLEND);
+                GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+            } else {
+                GL11.glDisable(GL11.GL_BLEND);
+            }
+            lastBlendState = needsBlend;
+        }
+
+        // Only change cull state when needed
+        boolean needsCull = !meshMaterialSet.material.isDoubleSided();
+        if (needsCull != lastCullState) {
+            if (needsCull) {
+                GL11.glEnable(GL11.GL_CULL_FACE);
+            } else {
+                GL11.glDisable(GL11.GL_CULL_FACE);
+            }
+            lastCullState = needsCull;
         }
     }
 
@@ -117,7 +197,8 @@ public class ComponentRenderer implements IRenderer {
 
     @Override
     public void unbind() {
-        for (int i = 0; i < 8; i++) {
+        // Only disable what we actually enabled
+        for (int i = 0; i <= 8; i++) {
             GL20.glDisableVertexAttribArray(i);
         }
         GL30.glBindVertexArray(0);
