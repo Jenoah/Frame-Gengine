@@ -3,6 +3,7 @@ package nl.framegengine.core.physics;
 import nl.framegengine.core.engine.WindowManager;
 import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.entity.GameObject;
+import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.input.MouseInput;
 import nl.framegengine.core.utils.AABB;
 import nl.framegengine.core.utils.ObjectPool;
@@ -10,6 +11,8 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+
+import java.util.List;
 
 public class Raycast {
     public static class Ray {
@@ -125,6 +128,21 @@ public class Raycast {
 
         // If tMin < tMax, the ray intersects the slab
         return tMin <= tMax;
+    }
+
+    public static GameObject getGameObject(Ray ray) {
+        return getGameObject(ray, null);
+    }
+
+        public static GameObject getGameObject(Ray ray, List<GameObject> excludedObjects){
+        if(SceneManager.currentScene == null) return null;
+
+        for (GameObject gameObject : SceneManager.currentScene.getSortedGameObjects()) {
+            if((excludedObjects != null && excludedObjects.contains(gameObject)) || !gameObject.isShowInEditor()) continue;
+            if(intersectFromMouse(ray, gameObject.getAabb())) return gameObject;
+        }
+
+        return null;
     }
 
     public static Vector3f closestPointOnLine(Vector3f currentPosition, Vector3f constraintAxis, Ray ray) {

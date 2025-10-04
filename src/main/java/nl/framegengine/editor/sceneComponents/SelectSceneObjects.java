@@ -40,12 +40,12 @@ public class SelectSceneObjects extends Component {
 
         if(!(MouseInput.isLbClicked() && SceneManager.currentScene != null)) return;
 
-        for (GameObject go : SceneManager.currentScene.getGameObjects()) {
-            if((gizmoObject.isSelfOrChild(go) || go.isShowInEditor()) && Raycast.intersectFromMouse(camera, go)){
-                hierarchyPanel.setCurrentlySelectedGameObject(go);
-                gizmoObject.setEnabled(true);
-                return;
-            }
+        Raycast.Ray mouseRay = Raycast.fromCameraByMouse(camera);
+        GameObject clickedGameObject = Raycast.getGameObject(mouseRay);
+        if(clickedGameObject != null){
+            hierarchyPanel.setCurrentlySelectedGameObject(clickedGameObject);
+            gizmoObject.setEnabled(true);
+            return;
         }
         hierarchyPanel.setCurrentlySelectedGameObject(null);
         gizmoObject.setEnabled(false);

@@ -180,12 +180,9 @@ public class Camera extends GameObject {
     }
 
     public void sortGameObjectsInScene(){
-        if(SceneManager.currentScene == null) return;
+        if(SceneManager.currentScene == null) return; //TODO: Implement hadUpdated() to check to increase performance
         Vector3f currentCameraPosition = ObjectPool.VECTOR3F_POOL.obtain().set(getPosition());
-        SceneManager.currentScene.getSortedGameObjects().forEach(go -> {
-            go.setRenderCameraSquaredDistance(currentCameraPosition);
-        });
-
+        SceneManager.currentScene.getSortedGameObjects().forEach(go -> go.setRenderCameraSquaredDistance(getPosition()));
         ObjectPool.VECTOR3F_POOL.free(currentCameraPosition);
     }
 

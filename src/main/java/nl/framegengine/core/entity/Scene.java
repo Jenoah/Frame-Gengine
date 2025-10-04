@@ -74,12 +74,14 @@ public class Scene implements IJsonSerializable {
     public void update() {
         updateRootGameObjectTransforms();
 
+        RenderManager.getRenderCamera().sortGameObjectsInScene();
+        syncSortedGameObjects();
+
         for (GameObject gameObject : gameObjects.stream().toList()) {
             gameObject.update();
         }
 
-        mainCamera.sortGameObjectsInScene();
-        syncSortedGameObjects();
+
     }
 
     public void updateRootGameObjectTransforms(){
@@ -138,8 +140,6 @@ public class Scene implements IJsonSerializable {
     }
 
     public void syncSortedGameObjects(){
-        sortedGameObjects.clear();
-        sortedGameObjects.addAll(gameObjects);
         sortedGameObjects.sort(Comparator.comparingDouble(GameObject::getRenderCameraSquaredDistance));
     }
 
