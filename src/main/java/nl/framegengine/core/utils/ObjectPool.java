@@ -1,6 +1,9 @@
 package nl.framegengine.core.utils;
 
 import org.joml.*;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -28,4 +31,10 @@ public class ObjectPool<T> {
     public static final ObjectPool<Vector2f> VECTOR2F_POOL = new ObjectPool<>(Vector2f::new);
     public static final ObjectPool<Quaternionf> QUATERNIONF_OBJECT_POOL = new ObjectPool<>(Quaternionf::new);
     public static final ObjectPool<Matrix4f> MATRIX4F_OBJECT_POOL = new ObjectPool<>(Matrix4f::new);
+
+    // JSON builder pools for efficient serialization
+    public static final ObjectPool<JsonObjectBuilder> JSON_OBJECT_BUILDER_POOL =
+            new ObjectPool<>(Json::createObjectBuilder);
+    public static final ObjectPool<JsonArrayBuilder> JSON_ARRAY_BUILDER_POOL =
+            new ObjectPool<>(Json::createArrayBuilder);
 }

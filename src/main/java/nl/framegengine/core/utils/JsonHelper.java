@@ -135,7 +135,7 @@ public class JsonHelper {
     }
 
     public static JsonObject objectToJson(Object object, String[] valuesToIgnore){
-        JsonObjectBuilder objectInfo = Json.createObjectBuilder();
+        JsonObjectBuilder objectInfo = ObjectPool.JSON_OBJECT_BUILDER_POOL.obtain();
         objectInfo.add("class", object.getClass().getName());
         if(object instanceof GameObject go && go.getParent() != null){
             objectInfo.add("parentGuid", go.getParent().getGuid());
@@ -159,13 +159,13 @@ public class JsonHelper {
             try {
                 field.setAccessible(true);
                 Object currentValue = field.get(object);
+                // Skip null values
+                if (currentValue == null) continue;
+
+                // Check against default value only if necessary
                 Object defaultValue = field.get(defaultInstance);
+                if (currentValue.equals(defaultValue)) continue;
 
-                // Skip if current is null or equal to default
-                if (currentValue == null && defaultValue == null) continue;
-                if (currentValue != null && currentValue.equals(defaultValue)) continue;
-
-                assert currentValue != null;
                 addPropertyToJsonObject(objectInfo, field.getName(), currentValue);
 
             } catch (IllegalAccessException e) {
@@ -173,7 +173,9 @@ public class JsonHelper {
             }
         }
 
-        return objectInfo.build();
+        JsonObject result = objectInfo.build();
+        ObjectPool.JSON_OBJECT_BUILDER_POOL.free(objectInfo);
+        return result;
     }
 
     public static void addPropertyToJsonObject(JsonObjectBuilder jsonObjectBuilder, String name, Object object) {
@@ -288,60 +290,72 @@ public class JsonHelper {
     }
 
     public static JsonArray vector3ToJsonArray(Vector3f vector){
-        JsonArrayBuilder jsonArray = Json.createArrayBuilder();
+        JsonArrayBuilder jsonArray = ObjectPool.JSON_ARRAY_BUILDER_POOL.obtain();
         jsonArray.add(vector.x);
         jsonArray.add(vector.y);
         jsonArray.add(vector.z);
 
-        return jsonArray.build();
+        JsonArray result = jsonArray.build();
+        ObjectPool.JSON_ARRAY_BUILDER_POOL.free(jsonArray);
+        return result;
     }
 
     public static JsonArray vector4ToJsonArray(Vector4f vector){
-        JsonArrayBuilder jsonArray = Json.createArrayBuilder();
+        JsonArrayBuilder jsonArray = ObjectPool.JSON_ARRAY_BUILDER_POOL.obtain();
         jsonArray.add(vector.x);
         jsonArray.add(vector.y);
         jsonArray.add(vector.z);
         jsonArray.add(vector.w);
 
-        return jsonArray.build();
+        JsonArray result = jsonArray.build();
+        ObjectPool.JSON_ARRAY_BUILDER_POOL.free(jsonArray);
+        return result;
     }
 
     public static JsonArray quaternionToJsonArray(Quaternionf quaternion){
-        JsonArrayBuilder jsonArray = Json.createArrayBuilder();
+        JsonArrayBuilder jsonArray = ObjectPool.JSON_ARRAY_BUILDER_POOL.obtain();
         jsonArray.add(quaternion.x);
         jsonArray.add(quaternion.y);
         jsonArray.add(quaternion.z);
         jsonArray.add(quaternion.w);
 
-        return jsonArray.build();
+        JsonArray result = jsonArray.build();
+        ObjectPool.JSON_ARRAY_BUILDER_POOL.free(jsonArray);
+        return result;
     }
 
     public static JsonObject vector3ToJsonObject(Vector3f vector){
-        JsonObjectBuilder jsonObject = Json.createObjectBuilder();
+        JsonObjectBuilder jsonObject = ObjectPool.JSON_OBJECT_BUILDER_POOL.obtain();
         jsonObject.add("x", vector.x);
         jsonObject.add("y", vector.y);
         jsonObject.add("z", vector.z);
 
-        return jsonObject.build();
+        JsonObject result = jsonObject.build();
+        ObjectPool.JSON_OBJECT_BUILDER_POOL.free(jsonObject);
+        return result;
     }
 
     public static JsonObject vector4ToJsonObject(Vector4f vector){
-        JsonObjectBuilder jsonObject = Json.createObjectBuilder();
+        JsonObjectBuilder jsonObject = ObjectPool.JSON_OBJECT_BUILDER_POOL.obtain();
         jsonObject.add("x", vector.x);
         jsonObject.add("y", vector.y);
         jsonObject.add("z", vector.z);
         jsonObject.add("w", vector.w);
 
-        return jsonObject.build();
+        JsonObject result = jsonObject.build();
+        ObjectPool.JSON_OBJECT_BUILDER_POOL.free(jsonObject);
+        return result;
     }
 
     public static JsonObject quaternionToJsonObject(Quaternionf quaternion){
-        JsonObjectBuilder jsonObject = Json.createObjectBuilder();
+        JsonObjectBuilder jsonObject = ObjectPool.JSON_OBJECT_BUILDER_POOL.obtain();
         jsonObject.add("x", quaternion.x);
         jsonObject.add("y", quaternion.y);
         jsonObject.add("z", quaternion.z);
         jsonObject.add("w", quaternion.w);
 
-        return jsonObject.build();
+        JsonObject result = jsonObject.build();
+        ObjectPool.JSON_OBJECT_BUILDER_POOL.free(jsonObject);
+        return result;
     }
 }
