@@ -66,13 +66,17 @@ public class Raycast {
         return ray;
     }
 
-    public static boolean intersectFromMouse(Camera camera, GameObject gameObject) {
-        return intersectFromMouse(camera, gameObject.getAabb());
+    public static boolean intersectFromMouse(Ray ray, GameObject gameObject) {
+        return intersectFromMouse(ray, gameObject.getAabb());
     }
 
-    public static boolean intersectFromMouse(Camera camera, AABB aabb) {
-        if(camera == null || aabb == null) return false;
+    public static boolean intersectFromMouse(Camera camera, GameObject gameObject) {
         Ray ray = fromCameraByMouse(camera);
+        return intersectFromMouse(ray, gameObject.getAabb());
+    }
+
+    public static boolean intersectFromMouse(Ray ray, AABB aabb) {
+        if(aabb == null) return false;
 
         //Set aabb of object that is being tested to the testingAABB to allow for converting to world position
         AABB worldAABB = new AABB(aabb);
@@ -121,5 +125,42 @@ public class Raycast {
 
         // If tMin < tMax, the ray intersects the slab
         return tMin <= tMax;
+    }
+
+    public static Vector3f closestPointOnLine(Vector3f currentPosition, Vector3f constraintAxis, Ray ray) {
+        return closestPointOnLine(currentPosition, constraintAxis, ray.origin, ray.direction);
+    }
+
+    public static Vector3f closestPointOnLine(Vector3f currentPosition, Vector3f constraintAxis, Vector3f targetPosition, Vector3f targetDirection) {
+        // Normalize directions (important for correct projection calculations)
+        constraintAxis = ObjectPool.VECTOR3F_POOL.obtain().set(constraintAxis).normalize();
+        targetDirection = ObjectPool.VECTOR3F_POOL.obtain().set(targetDirection).normalize();
+
+        Vector3f linePointRayOriginDifference = ObjectPool.VECTOR3F_POOL.obtain().set(currentPosition).sub(targetPosition);
+
+        float a = constraintAxis.dot(constraintAxis); // should be 1 since normalized
+        float b = constraintAxis.dot(targetDirection);
+        float c = targetDirection.dot(targetDirection); // should be 1 since normalized
+        float d = constraintAxis.dot(linePointRayOriginDifference);
+        float e = targetDirection.dot(linePointRayOriginDifference);
+
+        float denominator = a * c - b * b;
+
+        float moveDelta;
+        if (denominator < 1e-6f) {
+            // Lines are almost parallel
+            moveDelta = 0.0f; // Use linePoint as closest point on line
+        } else {
+            moveDelta = (b * e - c * d) / denominator;
+        }
+
+        // The closest point on the line is linePoint + sc * lineDirNorm
+        Vector3f closestPoint = new Vector3f(constraintAxis).mul(moveDelta).add(currentPosition);
+
+        ObjectPool.VECTOR3F_POOL.free(targetDirection);
+        ObjectPool.VECTOR3F_POOL.free(constraintAxis);
+        ObjectPool.VECTOR3F_POOL.free(linePointRayOriginDifference);
+
+        return closestPoint;
     }
 }
