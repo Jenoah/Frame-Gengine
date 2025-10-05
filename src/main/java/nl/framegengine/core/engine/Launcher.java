@@ -15,6 +15,7 @@ public class Launcher {
         game = new GameInstance();
         EngineManager engine = new EngineManager();
         EngineSettings.loadEngineConfig();
+        EngineSettings.isInGame = true;
 
         try{
             engine.start(game, true);
