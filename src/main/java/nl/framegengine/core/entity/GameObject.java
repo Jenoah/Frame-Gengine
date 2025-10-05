@@ -33,6 +33,7 @@ public class GameObject implements IJsonSerializable {
     private boolean showInEditor = true;
     protected boolean drawDebugWireframe = false;
     private float renderCameraSquaredDistance = 0;
+    protected boolean canBeSaved = true;
 
     private static final Dictionary<String, GameObject> instancedObjects = new Hashtable<>();
 
@@ -539,6 +540,17 @@ public class GameObject implements IJsonSerializable {
 
     public void setRenderCameraSquaredDistance(float distanceSquared) {
         this.renderCameraSquaredDistance = distanceSquared;
+    }
+
+    public final boolean canBeSaved() {
+        if(parent != null){
+            return canBeSaved && parent.canBeSaved();
+        }
+        return canBeSaved;
+    }
+
+    public void canBeSaved(boolean canBeSaved) {
+        this.canBeSaved = canBeSaved;
     }
 
     @Override

@@ -100,7 +100,7 @@ public class GamePanel extends EditorPanel {
 
         ImGuiHelper.showProgressBar("Loading Game");
         removeEditorCamera();
-        removeGizmo();
+        //removeGizmo();
         editingSceneJson = SceneManager.currentScene.serializeToJson().toString();
         Scene gameplayScene = new Scene();
         gameplayScene.deserializeFromJson(editingSceneJson);
@@ -129,6 +129,7 @@ public class GamePanel extends EditorPanel {
         editorCamera.addComponent(new SelectSceneObjects(editorCamera,
                 EditorWindow.getEditorLayout().getEditorPanelOfType(HierarchyPanel.class), gizmo));
         editorCamera.setShowInEditor(false);
+        editorCamera.canBeSaved(false);
         SceneManager.currentScene.addEntity(editorCamera);
         RenderManager.setRenderCamera(editorCamera);
     }
@@ -167,6 +168,7 @@ public class GamePanel extends EditorPanel {
         gizmo.addComponent(moveGizmoOnAxis);
         gizmo.addComponent(gizmoMovement);
         gizmo.setShowInEditor(false);
+        gizmo.canBeSaved(false);
         SceneManager.currentScene.addEntity(gizmo);
 
         return gizmo;

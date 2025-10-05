@@ -187,7 +187,7 @@ public class JsonHelper {
             case Integer integer -> jsonObjectBuilder.add(name, integer);
             case Boolean bool -> jsonObjectBuilder.add(name, bool);
             case String str -> jsonObjectBuilder.add(name, str);
-            case GameObject go -> jsonObjectBuilder.add(name, go.getGuid());
+            case GameObject go -> { if(go.canBeSaved()) jsonObjectBuilder.add(name, go.getGuid()); }
             case IJsonSerializable jsonSerializable -> jsonObjectBuilder.add(name, jsonSerializable.serializeToJson());
             case List<?> list -> {
                 if(!list.isEmpty()){

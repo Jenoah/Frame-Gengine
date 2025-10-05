@@ -405,7 +405,7 @@ public class Scene implements IJsonSerializable {
 
         JsonArrayBuilder sceneGoInfo = Json.createArrayBuilder();
         this.getGameObjects().forEach(go -> {
-            sceneGoInfo.add(go.serializeToJson());
+            if(go.canBeSaved()) sceneGoInfo.add(go.serializeToJson());
         });
         sceneInfo.add("gameObjects", sceneGoInfo);
 
