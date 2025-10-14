@@ -1,8 +1,8 @@
 package nl.framegengine.core.engine;
 
-import nl.framegengine.core.input.MouseInput;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.SceneManager;
+import nl.framegengine.core.input.MouseInput;
 import nl.framegengine.editor.ImGuiHelper;
 import org.joml.Math;
 import org.lwjgl.glfw.GLFW;
@@ -20,9 +20,11 @@ public class EngineManager {
     private float fpsUpdateTimer = 0.0f;
     private static int fps = 0;
     private static float deltaTime = 0.0f;
+    private static float frameTime = 0.0f;
     private static int currentFrameCount = 0;
 
     private static final float MIN_DELTA_TIME = 1.0f / 10000f; // 1ms minimum, adjust as needed
+    private static double frameTimeStartTime = 0.0;
 
     private void init(final ILogic IGameLogic, boolean standaloneWindow) throws Exception {
         errorCallback = GLFWErrorCallback.createPrint(System.err);
@@ -73,11 +75,13 @@ public class EngineManager {
             stop();
             return;
         }
+        frameTimeStartTime = getCurrentTime();
         updateDeltaTime();
         handleInput();
         updateGame();
         renderFrame();
         calculateFps();
+        calculateFrameTime();
     }
 
     public void stop() {
@@ -103,6 +107,10 @@ public class EngineManager {
             currentFrameCount = 0;
             fpsUpdateTimer += 1f;
         }
+    }
+
+    private void calculateFrameTime(){
+        frameTime = (float)(getCurrentTime() - frameTimeStartTime);
     }
 
     private void renderFrame() {
@@ -139,6 +147,14 @@ public class EngineManager {
 
     public static float getDeltaTimeMS() {
         return (deltaTime * 100000f) / 100f;
+    }
+
+    public static float getFrameTime(){
+        return frameTime;
+    }
+
+    public static float getFrameTimeMS() {
+        return (frameTime * 1000f);
     }
 
     public static ILogic getGameLogic(){

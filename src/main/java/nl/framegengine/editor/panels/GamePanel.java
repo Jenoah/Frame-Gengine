@@ -27,6 +27,7 @@ import nl.framegengine.editor.sceneComponents.GizmoMovement;
 import nl.framegengine.editor.sceneComponents.ScenePreviewCameraControls;
 import nl.framegengine.editor.sceneComponents.SelectSceneObjects;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class GamePanel extends EditorPanel {
@@ -38,6 +39,14 @@ public class GamePanel extends EditorPanel {
     private boolean showStats = false;
     private String editingSceneJson = null;
     private HierarchyPanel hierarchyPanel = null;
+
+    private final int[] fpsValues = new int[10];
+    private int fpsIteration = 0;
+    private int fpsAverage = 0;
+
+    private final float[] frameTimeValues = new float[10];
+    private int frameTimeIteration = 0;
+    private float frameTimeAverage = 0f;
 
     public GamePanel(int posX, int posY, int sizeX, int sizeY) {
         super(posX, posY, sizeX, sizeY);
@@ -76,14 +85,38 @@ public class GamePanel extends EditorPanel {
             inFocus = ImGui.isItemHovered();
         }
 
+        updateFpsAverage();
+        updateFrameTimeAverage();
         ImGui.setCursorPos(8, 24);
-        ImGui.text("FPS: " + EngineManager.getFps());
+        ImGui.text("FPS: " + fpsAverage);
+        ImGui.setCursorPos(8, 36);
+        ImGui.text("Frametime: " + frameTimeAverage);
 
         if(showStats){
             ImGui.setCursorPos(8, 48);
             ImGui.pushTextWrapPos(sizeX / 2f);
             ImGui.text("Stats: " + RenderManager.getMetrics());
             ImGui.popTextWrapPos();
+        }
+    }
+
+    private void updateFpsAverage(){
+        fpsValues[fpsIteration] = EngineManager.getFps();
+        fpsIteration++;
+        if(fpsIteration >= fpsValues.length){
+            fpsIteration = 0;
+            fpsAverage = Arrays.stream(fpsValues).sum() / fpsValues.length;
+        }
+    }
+
+    private void updateFrameTimeAverage(){
+        frameTimeValues[frameTimeIteration] = EngineManager.getFrameTimeMS();
+        frameTimeIteration++;
+        if(frameTimeIteration >= frameTimeValues.length){
+            frameTimeIteration = 0;
+            frameTimeAverage = 0f;
+            for (float frameTimeValue : frameTimeValues) frameTimeAverage += frameTimeValue;
+            frameTimeAverage /= frameTimeValues.length;
         }
     }
 
