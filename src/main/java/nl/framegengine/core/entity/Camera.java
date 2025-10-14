@@ -1,9 +1,17 @@
 package nl.framegengine.core.entity;
 
+import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.engine.WindowManager;
+import nl.framegengine.core.modelLoaders.PrimitiveLoader;
 import nl.framegengine.core.rendering.utils.FrustumPlane;
+import nl.framegengine.core.shaders.ShaderManager;
 import nl.framegengine.core.utils.AABB;
 import nl.framegengine.core.utils.ObjectPool;
+import nl.framegengine.core.visual.Material;
+import nl.framegengine.core.visual.Mesh;
+import nl.framegengine.core.visual.MeshMaterialSet;
+import nl.framegengine.core.visual.Texture;
+import nl.framegengine.editor.EngineSettings;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -19,6 +27,7 @@ public class Camera extends GameObject {
 
     private final AABB worldFrustumTestingAABB = new AABB();
     private final Vector3f frustumPlaneNormal = new Vector3f();
+    private boolean isShowingProxy = false;
 
     public Camera() {
         super();
@@ -198,5 +207,22 @@ public class Camera extends GameObject {
     public void cleanUp() {
         super.cleanUp();
         mainCamera = null;
+    }
+
+    public Camera showProxy(){
+        if(!isShowingProxy && !EngineSettings.isInGame){
+            Material proxyMaterial = new Material(ShaderManager.billboardShader);
+            proxyMaterial.castShadow(false).receiveShadows(false);
+            String texturePath = "textures/cameraGizmo.png";
+            proxyMaterial.setAlbedoTexture(new Texture(texturePath, false, false)).setDoubleSided(true).setTransparent(true);
+            Mesh proxyMesh = PrimitiveLoader.getQuadMesh();
+
+            MeshMaterialSet mms = new MeshMaterialSet(proxyMesh, proxyMaterial);
+            addComponent(new RenderComponent(mms));
+
+            isShowingProxy = true;
+        }
+
+        return this;
     }
 }
