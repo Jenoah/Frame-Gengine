@@ -22,7 +22,7 @@ public class Light extends GameObject {
     protected float constant;
     protected float linear;
     protected float exponent;
-    private boolean isShowingProxy = false;
+    protected boolean isShowingProxy = false;
 
     public Light(){}
 

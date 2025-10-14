@@ -1,6 +1,14 @@
 package nl.framegengine.core.lighting;
 
+import nl.framegengine.core.components.visual.RenderComponent;
+import nl.framegengine.core.modelLoaders.PrimitiveLoader;
+import nl.framegengine.core.shaders.ShaderManager;
+import nl.framegengine.core.visual.Material;
+import nl.framegengine.core.visual.Mesh;
+import nl.framegengine.core.visual.MeshMaterialSet;
+import nl.framegengine.core.visual.Texture;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 public class PointLight extends Light {
 
@@ -14,7 +22,22 @@ public class PointLight extends Light {
         super(color, position, intensity, distance);
     }
 
+    @Override
+    public Light showProxy(){
+        if(!isShowingProxy){
+            Material proxyMaterial = new Material(ShaderManager.billboardShader);
+            proxyMaterial.castShadow(false).receiveShadows(false);
+            String texturePath = "textures/pointLight.png";
+            proxyMaterial.setAlbedoTexture(new Texture(texturePath, false, false)).setDoubleSided(true).setTransparent(true);
+            proxyMaterial.setDiffuseColor(new Vector4f(color.x, color.y, color.z, 1f));
+            Mesh proxyMesh = PrimitiveLoader.getQuadMesh();
 
+            MeshMaterialSet mms = new MeshMaterialSet(proxyMesh, proxyMaterial);
+            addComponent(new RenderComponent(mms));
 
+            isShowingProxy = true;
+        }
 
+        return this;
+    }
 }
