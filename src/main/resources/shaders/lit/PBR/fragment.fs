@@ -5,7 +5,7 @@ const float PI = 3.14159265359;
 
 in vec2 UV;
 in vec3 fragPosition;
-in float fogFactor;
+//in float fogFactor;
 in mat3 TBN;
 in vec4 shadowCoords;
 
@@ -65,6 +65,9 @@ uniform float specularPower = 0;
 uniform float shadowBias;
 uniform int shadowPCFCount = 2;
 uniform int shadowMapSize;
+
+uniform float fogDensity;
+uniform float fogGradient;
 
 uniform int pointLightCount = 0;
 uniform int spotLightCount = 0;
@@ -272,6 +275,7 @@ void main()
     }
 
     // Fog
+    float fogFactor = clamp(exp(-pow((length(viewPosition.xyz - fragPosition.xyz)*fogDensity), fogGradient)), 0, 1);
     result = mix(fogColor, result, fogFactor);
 
     color = vec4(result, albedoSample.a);

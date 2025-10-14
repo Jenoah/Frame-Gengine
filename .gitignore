@@ -27,3 +27,4 @@ replay_pid*
 /.idea/
 imgui.ini
 /imgui.ini
+/qodana.yaml
