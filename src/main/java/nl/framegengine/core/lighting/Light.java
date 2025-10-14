@@ -10,6 +10,7 @@ import nl.framegengine.core.visual.Material;
 import nl.framegengine.core.visual.Mesh;
 import nl.framegengine.core.visual.MeshMaterialSet;
 import nl.framegengine.core.visual.Texture;
+import nl.framegengine.editor.EngineSettings;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -93,7 +94,7 @@ public class Light extends GameObject {
     }
 
     public Light showProxy(){
-        if(!isShowingProxy){
+        if(!isShowingProxy && !EngineSettings.isInGame){
             boolean isPointLight = this instanceof PointLight;
             Material proxyMaterial = new Material(isPointLight ? ShaderManager.billboardShader : ShaderManager.unlitShader);
             proxyMaterial.castShadow(false).receiveShadows(false);

@@ -7,6 +7,7 @@ import nl.framegengine.core.visual.Material;
 import nl.framegengine.core.visual.Mesh;
 import nl.framegengine.core.visual.MeshMaterialSet;
 import nl.framegengine.core.visual.Texture;
+import nl.framegengine.editor.EngineSettings;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -27,7 +28,7 @@ public class DirectionalLight extends Light{
 
     @Override
     public Light showProxy(){
-        if(!isShowingProxy){
+        if(!isShowingProxy && !EngineSettings.isInGame){
             Material proxyMaterial = new Material(ShaderManager.unlitShader);
             proxyMaterial.castShadow(false).receiveShadows(false);
             String texturePath = "textures/directionalLight.png";
