@@ -61,11 +61,11 @@ public class EngineSettings {
         if (JsonHelper.hasJsonKey(projectInfo, "currentProjectName")) currentProjectName = projectInfo.getString("currentProjectName");
         if(currentProjectName.isBlank()) currentProjectName = FileHelper.getDirectoryName(currentProjectDirectory);
 
-        if(!isCompiled) {
+        if (!isCompiled && !ManifestHelper.isRunning()) {
             saveEngineConfig();
             ManifestHelper.updateManifest();
             ManifestHelper.registerManifestListener();
-        }else{
+        } else {
             ManifestHelper.loadManifest();
         }
 

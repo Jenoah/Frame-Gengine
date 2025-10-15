@@ -30,6 +30,7 @@ public class ManifestHelper {
     private static final List<HashMap<String, String>> others = new ArrayList<>();
 
     private static final List<EventCallback> eventCallbacks = new ArrayList<>();
+    private static FileAlterationMonitor monitor = null;
 
     public static void registerManifestListener() {
         try {
@@ -59,14 +60,10 @@ public class ManifestHelper {
 
                         // Exclude by full path
                         String absolutePath = file.getCanonicalPath();
-                        if (excludedPaths.contains(absolutePath)) {
-                            return false;
-                        }
+                        if (excludedPaths.contains(absolutePath)) return false;
 
                         // Exclude .app files
-                        if (file.getName().endsWith(".app")) {
-                            return false;
-                        }
+                        if (file.getName().endsWith(".app")) return false;
 
                         return true;
                     } catch (IOException e) {
@@ -89,7 +86,7 @@ public class ManifestHelper {
                     .setFileFilter(customFilter)
                     .get();
 
-            FileAlterationMonitor monitor = new FileAlterationMonitor(1000);
+            monitor = new FileAlterationMonitor(1000);
             FileAlterationListener listener = new ManifestHelper.ManifestFileListener();
 
             observer.addListener(listener);
@@ -376,4 +373,6 @@ public class ManifestHelper {
         @Override
         public void onStop(FileAlterationObserver observer) {}
     }
+
+    public static boolean isRunning(){ return monitor != null; }
 }
