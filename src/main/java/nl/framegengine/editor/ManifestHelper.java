@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -147,10 +149,8 @@ public class ManifestHelper {
         }
     }
 
-    public static void updateManifest(){
+    public static void updateManifest() {
         loadManifest();
-
-        Debug.log("Updating manifest");
 
         JsonObjectBuilder jsonManifestContent = Json.createObjectBuilder();
         JsonArrayBuilder textureArray = Json.createArrayBuilder();
@@ -165,21 +165,25 @@ public class ManifestHelper {
         List<HashMap<String, String>> manifestMaterials = new ArrayList<>();
         List<HashMap<String, String>> manifestOthers = new ArrayList<>();
 
-        File[] filesInProject = FileHelper.findFilesInDirectory(new File(EngineSettings.currentProjectDirectory), new String[]{".app", ".tmp", ".bak"}).toArray(File[]::new);
+        Path[] filesInProject = FileHelper.findFilesInDirectory(Paths.get(EngineSettings.currentProjectDirectory), new HashSet<>(Arrays.asList(".app", ".tmp", ".bak"))).toArray(Path[]::new);
 
-        for (File file : filesInProject) {
-            manifestFileType fileType = fileToManifestFileType(file);
-            if(!file.exists() || file.isHidden()) continue;
-            String fileGUID = FileHelper.getChecksum(file.getAbsolutePath());
-            String relativePath = Paths.get(EngineSettings.currentProjectDirectory).relativize(file.toPath()).toString();
+        try {
+            for (Path filePath : filesInProject) {
+                manifestFileType fileType = pathToManifestFileType(filePath);
+                if (!Files.exists(filePath) || Files.isHidden(filePath)) continue;
+                String fileGUID = FileHelper.getChecksum(filePath.toAbsolutePath().toString());
+                String relativePath = Paths.get(EngineSettings.currentProjectDirectory).relativize(filePath).toString();
 
-            switch (fileType){
-                case TEXTURE -> addManifestRecord(textures, fileGUID, relativePath, manifestTextures, file);
-                case SCRIPT -> addManifestRecord(scripts, fileGUID, relativePath, manifestScripts, file);
-                case LEVEL -> addManifestRecord(levels, fileGUID, relativePath, manifestLevels, file);
-                case MATERIAL -> addManifestRecord(materials, fileGUID, relativePath, manifestMaterials, file);
-                case null, default -> addManifestRecord(others, fileGUID, relativePath, manifestOthers, file);
+                switch (fileType) {
+                    case TEXTURE -> addManifestRecord(textures, fileGUID, relativePath, manifestTextures, filePath);
+                    case SCRIPT -> addManifestRecord(scripts, fileGUID, relativePath, manifestScripts, filePath);
+                    case LEVEL -> addManifestRecord(levels, fileGUID, relativePath, manifestLevels, filePath);
+                    case MATERIAL -> addManifestRecord(materials, fileGUID, relativePath, manifestMaterials, filePath);
+                    case null, default -> addManifestRecord(others, fileGUID, relativePath, manifestOthers, filePath);
+                }
             }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
         manifestTextures.forEach(manifestValue -> addToManifestArray(manifestValue, textureArray));
@@ -243,12 +247,12 @@ public class ManifestHelper {
         jsonArrayBuilder.add(fileInfo.build());
     }
 
-    private static void addManifestRecord(List<HashMap<String, String>> iterationList, String fileGuid, String relativePath, List<HashMap<String, String>> manifestArray, File file){
+    private static void addManifestRecord(List<HashMap<String, String>> iterationList, String fileGuid, String relativePath, List<HashMap<String, String>> manifestArray, Path filePath){
         boolean hasAddedFile = false;
         for (HashMap<String, String> value : iterationList) {
             if(value.get("guid").equals(fileGuid) && !value.get("path").equals(relativePath)){
                 value.replace("path", relativePath);
-                value.replace("filename", FileHelper.getFileName(file.getPath()));
+                value.replace("filename", FileHelper.getFileName(filePath.toString()));
                 manifestArray.add(value);
                 hasAddedFile = true;
                 break;
@@ -262,7 +266,7 @@ public class ManifestHelper {
             HashMap<String, String> fileHashmap = new HashMap<>();
             fileHashmap.put("guid", fileGuid);
             fileHashmap.put("path", relativePath);
-            fileHashmap.put("filename", FileHelper.getFileName(file.getPath()));
+            fileHashmap.put("filename", FileHelper.getFileName(filePath.toString()));
             manifestArray.add(fileHashmap);
         }
     }
@@ -276,7 +280,11 @@ public class ManifestHelper {
     }
 
     private static manifestFileType fileToManifestFileType(File file){
-        String extension = FileHelper.getExtension(file.getPath());
+        return pathToManifestFileType(file.toPath());
+    }
+
+    private static manifestFileType pathToManifestFileType(Path path){
+        String extension = FileHelper.getExtension(path.toString());
 
         return switch (extension) {
             case "jpg", "jpeg", "JPG", "JPEG", "png", "PNG", "gif", "tiff" -> manifestFileType.TEXTURE;

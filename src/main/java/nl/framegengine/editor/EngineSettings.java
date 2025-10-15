@@ -63,8 +63,11 @@ public class EngineSettings {
 
         if (!isCompiled && !ManifestHelper.isRunning()) {
             saveEngineConfig();
-            ManifestHelper.updateManifest();
+            Debug.log("Engine config saved");
+                ManifestHelper.updateManifest();
+            Debug.log("Manifest updated");
             ManifestHelper.registerManifestListener();
+            Debug.log("Manifest registered");
         } else {
             ManifestHelper.loadManifest();
         }
@@ -179,7 +182,7 @@ public class EngineSettings {
                             System.out.println(line); // Print to Java console or your logger
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        Debug.logError(e.getMessage());
                     }
                 });
                 outputReader.start();
@@ -193,10 +196,8 @@ public class EngineSettings {
                 } else {
                     Debug.logError("Build failed. Exit code: " + exitCode);
                 }
-            } catch (
-                    Exception e) {
+            } catch (Exception e) {
                 Debug.logError("Error while building: " + e.getMessage());
-                e.printStackTrace();
             }
         }).thenRun(() -> {
             ImGuiHelper.hideProgressBar();

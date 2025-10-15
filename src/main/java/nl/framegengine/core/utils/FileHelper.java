@@ -13,11 +13,12 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.lwjgl.util.nfd.NativeFileDialog.*;
 
@@ -76,41 +77,48 @@ public class FileHelper {
         return javaFiles;
     }
 
-    public static List<File> findFilesInDirectory(File rootDir) {
-        return findFilesInDirectory(rootDir, false, new String[]{});
+    public static List<Path> findFilesInDirectory(File rootDir) {
+        return findFilesInDirectory(rootDir.toPath(), false, new HashSet<>());
     }
 
-    public static List<File> findFilesInDirectory(File rootDir, boolean showHiddenFiles) {
-        return findFilesInDirectory(rootDir, showHiddenFiles, new String[]{});
+    public static List<Path> findFilesInDirectory(Path rootDir) {
+        return findFilesInDirectory(rootDir, false, new HashSet<>());
     }
 
-    public static List<File> findFilesInDirectory(File rootDir, String[] foldersToExclude) {
+    public static List<Path> findFilesInDirectory(Path rootDir, boolean showHiddenFiles) {
+        return findFilesInDirectory(rootDir, showHiddenFiles, new HashSet<>());
+    }
+
+    public static List<Path> findFilesInDirectory(File rootDir, boolean showHiddenFiles) {
+        return findFilesInDirectory(rootDir.toPath(), showHiddenFiles, new HashSet<>());
+    }
+
+    public static List<Path> findFilesInDirectory(File rootDir, Set<String> foldersToExclude) {
+        return findFilesInDirectory(rootDir.toPath(), false, foldersToExclude);
+    }
+
+    public static List<Path> findFilesInDirectory(Path rootDir, Set<String> foldersToExclude) {
         return findFilesInDirectory(rootDir, false, foldersToExclude);
     }
 
-    public static List<File> findFilesInDirectory(File rootDir, boolean showHiddenFiles, String[] extensionsToExclude) {
-        List<File> files = new ArrayList<>();
-        File[] directoryFiles = rootDir.listFiles();
-        if (directoryFiles != null) {
-            for (File file : directoryFiles) {
-                if (file.isDirectory()) {
-                    boolean visible = showHiddenFiles || (!showHiddenFiles && !file.isHidden());
-                    boolean isExcludedFolder = Arrays.stream(extensionsToExclude)
-                            .anyMatch(ext -> file.getName().toLowerCase().endsWith(ext.toLowerCase()));
-
-                    if (visible && !isExcludedFolder) {
-                        files.addAll(findFilesInDirectory(file, showHiddenFiles, extensionsToExclude));
-                    }
-                } else {
-                    boolean isExcludedFile = Arrays.stream(extensionsToExclude)
-                            .anyMatch(ext -> file.getName().toLowerCase().endsWith(ext.toLowerCase()));
-                    if (!isExcludedFile) {
-                        files.add(file);
-                    }
-                }
-            }
+    public static List<Path> findFilesInDirectory(Path rootDir, boolean showHiddenFiles, Set<String> extensionsToExclude) {
+        try (Stream<Path> stream = Files.walk(rootDir)) {
+            return stream
+                    .filter(Files::isRegularFile)
+                    .filter(path -> {
+                        try {
+                            return showHiddenFiles || !Files.isHidden(path);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
+                    .filter(path -> extensionsToExclude.stream()
+                            .noneMatch(ext -> path.getFileName().toString().toLowerCase().endsWith(ext.toLowerCase())))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            Debug.logError(e.getMessage());
+            return Collections.emptyList();
         }
-        return files;
     }
 
     public static File[] listDirectoryAndFiles(String dir) {
@@ -390,14 +398,16 @@ public class FileHelper {
         }
     }
 
-    public static String getChecksum(String filepath){
+    public static String getChecksum(String filepath) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
-            try (DigestInputStream dis = new DigestInputStream(new FileInputStream(filepath), md)) {
-                while (dis.read() != -1) ; // read entire file
-                md = dis.getMessageDigest();
+            try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(filepath))) {
+                byte[] buffer = new byte[8192]; // 8 KB buffer
+                int bytesRead;
+                while ((bytesRead = bis.read(buffer)) != -1) {
+                    md.update(buffer, 0, bytesRead);
+                }
             }
-            // bytes to hex
             StringBuilder result = new StringBuilder();
             for (byte b : md.digest()) {
                 result.append(String.format("%02x", b));
