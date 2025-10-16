@@ -61,4 +61,8 @@ public class GizmoMovement extends Component {
     private void move(Raycast.Ray mouseRay){
         moveOnAxis.move(mouseRay.origin, mouseRay.direction);
     }
+
+    public final boolean isCurrentlyMoving(){
+        return isDragging;
+    }
 }

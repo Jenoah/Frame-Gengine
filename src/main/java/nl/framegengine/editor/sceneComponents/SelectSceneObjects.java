@@ -13,12 +13,14 @@ public class SelectSceneObjects extends Component {
     private Camera camera;
     private final HierarchyPanel hierarchyPanel;
     private final GameObject gizmoObject;
+    private GizmoMovement gizmoMovement = null;
 
 
     public SelectSceneObjects(HierarchyPanel hierarchyPanel, GameObject gizmoObject){
         runInEditor = true;
         this.hierarchyPanel = hierarchyPanel;
         this.gizmoObject = gizmoObject;
+        if(gizmoObject != null) this.gizmoMovement = gizmoObject.getComponent(GizmoMovement.class);
     }
 
     public SelectSceneObjects(Camera camera, HierarchyPanel hierarchyPanel, GameObject gizmoObject){
@@ -26,6 +28,7 @@ public class SelectSceneObjects extends Component {
         this.camera = camera;
         this.hierarchyPanel = hierarchyPanel;
         this.gizmoObject = gizmoObject;
+        if(gizmoObject != null) this.gizmoMovement = gizmoObject.getComponent(GizmoMovement.class);
     }
 
     @Override
@@ -38,9 +41,10 @@ public class SelectSceneObjects extends Component {
         super.update();
         if(camera == null) RenderManager.getRenderCamera();
 
-        if(!(MouseInput.isLbClicked() && SceneManager.currentScene != null)) return;
+        if(!(MouseInput.isLbClicked() && SceneManager.currentScene != null) || gizmoMovement.isCurrentlyMoving()) return;
 
         Raycast.Ray mouseRay = Raycast.fromCameraByMouse(camera);
+
         GameObject clickedGameObject = Raycast.getGameObject(mouseRay);
         if(clickedGameObject != null){
             hierarchyPanel.setCurrentlySelectedGameObject(clickedGameObject);
