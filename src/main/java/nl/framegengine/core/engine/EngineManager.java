@@ -47,7 +47,7 @@ public class EngineManager {
     public void start(final ILogic gameLogic, boolean standaloneWindow) throws Exception {
         if (running) return;
         init(gameLogic, standaloneWindow);
-        Debug.log("Starting Engine...");
+        Debug.logConsole("Starting Engine...");
         run();
     }
 
@@ -64,7 +64,7 @@ public class EngineManager {
             }
         } finally {
             if(running){
-                Debug.log("Stopping engine");
+                Debug.logConsole("Stopping engine");
                 cleanup();
             }
         }
@@ -86,7 +86,7 @@ public class EngineManager {
 
     public void stop() {
         if(window.isStandalone() && !running) return;
-        Debug.log("Stopping engine...");
+        Debug.logConsole("Stopping engine...");
         running = false;
         cleanup();
     }
@@ -119,7 +119,7 @@ public class EngineManager {
     }
 
     private void cleanup() {
-        Debug.log("Cleaning up...");
+        Debug.logConsole("Cleaning up...");
         MouseInput.cleanUp();
         window.cleanUp();
         gameLogic.cleanUp();

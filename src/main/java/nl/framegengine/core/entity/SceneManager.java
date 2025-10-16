@@ -26,14 +26,14 @@ public class SceneManager {
     public static ComponentLoader componentLoader;
 
     public static Scene loadScene(String filePath) throws Exception {
-        Debug.log("Loading in scene at " + filePath);
+        Debug.logConsole("Loading in scene at " + filePath);
         if(componentLoader == null){
-            Debug.log("Loading in components");
+            Debug.logConsole("Loading in components");
             URL inputResourceUrl = new File(EngineSettings.currentProjectDirectory).toURI().toURL();
             URL compiledResourceUrl = new File(EngineSettings.currentProjectDirectory + File.separator + "/.compiled").toURI().toURL();
 
             componentLoader = new ComponentLoader(inputResourceUrl.toURI().getPath(), compiledResourceUrl.toURI().getPath());
-            Debug.log("Components loaded");
+            Debug.logConsole("Components loaded");
         }
 
         Scene scene = new Scene();
@@ -52,7 +52,7 @@ public class SceneManager {
     }
 
     private static void initScene(Scene scene){
-        Debug.log("Loading in scene game objects");
+        Debug.logConsole("Loading in scene game objects");
         scene.getGameObjects().forEach(go -> {
             if(go instanceof Light light) tryAddLight(light, scene);
             if(go instanceof Camera camera) camera.showProxy();
@@ -63,7 +63,7 @@ public class SceneManager {
         });
         scene.sortedGameObjects.addAll(scene.gameObjects);
         scene.syncSortedGameObjects();
-        Debug.log("Loading scene settings");
+        Debug.logConsole("Loading scene settings");
         scene.updateLights();
         scene.setFogColor(scene.getFogColor());
         scene.setFogDensity(scene.getFogDensity());
@@ -110,17 +110,17 @@ public class SceneManager {
 
     public static void setCurrentScene(Scene scene, boolean cleanup){
         if(currentScene != null && cleanup){
-            Debug.log("Cleaning scene " + currentScene.getLevelName());
+            Debug.logConsole("Cleaning scene " + currentScene.getLevelName());
             currentScene.cleanUp();
         }
         currentScene = scene;
-        Debug.log("Loading in " + currentScene.getLevelName());
+        Debug.logConsole("Loading in " + currentScene.getLevelName());
         initScene(scene);
-        Debug.log("Starting scene");
+        Debug.logConsole("Starting scene");
         currentScene.postStart();
-        Debug.log("Updating scene lights");
+        Debug.logConsole("Updating scene lights");
         currentScene.updateLights();
-        Debug.log("Scene loaded in");
+        Debug.logConsole("Scene loaded in");
     }
 
     public static void cleanUp(){

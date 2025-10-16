@@ -1,5 +1,6 @@
 package nl.framegengine.core.rendering.utils;
 
+import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.engine.WindowManager;
 import org.lwjgl.opengl.*;
 
@@ -85,7 +86,7 @@ public class FrameBuffer {
      */
     public int getColourTexture() {
         if (GL30.glCheckFramebufferStatus(GL30.GL_FRAMEBUFFER) != GL30.GL_FRAMEBUFFER_COMPLETE) {
-            throw new RuntimeException("Framebuffer is not complete!");
+            Debug.logConsoleError("Framebuffer is not complete!");
         }
 
         return colourTexture;

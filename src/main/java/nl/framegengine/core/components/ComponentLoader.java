@@ -51,7 +51,7 @@ public class ComponentLoader extends ClassLoader {
         }
 
         if (javaFiles.isEmpty()) {
-            Debug.logError("No .java files found.");
+            Debug.logConsoleError("No .java files found.");
             return;
         }
 
@@ -70,7 +70,7 @@ public class ComponentLoader extends ClassLoader {
             if (!success) {
                 throw new RuntimeException("Compilation of user scripts failed.");
             } else {
-                Debug.log("Compilation successful.");
+                Debug.logConsole("Compilation successful.");
             }
         }
     }

@@ -38,7 +38,7 @@ public class RenderManager {
     private static boolean showWireframe = false;
 
     public static void init() throws Exception {
-        Debug.log("Initializing RenderManager");
+        Debug.logConsole("Initializing RenderManager");
         if(window == null && WindowManager.getInstance() != null) window = WindowManager.getInstance();
         if(metrics == null) metrics = new RenderMetrics();
 

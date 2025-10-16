@@ -18,21 +18,21 @@ public class GameInstance implements ILogic{
 
     @Override
     public void init() throws Exception {
-        Debug.log("Initiating game...");
+        Debug.logConsole("Initiating game...");
         RenderManager.init();
         EngineSettings.loadSettings();
 
-        Debug.log("Loading window settings");
+        Debug.logConsole("Loading window settings");
         window.setClearColor(0, 0, 0, 0);
         window.setWindowIcon("textures/FrameGengine_icon.png");
 
         Scene level = SceneManager.loadScene(EngineSettings.currentProjectDirectory + File.separator + EngineSettings.currentLevelPath);
 
-        Debug.log("Adding scene to SceneManager");
+        Debug.logConsole("Adding scene to SceneManager");
         SceneManager.addScene(level);
         SceneManager.setCurrentScene(0);
 
-        Debug.log("Updating shaders with scene settings");
+        Debug.logConsole("Updating shaders with scene settings");
         ShaderManager.updateGenericUniforms();
     }
 

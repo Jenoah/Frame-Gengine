@@ -57,7 +57,7 @@ public class WindowManager {
     }
 
     public void init(){
-        Debug.log("Initializing window");
+        Debug.logConsole("Initializing window");
         boolean maximized = (width == 0 || height == 0);
 
         if(standalone) {

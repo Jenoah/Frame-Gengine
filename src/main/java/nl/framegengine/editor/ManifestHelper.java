@@ -143,9 +143,9 @@ public class ManifestHelper {
                     }
                 }
             });
-            Debug.log("Loaded in " + (textures.size() + scripts.size() + levels.size() + materials.size() + others.size()) + " data entries");
+            Debug.logConsole("Loaded in " + (textures.size() + scripts.size() + levels.size() + materials.size() + others.size()) + " data entries");
         }else{
-            Debug.logError("Manifest file empty");
+            Debug.logConsoleError("Manifest file empty");
         }
     }
 
@@ -209,7 +209,7 @@ public class ManifestHelper {
         FileHelper.writeToFile(stringWriter.toString(), getManifestPath());
 
         if(!eventCallbacks.isEmpty()) eventCallbacks.forEach(EventCallback::onTrigger);
-        Debug.log("Manifest updated");
+        Debug.logConsole("Manifest updated");
     }
 
     public static boolean setEventCallback(EventCallback callback){

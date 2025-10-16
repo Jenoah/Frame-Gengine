@@ -45,11 +45,11 @@ public class EngineSettings {
 
     public static void loadSettings() {
         if (!isCompiled && (currentProjectDirectory.isEmpty() || !new File(currentProjectDirectory).exists())) return;
-        Debug.log("Loading in engine settings");
+        Debug.logConsole("Loading in engine settings");
         String saveFileContent = FileHelper.readFile(currentProjectDirectory + settingsFileName);
 
         if(saveFileContent == null) {
-            Debug.logError("No settings file has been found. Creating...");
+            Debug.logConsole("No settings file has been found. Creating...");
             saveSettings();
             return;
         }
@@ -63,16 +63,16 @@ public class EngineSettings {
 
         if (!isCompiled && !ManifestHelper.isRunning()) {
             saveEngineConfig();
-            Debug.log("Engine config saved");
+            Debug.logConsole("Engine config saved");
                 ManifestHelper.updateManifest();
-            Debug.log("Manifest updated");
+            Debug.logConsole("Manifest updated");
             ManifestHelper.registerManifestListener();
-            Debug.log("Manifest registered");
+            Debug.logConsole("Manifest registered");
         } else {
             ManifestHelper.loadManifest();
         }
 
-        Debug.log("Project settings successfully loaded in");
+        Debug.logConsole("Project settings successfully loaded in");
     }
 
     public static void createNewProject(){
@@ -134,7 +134,7 @@ public class EngineSettings {
 
         String saveFileContent = FileHelper.readFile(settingsFile.getAbsolutePath());
         if(saveFileContent == null) {
-            Debug.logError("No editor config found. Creating...");
+            Debug.logConsole("No editor config found. Creating...");
             saveEngineConfig();
             return;
         }

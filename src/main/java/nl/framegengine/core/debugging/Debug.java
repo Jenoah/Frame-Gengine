@@ -24,6 +24,20 @@ public class Debug {
         System.out.println(debugMessage);
     }
 
+    public static void logConsole(String message){
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+
+        // Find the caller's class and line number (index 2 is the caller of Log())
+        StackTraceElement caller = stackTrace[2];
+
+        // Extract the class name and line number
+        String className = caller.getClassName();
+        int lineNumber = caller.getLineNumber();
+
+        String debugMessage = "\u001B[35m" + "[ConsoleLog] " + "\u001B[90m" + className + ":" + lineNumber + " \u001B[0m" + message;
+        System.out.println(debugMessage);
+    }
+
     public static void logError(String message){
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 
@@ -35,6 +49,18 @@ public class Debug {
         String debugMessage = "\u001B[35m" + "[Log] " + "\u001B[90m" + className + ":" + lineNumber + " \u001B[31m" + message;
 
         logHistory.add(new LogEntry(ConsoleColors.parseAnsi(debugMessage)));
+        System.out.println(debugMessage);
+    }
+
+    public static void logConsoleError(String message){
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+
+        StackTraceElement caller = stackTrace[2];
+
+        String className = caller.getClassName();
+        int lineNumber = caller.getLineNumber();
+
+        String debugMessage = "\u001B[35m" + "[ConsoleLog] " + "\u001B[90m" + className + ":" + lineNumber + " \u001B[31m" + message;
         System.out.println(debugMessage);
     }
 
