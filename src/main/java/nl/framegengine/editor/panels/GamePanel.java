@@ -48,6 +48,13 @@ public class GamePanel extends EditorPanel {
     private int frameTimeIteration = 0;
     private float frameTimeAverage = 0f;
 
+    private final ImVec2 availableWindowSpace = new ImVec2();
+
+    float offsetX = 36f;
+    float offsetY = 0f;
+
+    private boolean updateMouseOffset = false;
+
     public GamePanel(int posX, int posY, int sizeX, int sizeY) {
         super(posX, posY, sizeX, sizeY);
         recalculateResolution();
@@ -70,19 +77,21 @@ public class GamePanel extends EditorPanel {
 
         if(EditorWindow.getInstance().getGameFBOID() != -1){
 
-            ImVec2 avail = ImGui.getContentRegionAvail();
+            availableWindowSpace.set(ImGui.getContentRegionAvail());
 
-            float offsetX = (avail.x - aspectWidth) / 2.0f;
-            float offsetY = (avail.y - (aspectHeight - 20)) / 2.0f;
+            offsetX = ImGui.getCursorPosX() + Math.max(((availableWindowSpace.x - aspectWidth) / 2.0f), 0);
+            offsetY = ImGui.getCursorPosY() + Math.max(((availableWindowSpace.y - aspectHeight) / 2.0f), 0);
 
-            offsetX = Math.max(offsetX, 0);
-            offsetY = Math.max(offsetY, 0);
+            ImGui.setCursorPosX(offsetX);
+            ImGui.setCursorPosY(offsetY);
 
-            ImGui.setCursorPosX(ImGui.getCursorPosX() + offsetX);
-            ImGui.setCursorPosY(ImGui.getCursorPosY() + offsetY);
-
-            ImGui.image(EditorWindow.getInstance().getGameFBOID(), aspectWidth, aspectHeight - 20, 0, 1, 1, 0);
+            ImGui.image(EditorWindow.getInstance().getGameFBOID(), aspectWidth, aspectHeight, 0, 1, 1, 0);
             inFocus = ImGui.isItemHovered();
+        }
+
+        if(updateMouseOffset){
+            MouseInput.setMouseOffset((int) (posX + offsetX), (int) (posY + offsetY));
+            updateMouseOffset = false;
         }
 
         updateFpsAverage();
@@ -231,27 +240,25 @@ public class GamePanel extends EditorPanel {
 
     public void recalculateResolution(){
         recalculateResolution(true);
-        int offsetX = Math.abs(aspectWidth - sizeX) / 2;
-        int offsetY = Math.abs(aspectHeight - sizeY) / 2;
-        MouseInput.setMouseOffset(posX + offsetX, posY + offsetY);
     }
 
     public void recalculateResolution(boolean refreshGameInstance) {
-        if (aspectRatio <= 0) {
+        int availableHeight = sizeY - 20;
+
+        float targetWidth = availableHeight * aspectRatio;
+        if (targetWidth <= sizeX) {
+            aspectWidth = Math.round(targetWidth);
+            aspectHeight = availableHeight;
+        } else {
             aspectWidth = sizeX;
-            aspectHeight = sizeY;
-        }else {
-            aspectWidth = Math.round(sizeY * aspectRatio);
-            aspectHeight = sizeY;
-            if (aspectWidth > sizeX) {
-                aspectWidth = sizeX;
-                aspectHeight = Math.round(sizeX / aspectRatio);
-            }
+            aspectHeight = Math.round((float)sizeX / aspectRatio);
         }
 
         if(refreshGameInstance && WindowManager.getInstance() != null){
             WindowManager.getInstance().setWindowSize(aspectWidth, aspectHeight);
         }
+
+        updateMouseOffset = true;
     }
 
     public void startEngine(){
