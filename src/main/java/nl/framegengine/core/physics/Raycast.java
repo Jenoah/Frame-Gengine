@@ -6,6 +6,7 @@ import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.input.MouseInput;
 import nl.framegengine.core.utils.AABB;
+import nl.framegengine.core.utils.Calculus;
 import nl.framegengine.core.utils.ObjectPool;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -22,6 +23,16 @@ public class Raycast {
         public Ray(Vector3f origin, Vector3f direction) {
             this.origin.set(origin);
             this.direction.set(direction);
+        }
+    }
+
+    public static class RayHit {
+        public final Vector3f locationWorldSpace = new Vector3f();
+        public GameObject gameObject = null;
+
+        public RayHit(Vector3f locationWorldSpace, GameObject hitObject) {
+            this.locationWorldSpace.set(locationWorldSpace);
+            this.gameObject = hitObject;
         }
     }
 
@@ -69,80 +80,79 @@ public class Raycast {
         return ray;
     }
 
-    public static boolean intersectFromMouse(Ray ray, GameObject gameObject) {
-        return intersectFromMouse(ray, gameObject.getAabb());
+    public static boolean intersectRay(Ray ray, GameObject gameObject) {
+        Float hitValue = intersectRay(ray, gameObject.getAabb());
+        return hitValue != null && hitValue > 0;
     }
 
     public static boolean intersectFromMouse(Camera camera, GameObject gameObject) {
         Ray ray = fromCameraByMouse(camera);
-        return intersectFromMouse(ray, gameObject.getAabb());
+        Float hitValue = intersectRay(ray, gameObject.getAabb());
+        return hitValue != null && hitValue > 0;
     }
 
-    public static boolean intersectFromMouse(Ray ray, AABB aabb) {
-        if(aabb == null) return false;
+    public static Float intersectRay(Ray ray, AABB aabb) {
+        if (aabb == null) return null;
 
-        //Set aabb of object that is being tested to the testingAABB to allow for converting to world position
         AABB worldAABB = new AABB(aabb);
         worldAABB.offset(aabb.getWorldOffset());
 
-        // Initialize tMin and tMax to track the intersection distances along the ray
         float tMin = Float.NEGATIVE_INFINITY;
         float tMax = Float.POSITIVE_INFINITY;
 
-        // Iterate through each axis (x, y, z)
         for (int i = 0; i < 3; i++) {
             float rayOrigin = ray.origin.get(i);
             float rayDirection = ray.direction.get(i);
 
-            // Get slab bounds for current axis
             float slabMin = worldAABB.min.get(i);
             float slabMax = worldAABB.max.get(i);
 
-            // Check if ray is parallel to the slab (rayDirection == 0)
             if (rayDirection == 0) {
                 if (rayOrigin < slabMin || rayOrigin > slabMax) {
-                    return false;  // No intersection if ray is outside of bounds
+                    return null;
                 }
             } else {
-                // Calculate intersection points (near and far)
                 float t1 = (slabMin - rayOrigin) / rayDirection;
                 float t2 = (slabMax - rayOrigin) / rayDirection;
-
-                // Ensure t1 is the smaller and t2 is the larger value
                 if (t1 > t2) {
                     float temp = t1;
                     t1 = t2;
                     t2 = temp;
                 }
-
-                // Update tMin and tMax to reflect the valid range of intersection
                 tMin = Math.max(tMin, t1);
                 tMax = Math.min(tMax, t2);
-
-                // Early exit if the ray misses the slab in any dimension
                 if (tMin > tMax) {
-                    return false;
+                    return null;
                 }
             }
         }
-
-        // If tMin < tMax, the ray intersects the slab
-        return tMin <= tMax;
+        if (tMin < 0) {
+            // Intersection behind the ray origin
+            return null;
+        }
+        return tMin;
     }
 
-    public static GameObject getGameObject(Ray ray) {
+    public static RayHit getGameObject(Ray ray) {
         return getGameObject(ray, null);
     }
 
-        public static GameObject getGameObject(Ray ray, List<GameObject> excludedObjects){
+    public static RayHit getGameObject(Ray ray, List<GameObject> excludedObjects){
         if(SceneManager.currentScene == null) return null;
+
+        GameObject closestObject = null;
+        float closestDistance = Float.POSITIVE_INFINITY;
 
         for (GameObject gameObject : SceneManager.currentScene.getSortedGameObjects()) {
             if((excludedObjects != null && excludedObjects.contains(gameObject)) || !gameObject.isShowInEditor()) continue;
-            if(intersectFromMouse(ray, gameObject.getAabb())) return gameObject;
+            Float t = intersectRay(ray, gameObject.getAabb());
+            if (t != null && t < closestDistance) {
+                closestDistance = t;
+                closestObject = gameObject;
+            }
         }
 
-        return null;
+        return new RayHit(Calculus.addVectors(ray.origin, Calculus.multiplyVector(ray.direction, closestDistance)), closestObject);
     }
 
     public static Vector3f closestPointOnLine(Vector3f currentPosition, Vector3f constraintAxis, Ray ray) {

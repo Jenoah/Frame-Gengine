@@ -45,7 +45,7 @@ public class SelectSceneObjects extends Component {
 
         Raycast.Ray mouseRay = Raycast.fromCameraByMouse(camera);
 
-        GameObject clickedGameObject = Raycast.getGameObject(mouseRay);
+        GameObject clickedGameObject = Raycast.getGameObject(mouseRay).gameObject;
         if(clickedGameObject != null){
             hierarchyPanel.setCurrentlySelectedGameObject(clickedGameObject);
             gizmoObject.setEnabled(true);

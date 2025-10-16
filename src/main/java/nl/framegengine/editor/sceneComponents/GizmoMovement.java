@@ -39,16 +39,16 @@ public class GizmoMovement extends Component {
         Raycast.Ray mouseRay = fromCameraByMouse(camera);
 
         if(MouseInput.isLbClicked()) {
-            if (Raycast.intersectFromMouse(mouseRay, xAxis)) {
+            if (Raycast.intersectRay(mouseRay, xAxis)) {
                 isDragging = true;
                 moveOnAxis.setConstraintAxis(Constants.VECTOR3_RIGHT);
                 moveOnAxis.setOffset(Calculus.subtractVectors(root.getPosition(), Raycast.closestPointOnLine(root.getPosition(), Constants.VECTOR3_RIGHT, mouseRay)));
-            } else if (Raycast.intersectFromMouse(mouseRay, yAxis)) {
+            } else if (Raycast.intersectRay(mouseRay, yAxis)) {
                 isDragging = true;
                 moveOnAxis.setConstraintAxis(Constants.VECTOR3_UP);
                 moveOnAxis.setOffset(Calculus.subtractVectors(root.getPosition(), Raycast.closestPointOnLine(root.getPosition(), Constants.VECTOR3_UP, mouseRay)));
 
-            } else if (Raycast.intersectFromMouse(mouseRay, zAxis)) {
+            } else if (Raycast.intersectRay(mouseRay, zAxis)) {
                 isDragging = true;
                 moveOnAxis.setConstraintAxis(Constants.VECTOR3_FORWARD);
                 moveOnAxis.setOffset(Calculus.subtractVectors(root.getPosition(), Raycast.closestPointOnLine(root.getPosition(), Constants.VECTOR3_FORWARD, mouseRay)));
