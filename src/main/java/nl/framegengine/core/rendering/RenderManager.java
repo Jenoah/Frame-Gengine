@@ -16,6 +16,7 @@ import nl.framegengine.core.rendering.shadow.ShadowRenderer;
 import nl.framegengine.core.rendering.utils.FrameBuffer;
 import nl.framegengine.core.skybox.SkyboxRenderer;
 import nl.framegengine.core.utils.Constants;
+import nl.framegengine.core.visual.Mesh;
 import nl.framegengine.editor.EditorWindow;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -151,16 +152,35 @@ public class RenderManager {
         debugRenderer.drawCube(position, rotation, Constants.VECTOR3_ONE);
     }
 
-    public static void debugLine(Vector3f startPoint, Vector3f endPoint){
-        debugRenderer.drawLine(startPoint, endPoint);
+    public static DebugRenderer.DebugMesh debugLine(Vector3f startPoint, Vector3f endPoint){
+        return debugRenderer.drawLine(startPoint, endPoint);
     }
+
+    public static DebugRenderer.DebugMesh debugLine(Vector3f startPoint, Vector3f endPoint, Vector3f color){
+        return debugRenderer.drawLine(startPoint, endPoint, color, false);
+    }
+
+    public static DebugRenderer.DebugMesh debugLine(Vector3f startPoint, Vector3f endPoint, Vector3f color, boolean persistent){
+        return debugRenderer.drawLine(startPoint, endPoint, color, persistent);
+    }
+
+    public static DebugRenderer.DebugMesh debugMesh(Vector3f worldPosition, Mesh mesh){
+        return debugRenderer.drawMesh(worldPosition, mesh);
+    }
+
+    public static DebugRenderer.DebugMesh debugMesh(Vector3f worldPosition, Mesh mesh, Vector3f color){
+        return debugRenderer.drawMesh(worldPosition, mesh, color);
+    }
+
+    public static DebugRenderer.DebugMesh debugMesh(Vector3f worldPosition, Mesh mesh, Vector3f color, boolean persistent){
+        return debugRenderer.drawMesh(worldPosition, mesh, color, persistent);
+    }
+
+
+
 
     public static void debugRay(Raycast.Ray ray, float length){
         debugRenderer.drawRay(ray, length);
-    }
-
-    public static void debugLine(Vector3f startPoint, Vector3f endPoint, Vector3f color){
-        debugRenderer.drawLine(startPoint, endPoint, color);
     }
 
     public static void debugRay(Raycast.Ray ray){
