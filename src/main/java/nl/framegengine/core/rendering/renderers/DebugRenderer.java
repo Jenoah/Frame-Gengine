@@ -15,14 +15,69 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 public class DebugRenderer implements IRenderer {
 
+    public class DebugMesh {
+        public Mesh mesh;
+        public Vector3f worldPosition;
+        public Quaternionf worldRotation = new Quaternionf().identity();
+        public Vector3f color;
+        public Vector3f worldScale = new Vector3f(1);
+        public boolean persistent;
+
+        public DebugMesh(Vector3f startPoint, Vector3f endPoint) {
+            this.mesh = new Mesh(new Vector3f[]{startPoint, endPoint});
+            this.color = Constants.COLOR_RED;
+            this.persistent = false;
+            this.worldPosition = startPoint;
+        }
+
+        public DebugMesh(Mesh mesh, Vector3f worldPosition) {
+            this.mesh = mesh;
+            this.color = Constants.COLOR_RED;
+            this.persistent = false;
+            this.worldPosition = worldPosition;
+        }
+
+        public DebugMesh(Vector3f startPoint, Vector3f endPoint, Vector3f color) {
+            this.mesh = new Mesh(new Vector3f[]{startPoint, endPoint});
+            this.color = color;
+            this.persistent = false;
+            this.worldPosition = startPoint;
+        }
+
+        public DebugMesh(Mesh mesh, Vector3f worldPosition, Vector3f color) {
+            this.mesh = mesh;
+            this.color = color;
+            this.persistent = false;
+            this.worldPosition = worldPosition;
+        }
+
+        public DebugMesh(Vector3f startPoint, Vector3f endPoint, Vector3f color, boolean persistent) {
+            this.mesh = new Mesh(new Vector3f[]{startPoint, endPoint});
+            this.color = color;
+            this.persistent = persistent;
+            this.worldPosition = startPoint;
+        }
+
+        public DebugMesh(Mesh mesh, Vector3f worldPosition, Vector3f color, boolean persistent) {
+            this.mesh = mesh;
+            this.color = color;
+            this.persistent = persistent;
+            this.worldPosition = worldPosition;
+        }
+
+        public void cleanUp(){
+            this.mesh.cleanUp();
+        }
+    }
+
     private final Set<DebugEntity> debugEntities = new HashSet<>();
-    private final HashMap<Mesh, Vector3f> debugLines = new HashMap<>();
+    private final Set<DebugMesh> debugMeshes = new HashSet<>();
+    private final Set<DebugMesh> debugLines = new HashSet<>();
     private DebugShader debugShader;
     private Camera mainCamera;
 
@@ -34,16 +89,19 @@ public class DebugRenderer implements IRenderer {
         debugShader.init();
 
         cubeMesh = PrimitiveLoader.getCube().getMesh();
+        GL30.glEnable(GL30.GL_LINE_SMOOTH);
+        GL30.glLineWidth(100);
     }
 
     @Override
     public void render() {
-        if(mainCamera == null || debugLines.isEmpty() && debugEntities.isEmpty()) return;
+        if(mainCamera == null || debugMeshes.isEmpty() && debugEntities.isEmpty()) return;
 
         debugShader.bind();
         debugShader.render(mainCamera);
 
         renderDebugShape();
+        renderMeshes();
         renderLines();
 
         debugShader.unbind();
@@ -52,15 +110,41 @@ public class DebugRenderer implements IRenderer {
     private void renderLines(){
         if(debugLines.isEmpty()) return;
 
-        debugShader.prepare(Constants.VECTOR3_ZERO, Constants.QUATERNION_IDENTITY, Constants.VECTOR3_ONE, mainCamera);
-        debugLines.forEach((mesh, color) -> {
-            bind(mesh);
-            debugShader.setColor(color);
-            GL11.glDrawArrays(GL11.GL_LINES, 0, mesh.getVertices().length);
+        debugLines.forEach(debugMesh -> {
+        debugShader.prepare(debugMesh.worldPosition, debugMesh.worldRotation, Constants.VECTOR3_ONE, mainCamera);
+            bind(debugMesh.mesh);
+            debugShader.setColor(debugMesh.color);
+            GL11.glDrawArrays(GL11.GL_LINES, 0, debugMesh.mesh.getVertices().length);
             unbind();
-            mesh.cleanUp();
         });
-        debugLines.clear();
+
+        debugLines.removeIf(debugMesh -> {
+            if(!debugMesh.persistent){
+                debugMesh.cleanUp();
+                return true;
+            }
+            return false;
+        });
+    }
+
+    private void renderMeshes(){
+        if(debugMeshes.isEmpty()) return;
+
+        debugMeshes.forEach(debugMesh -> {
+            debugShader.prepare(debugMesh.worldPosition, debugMesh.worldRotation, debugMesh.worldScale, mainCamera);
+            bind(debugMesh.mesh);
+            debugShader.setColor(debugMesh.color);
+            GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, debugMesh.mesh.getVertices().length);
+            unbind();
+        });
+
+        debugMeshes.removeIf(debugMesh -> {
+            if(!debugMesh.persistent){
+                debugMesh.cleanUp();
+                return true;
+            }
+            return false;
+        });
     }
 
     private void renderDebugShape(){
@@ -120,17 +204,40 @@ public class DebugRenderer implements IRenderer {
         debugEntities.add(new DebugEntity(position, rotation, size, DebugEntity.DebugShape.CUBE));
     }
 
-    public void drawLine(Vector3f startPoint, Vector3f endPoint){
-        drawLine(startPoint, endPoint, Constants.VECTOR3_RIGHT);
+    public DebugMesh drawLine(Vector3f startPoint, Vector3f endPoint){
+        return drawLine(startPoint, endPoint, Constants.COLOR_RED, false);
     }
 
-    public void drawLine(Vector3f startPoint, Vector3f endPoint, Vector3f color){
-        Mesh lineMesh = new Mesh(new Vector3f[]{startPoint, endPoint});
-        debugLines.put(lineMesh, color);
+    public DebugMesh drawLine(Vector3f startPoint, Vector3f endPoint, boolean persistent){
+        return drawLine(startPoint, endPoint, Constants.COLOR_RED, persistent);
+    }
+
+    public DebugMesh drawLine(Vector3f startPoint, Vector3f endPoint, Vector3f color, boolean persistent){
+        DebugMesh debugMesh = new DebugMesh(startPoint, endPoint, color, persistent);
+        debugLines.add(debugMesh);
+        return debugMesh;
+    }
+
+    public DebugMesh drawMesh(Vector3f worldPosition, Mesh mesh){
+        return drawMesh(worldPosition, mesh, Constants.COLOR_RED, false);
+    }
+
+    public DebugMesh drawMesh(Vector3f worldPosition, Mesh mesh, boolean persistent){
+        return drawMesh(worldPosition, mesh, Constants.COLOR_RED, persistent);
+    }
+
+    public DebugMesh drawMesh(Vector3f worldPosition, Mesh mesh, Vector3f color){
+        return drawMesh(worldPosition, mesh, color, false);
+    }
+
+    public DebugMesh drawMesh(Vector3f worldPosition, Mesh mesh, Vector3f color, boolean persistent){
+        DebugMesh debugMesh = new DebugMesh(mesh, worldPosition, color, persistent);
+        debugMeshes.add(debugMesh);
+        return debugMesh;
     }
 
     public void drawRay(Raycast.Ray ray, float length){
-        drawRay(ray, length, Constants.VECTOR3_RIGHT);
+        drawRay(ray, length, Constants.COLOR_RED);
     }
 
     public void drawRay(Raycast.Ray ray, float length, Vector3f color){
@@ -138,7 +245,7 @@ public class DebugRenderer implements IRenderer {
         endPoint.set(ray.direction.normalize()).mul(length);
         endPoint.set(Calculus.addVectors(ray.origin, endPoint));
 
-        drawLine(ray.origin, endPoint, color);
+        drawLine(ray.origin, endPoint, color, false);
     }
 
     public void setMainCamera(Camera camera){
