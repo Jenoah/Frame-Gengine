@@ -20,6 +20,7 @@ public class DebugShader extends Shader{
         createUniform("modelMatrix");
         createUniform("viewMatrix");
         createUniform("projectionMatrix");
+        createUniform("color");
     }
 
     public void prepare(Vector3f position, Quaternionf rotation, Vector3f scale, Camera camera) {
@@ -30,5 +31,9 @@ public class DebugShader extends Shader{
         this.setUniform("modelMatrix", modelMatrix);
         this.setUniform("viewMatrix", camera.getViewMatrix());
         this.setUniform("projectionMatrix", window.getProjectionMatrix());
+    }
+
+    public void setColor(Vector3f color){
+        this.setUniform("color", color);
     }
 }

@@ -159,8 +159,20 @@ public class RenderManager {
         debugRenderer.drawRay(ray, length);
     }
 
+    public static void debugLine(Vector3f startPoint, Vector3f endPoint, Vector3f color){
+        debugRenderer.drawLine(startPoint, endPoint, color);
+    }
+
     public static void debugRay(Raycast.Ray ray){
         debugRenderer.drawRay(ray, 1f);
+    }
+
+    public static void debugRay(Raycast.Ray ray, Vector3f color){
+        debugRenderer.drawRay(ray, 1f, color);
+    }
+
+    public static void debugRay(Raycast.Ray ray, float length, Vector3f color){
+        debugRenderer.drawRay(ray, length, color);
     }
 
     public static void setRenderCamera(Camera renderCamera){

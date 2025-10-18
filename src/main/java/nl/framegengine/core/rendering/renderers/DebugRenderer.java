@@ -7,22 +7,22 @@ import nl.framegengine.core.shaders.DebugShader;
 import nl.framegengine.core.utils.Calculus;
 import nl.framegengine.core.utils.Constants;
 import nl.framegengine.core.utils.DebugEntity;
-import nl.framegengine.core.utils.ObjectPool;
 import nl.framegengine.core.visual.Mesh;
 import nl.framegengine.core.visual.MeshMaterialSet;
-import org.joml.Math;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 public class DebugRenderer implements IRenderer {
 
     private final Set<DebugEntity> debugEntities = new HashSet<>();
+    private final HashMap<Mesh, Vector3f> debugLines = new HashMap<>();
     private DebugShader debugShader;
     private Camera mainCamera;
 
@@ -38,32 +38,58 @@ public class DebugRenderer implements IRenderer {
 
     @Override
     public void render() {
-        if(debugEntities.isEmpty() || mainCamera == null) return;
+        if(mainCamera == null || debugLines.isEmpty() && debugEntities.isEmpty()) return;
 
         debugShader.bind();
         debugShader.render(mainCamera);
 
-        GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
-
-        debugEntities.forEach(debugEntity -> {
-            bind(null);
-            debugShader.prepare(debugEntity.getPosition(), debugEntity.getRotation(), debugEntity.getScale(), mainCamera);
-
-            if(debugEntity.getShape() == DebugEntity.DebugShape.CUBE) {
-                GL11.glDrawElements(GL11.GL_TRIANGLES, cubeMesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
-            }
-            unbind();
-        });
-        GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
-        debugEntities.clear();
+        renderDebugShape();
+        renderLines();
 
         debugShader.unbind();
+    }
+
+    private void renderLines(){
+        if(debugLines.isEmpty()) return;
+
+        debugShader.prepare(Constants.VECTOR3_ZERO, Constants.QUATERNION_IDENTITY, Constants.VECTOR3_ONE, mainCamera);
+        debugLines.forEach((mesh, color) -> {
+            bind(mesh);
+            debugShader.setColor(color);
+            GL11.glDrawArrays(GL11.GL_LINES, 0, mesh.getVertices().length);
+            unbind();
+            mesh.cleanUp();
+        });
+        debugLines.clear();
+    }
+
+    private void renderDebugShape(){
+        if(debugEntities.isEmpty()) {
+
+            GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
+
+            debugEntities.forEach(debugEntity -> {
+                bind(cubeMesh);
+                debugShader.prepare(debugEntity.getPosition(), debugEntity.getRotation(), debugEntity.getScale(), mainCamera);
+
+                if (debugEntity.getShape() == DebugEntity.DebugShape.CUBE) {
+                    GL11.glDrawElements(GL11.GL_TRIANGLES, cubeMesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
+                }
+                unbind();
+            });
+            GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
+            debugEntities.clear();
+        }
     }
 
     @Override
     public void bind(MeshMaterialSet meshMaterialSet) {
         GL30.glBindVertexArray(cubeMesh.getVaoID());
+        GL20.glEnableVertexAttribArray(0);
+    }
 
+    public void bind(Mesh mesh) {
+        GL30.glBindVertexArray(mesh.getVaoID());
         GL20.glEnableVertexAttribArray(0);
     }
 
@@ -95,36 +121,24 @@ public class DebugRenderer implements IRenderer {
     }
 
     public void drawLine(Vector3f startPoint, Vector3f endPoint){
-        Vector3f centerPoint = new Vector3f();
-        centerPoint.x = Math.lerp(startPoint.x, endPoint.x, 0.5f);
-        centerPoint.y = Math.lerp(startPoint.y, endPoint.y, 0.5f);
-        centerPoint.z = Math.lerp(startPoint.z, endPoint.z, 0.5f);
+        drawLine(startPoint, endPoint, Constants.VECTOR3_RIGHT);
+    }
 
-        Vector3f difference = Calculus.subtractVectors(startPoint, endPoint);
-        float length = difference.length();
-        Vector3f direction = difference.normalize();
-
-        if(direction.lengthSquared() <= 0.01) direction.set(0, 0, -1);
-        Quaternionf lookDirection = new Quaternionf().rotateTo(new Vector3f(Constants.VECTOR3_FORWARD), direction);
-
-        debugEntities.add(new DebugEntity(centerPoint, lookDirection, new Vector3f(0.025f, 0.025f, length)));
+    public void drawLine(Vector3f startPoint, Vector3f endPoint, Vector3f color){
+        Mesh lineMesh = new Mesh(new Vector3f[]{startPoint, endPoint});
+        debugLines.put(lineMesh, color);
     }
 
     public void drawRay(Raycast.Ray ray, float length){
-        Vector3f endPoint = ObjectPool.VECTOR3F_POOL.obtain();
+        drawRay(ray, length, Constants.VECTOR3_RIGHT);
+    }
+
+    public void drawRay(Raycast.Ray ray, float length, Vector3f color){
+        Vector3f endPoint = new Vector3f();
         endPoint.set(ray.direction.normalize()).mul(length);
         endPoint.set(Calculus.addVectors(ray.origin, endPoint));
 
-        Vector3f centerPoint = ObjectPool.VECTOR3F_POOL.obtain();
-        centerPoint.x = Math.lerp(ray.origin.x, endPoint.x, 0.5f);
-        centerPoint.y = Math.lerp(ray.origin.y, endPoint.y, 0.5f);
-        centerPoint.z = Math.lerp(ray.origin.z, endPoint.z, 0.5f);
-
-        Quaternionf lookDirection = new Quaternionf().rotateTo(new Vector3f(Constants.VECTOR3_FORWARD), ray.direction);
-
-        debugEntities.add(new DebugEntity(centerPoint, lookDirection, new Vector3f(0.0125f, 0.0125f, length)));
-        ObjectPool.VECTOR3F_POOL.free(centerPoint);
-        ObjectPool.VECTOR3F_POOL.free(endPoint);
+        drawLine(ray.origin, endPoint, color);
     }
 
     public void setMainCamera(Camera camera){
