@@ -6,7 +6,6 @@ import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import nl.framegengine.core.components.constraint.DirectConstraint;
 import nl.framegengine.core.components.constraint.MoveOnAxis;
-import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.engine.EngineManager;
 import nl.framegengine.core.engine.WindowManager;
@@ -187,22 +186,11 @@ public class GamePanel extends EditorPanel {
             mms.material.castShadow(false);
             mms.material.receiveShadows(false);
         });
-        GameObject xAxis = new GameObject("x-axis");
-        GameObject yAxis = new GameObject("y-axis");
-        GameObject zAxis = new GameObject("z-axis");
-
-        xAxis.addComponent(new RenderComponent(gizmoMms.get(0)));
-        zAxis.addComponent(new RenderComponent(gizmoMms.get(1)));
-        yAxis.addComponent(new RenderComponent(gizmoMms.get(2)));
-
-        zAxis.setParent(gizmo);
-        xAxis.setParent(gizmo);
-        yAxis.setParent(gizmo);
 
         gizmo.setScale(0.5f);
         DirectConstraint directConstraint = new DirectConstraint();
         MoveOnAxis moveGizmoOnAxis = new MoveOnAxis();
-        GizmoMovement gizmoMovement = new GizmoMovement(moveGizmoOnAxis, xAxis, yAxis, zAxis);
+        GizmoMovement gizmoMovement = new GizmoMovement(moveGizmoOnAxis);
         directConstraint.runInEditor = true;
         if(hierarchyPanel != null) hierarchyPanel.setGizmo(gizmo);
 

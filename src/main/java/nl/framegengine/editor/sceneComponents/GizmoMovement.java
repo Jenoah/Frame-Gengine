@@ -5,10 +5,16 @@ import nl.framegengine.core.components.constraint.MoveOnAxis;
 import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.input.MouseInput;
+import nl.framegengine.core.modelLoaders.OBJLoader.OBJLoader;
 import nl.framegengine.core.physics.Raycast;
 import nl.framegengine.core.rendering.RenderManager;
+import nl.framegengine.core.rendering.renderers.DebugRenderer;
 import nl.framegengine.core.utils.Calculus;
 import nl.framegengine.core.utils.Constants;
+import nl.framegengine.core.utils.ObjectPool;
+import nl.framegengine.core.visual.Mesh;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import static nl.framegengine.core.physics.Raycast.fromCameraByMouse;
 
@@ -17,15 +23,18 @@ public class GizmoMovement extends Component {
     private final MoveOnAxis moveOnAxis;
 
     private final GameObject xAxis, yAxis, zAxis;
+    private DebugRenderer.DebugMesh xAxisLine, yAxisLine, zAxisLine;
+    private DebugRenderer.DebugMesh xAxisHandle, yAxisHandle, zAxisHandle;
     private Camera camera;
     private boolean isDragging = false;
 
-    public GizmoMovement(MoveOnAxis moveOnAxis, GameObject xAxis, GameObject yAxis, GameObject zAxis){
+    public GizmoMovement(MoveOnAxis moveOnAxis){
         this.moveOnAxis = moveOnAxis;
-        this.xAxis = xAxis;
-        this.yAxis = yAxis;
-        this.zAxis = zAxis;
         runInEditor = true;
+        this.xAxis = new GameObject("x-axis");
+        this.yAxis = new GameObject("y-axis");
+        this.zAxis = new GameObject("z-axis");
+        coneMesh = OBJLoader.loadOBJModel("/models/cone.obj").stream().findFirst().get().getMesh();
     }
 
     @Override
