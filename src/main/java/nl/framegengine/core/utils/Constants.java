@@ -16,13 +16,26 @@ public class Constants {
     public static final float MOUSE_SENSITIVITY = 2f;
     public static final boolean USE_ANISOTROPIC = true;
 
-    //Vector 3 directions
+    //Vector 3
     public static final Vector3f VECTOR3_UP = new Vector3f(0, 1, 0);
     public static final Vector3f VECTOR3_FORWARD = new Vector3f(0, 0, -1);
     public static final Vector3f VECTOR3_BACK = new Vector3f(0, 0, 1);
     public static final Vector3f VECTOR3_RIGHT = new Vector3f(1, 0, 0);
     public static final Vector3f VECTOR3_ONE = new Vector3f(1, 1, 1);
     public static final Vector3f VECTOR3_ZERO = new Vector3f(0, 0, 0);
+    public static final Vector3f VECTOR3_HALF = new Vector3f(0.5f);
+    public static final Vector3f VECTOR3_QUARTER = new Vector3f(0.25f);
+    public static final Vector3f VECTOR3_EIGHTH = new Vector3f(0.125f);
+
+    //Vector 3 colors
+    public static final Vector3f COLOR_RED = new Vector3f(1, 0, 0);
+    public static final Vector3f COLOR_GREEN = new Vector3f(0, 1, 0);
+    public static final Vector3f COLOR_BLUE = new Vector3f(0, 0, 1);
+    public static final Vector3f COLOR_YELLOW = new Vector3f(1, 1, 0);
+    public static final Vector3f COLOR_CYAN = new Vector3f(0, 1, 1);
+    public static final Vector3f COLOR_MAGENTA = new Vector3f(1, 0, 1);
+    public static final Vector3f COLOR_WHITE = new Vector3f(1, 1, 1);
+    public static final Vector3f COLOR_BLACK = new Vector3f(0, 0, 0);
 
     //Vector 4 directions
     public static final Vector4f VECTOR4_UP = new Vector4f(0, 1, 0, 0);
@@ -33,6 +46,12 @@ public class Constants {
 
     //Quaternions
     public static final Quaternionf QUATERNION_IDENTITY = new Quaternionf().identity();
+    public static final Quaternionf QUATERNION_UP = new Quaternionf(0.7071f, 0, 0, 0.7071f);
+    public static final Quaternionf QUATERNION_DOWN = new Quaternionf(0.7071f, 0, 0, -0.7071f);
+    public static final Quaternionf QUATERNION_FORWARD = new Quaternionf(0.7071f, 0, 0.7071f, 0);
+    public static final Quaternionf QUATERNION_BACKWARDS = new Quaternionf(0.7071f, 0, -0.7071f, 0);
+    public static final Quaternionf QUATERNION_LEFT = new Quaternionf(0, 0, 0, 1);
+    public static final Quaternionf QUATERNION_RIGHT = new Quaternionf(1, 0, 0, 0);
 
     //Shadows
     public static final float SHADOW_DISTANCE = 40;
