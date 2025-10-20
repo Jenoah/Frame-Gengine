@@ -58,6 +58,11 @@ public class Material implements IJsonSerializable {
         this.aoMap = material.getAoMap();
         this.roughness = material.getRoughness();
         this.tilingScale = material.getTilingScale();
+        this.isOnTop = material.isOnTop();
+        this.castShadow = material.castShadow();
+        this.receiveShadows = material.receiveShadows();
+        this.isTransparent = material.isTransparent();
+
         setGuid();
         MaterialManager.addMaterial(this);
     }
