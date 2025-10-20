@@ -14,20 +14,14 @@ import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.entity.Scene;
 import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.input.MouseInput;
-import nl.framegengine.core.modelLoaders.OBJLoader.OBJLoader;
 import nl.framegengine.core.rendering.RenderManager;
-import nl.framegengine.core.shaders.ShaderManager;
 import nl.framegengine.core.utils.Constants;
-import nl.framegengine.core.visual.MeshMaterialSet;
-import nl.framegengine.core.visual.Texture;
-import nl.framegengine.core.visual.TextureLoader;
 import nl.framegengine.editor.*;
 import nl.framegengine.editor.sceneComponents.GizmoMovement;
 import nl.framegengine.editor.sceneComponents.ScenePreviewCameraControls;
 import nl.framegengine.editor.sceneComponents.SelectSceneObjects;
 
 import java.util.Arrays;
-import java.util.List;
 
 public class GamePanel extends EditorPanel {
 
@@ -157,6 +151,7 @@ public class GamePanel extends EditorPanel {
             SceneManager.setCurrentScene((Scene)new Scene().deserializeFromJson(editingSceneJson));
             GameObject gizmo = addGizmo();
             addEditorCamera(gizmo);
+            gizmo.setEnabled(false);
         }
     }
 
@@ -179,15 +174,7 @@ public class GamePanel extends EditorPanel {
         if(SceneManager.currentScene == null) return null;
         GameObject gizmo = new GameObject(EngineSettings.editorGizmoName);
         gizmo.translateLocal(Constants.VECTOR3_UP);
-        List<MeshMaterialSet> gizmoMms = OBJLoader.loadOBJModel("/models/gizmo.obj", new Texture(TextureLoader.loadTexture("textures/color_palette.png", true))).stream().toList();
-        gizmoMms.forEach(mms -> {
-            mms.material.setShader(ShaderManager.unlitShader);
-            mms.material.setOnTop(true);
-            mms.material.castShadow(false);
-            mms.material.receiveShadows(false);
-        });
 
-        gizmo.setScale(0.5f);
         DirectConstraint directConstraint = new DirectConstraint();
         MoveOnAxis moveGizmoOnAxis = new MoveOnAxis();
         GizmoMovement gizmoMovement = new GizmoMovement(moveGizmoOnAxis);
@@ -260,6 +247,7 @@ public class GamePanel extends EditorPanel {
             editorGameLauncher.run(sizeX, sizeY - 20);
             if(!EngineSettings.isInGame){
                 GameObject gizmo = addGizmo();
+                gizmo.setEnabled(false);
                 addEditorCamera(gizmo);
             }
         }
