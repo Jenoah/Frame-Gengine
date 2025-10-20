@@ -49,7 +49,7 @@ public class ComponentRenderer implements IRenderer {
         if ((sortedRenderObjects.isEmpty() && sortedTransparentRenderObjects.isEmpty()) || mainCamera == null) return;
 
         // Update cached collections if needed
-        if (needsRebatch || mainCamera.hasUpdated()) { updateRenderBatches(); }
+        if (needsRebatch) { updateRenderBatches(); }
 
         renderPass(cachedSortedEntries);
         renderPass(cachedTransparentEntries);
