@@ -22,7 +22,7 @@ public class DebugRenderer implements IRenderer {
 
     public class DebugMesh {
         public Mesh mesh;
-        public Vector3f worldPosition;
+        public Vector3f worldPosition = new Vector3f(0);
         public Quaternionf worldRotation = new Quaternionf().identity();
         public Vector3f color;
         public Vector3f worldScale = new Vector3f(1);
@@ -32,42 +32,42 @@ public class DebugRenderer implements IRenderer {
             this.mesh = new Mesh(new Vector3f[]{startPoint, endPoint});
             this.color = Constants.COLOR_RED;
             this.persistent = false;
-            this.worldPosition = startPoint;
+            this.worldPosition.set(worldPosition);
         }
 
         public DebugMesh(Mesh mesh, Vector3f worldPosition) {
             this.mesh = mesh;
             this.color = Constants.COLOR_RED;
             this.persistent = false;
-            this.worldPosition = worldPosition;
+            this.worldPosition.set(worldPosition);
         }
 
         public DebugMesh(Vector3f startPoint, Vector3f endPoint, Vector3f color) {
             this.mesh = new Mesh(new Vector3f[]{startPoint, endPoint});
             this.color = color;
             this.persistent = false;
-            this.worldPosition = startPoint;
+            this.worldPosition.set(worldPosition);
         }
 
         public DebugMesh(Mesh mesh, Vector3f worldPosition, Vector3f color) {
             this.mesh = mesh;
             this.color = color;
             this.persistent = false;
-            this.worldPosition = worldPosition;
+            this.worldPosition.set(worldPosition);
         }
 
         public DebugMesh(Vector3f startPoint, Vector3f endPoint, Vector3f color, boolean persistent) {
             this.mesh = new Mesh(new Vector3f[]{startPoint, endPoint});
             this.color = color;
             this.persistent = persistent;
-            this.worldPosition = startPoint;
+            this.worldPosition.set(worldPosition);
         }
 
         public DebugMesh(Mesh mesh, Vector3f worldPosition, Vector3f color, boolean persistent) {
             this.mesh = mesh;
             this.color = color;
             this.persistent = persistent;
-            this.worldPosition = worldPosition;
+            this.worldPosition.set(worldPosition);
         }
 
         public void cleanUp(){
@@ -95,15 +95,17 @@ public class DebugRenderer implements IRenderer {
 
     @Override
     public void render() {
-        if(mainCamera == null || debugMeshes.isEmpty() && debugEntities.isEmpty()) return;
+        if(mainCamera == null || debugMeshes.isEmpty() && debugEntities.isEmpty() && debugLines.isEmpty()) return;
 
         debugShader.bind();
         debugShader.render(mainCamera);
+        GL11.glDisable(GL11.GL_DEPTH_TEST);
 
         renderDebugShape();
         renderMeshes();
         renderLines();
 
+        GL11.glEnable(GL11.GL_DEPTH_TEST);
         debugShader.unbind();
     }
 
