@@ -33,24 +33,22 @@ public class OBJLoader {
         List<Vector2f> textures = new ArrayList<>();
 
         OBJModel currentModel = null;
-        String objName = "";
-        Random rand = new Random();
         HashMap<String, Material> mtlInfo = new HashMap<>();
         String mtlFolder = Paths.get(fileName).getParent().toString() + "/";
 
         for (String line : lines) {
-            String[] tokens = line.split("\\s+");
+            if (line.isBlank() || line.startsWith("#")) continue;
+            String[] tokens = line.trim().split("\\s+");
+            if (tokens.length == 0) continue;
+
             switch (tokens[0]) {
-                case "o":
-                    objName = tokens[1];
+                case "o" -> {
                     currentModel = new OBJModel();
                     currentModel.setMaterial(new Material(ShaderManager.getDefaultShader()));
                     objObject.addObjModel(currentModel);
-                    break;
-                case "mtllib":
-                    mtlInfo = loadMTL(mtlFolder + tokens[1]);
-                    break;
-                case "usemtl":
+                }
+                case "mtllib" -> mtlInfo = loadMTL(mtlFolder + tokens[1]);
+                case "usemtl" -> {
                     currentModel = new OBJModel();
                     if(mtlInfo.containsKey(tokens[1])){
                         currentModel.setMaterial(mtlInfo.get(tokens[1]));
@@ -58,28 +56,22 @@ public class OBJLoader {
                         currentModel.setMaterial(new Material(ShaderManager.getDefaultShader()));
                     }
                     objObject.addObjModel(currentModel);
-                    break;
-                case "v":
-                    vertices.add(new Vector3f(
-                            Float.parseFloat(tokens[1]),
-                            Float.parseFloat(tokens[2]),
-                            Float.parseFloat(tokens[3])
-                    ));
-                    break;
-                case "vn":
-                    normals.add(new Vector3f(
-                            Float.parseFloat(tokens[1]),
-                            Float.parseFloat(tokens[2]),
-                            Float.parseFloat(tokens[3])
-                    ));
-                    break;
-                case "vt":
-                    textures.add(new Vector2f(
-                            Float.parseFloat(tokens[1]),
-                            Float.parseFloat(tokens[2])
-                    ));
-                    break;
-                case "f":
+                }
+                case "v" -> vertices.add(new Vector3f(
+                        Float.parseFloat(tokens[1]),
+                        Float.parseFloat(tokens[2]),
+                        Float.parseFloat(tokens[3])
+                ));
+                case "vn" -> normals.add(new Vector3f(
+                        Float.parseFloat(tokens[1]),
+                        Float.parseFloat(tokens[2]),
+                        Float.parseFloat(tokens[3])
+                ));
+                case "vt" -> textures.add(new Vector2f(
+                        Float.parseFloat(tokens[1]),
+                        Float.parseFloat(tokens[2])
+                ));
+                case "f" -> {
                     if (currentModel == null) {
                         currentModel = new OBJModel();
                         currentModel.setMaterial(new Material(ShaderManager.getDefaultShader()));
@@ -93,43 +85,42 @@ public class OBJLoader {
 
                     for (int i = 1; i <= faceCount; i++) {
                         String[] vertexData = tokens[i].split("/");
+                        int vIdx = Integer.parseInt(vertexData[0]);
+                        vIdx = vIdx < 0 ? vertices.size() + vIdx : vIdx - 1;
+                        vertexIndices[i - 1] = vIdx;
 
-                        vertexIndices[i - 1] = Integer.parseInt(vertexData[0]) - 1;
-                        textureIndices[i - 1] = vertexData.length > 1 && !vertexData[1].isEmpty()
-                                ? Integer.parseInt(vertexData[1]) - 1 : -1;
-                        normalIndices[i - 1] = vertexData.length > 2 && !vertexData[2].isEmpty()
-                                ? Integer.parseInt(vertexData[2]) - 1 : -1;
+                        int tIdx = (vertexData.length > 1 && !vertexData[1].isEmpty())
+                                ? Integer.parseInt(vertexData[1]) : 0;
+                        tIdx = tIdx < 0 ? textures.size() + tIdx : (tIdx > 0 ? tIdx - 1 : -1);
+                        textureIndices[i - 1] = tIdx;
+
+                        int nIdx = (vertexData.length > 2 && !vertexData[2].isEmpty())
+                                ? Integer.parseInt(vertexData[2]) : 0;
+                        nIdx = nIdx < 0 ? normals.size() + nIdx : (nIdx > 0 ? nIdx - 1 : -1);
+                        normalIndices[i - 1] = nIdx;
                     }
 
-                    if (faceCount == 4) {
-                        Face face1 = new Face(
-                                new int[]{vertexIndices[0], vertexIndices[1], vertexIndices[2]},
-                                new int[]{textureIndices[0], textureIndices[1], textureIndices[2]},
-                                new int[]{normalIndices[0], normalIndices[1], normalIndices[2]}
+                    // Triangulate any polygon (3 or more vertices)
+                    for (int i = 1; i < faceCount - 1; i++) {
+                        Face face = new Face(
+                                new int[]{vertexIndices[0], vertexIndices[i], vertexIndices[i + 1]},
+                                new int[]{textureIndices[0], textureIndices[i], textureIndices[i + 1]},
+                                new int[]{normalIndices[0], normalIndices[i], normalIndices[i + 1]}
                         );
-                        Face face2 = new Face(
-                                new int[]{vertexIndices[0], vertexIndices[2], vertexIndices[3]},
-                                new int[]{textureIndices[0], textureIndices[2], textureIndices[3]},
-                                new int[]{normalIndices[0], normalIndices[2], normalIndices[3]}
-                        );
-                        currentModel.addFace(face1);
-                        currentModel.addFace(face2);
-                    } else {
-                        Face face = new Face(vertexIndices, textureIndices, normalIndices);
                         currentModel.addFace(face);
                     }
-                    break;
+                }
             }
         }
 
-        // If still no model was created, create a default one
+        // Ensure at least one model exists
         if (objObject.getObjModels().isEmpty()) {
             currentModel = new OBJModel();
             currentModel.setMaterial(new Material(ShaderManager.getDefaultShader()));
             objObject.addObjModel(currentModel);
         }
 
-        // Now, for each OBJModel, build its own vertex/index lists
+        // Assemble final model data
         for (OBJModel model : objObject.getObjModels()) {
             List<Vector3f> finalVertices = new ArrayList<>();
             List<Vector2f> finalTextures = new ArrayList<>();
@@ -143,13 +134,19 @@ public class OBJLoader {
                     int tIdx = face.getTextureCoords()[i];
                     int nIdx = face.getNormals()[i];
 
-                    // Build a unique key for this vertex/tex/normal combination
                     String key = vIdx + "/" + tIdx + "/" + nIdx;
                     Integer index = uniqueVertexMap.get(key);
                     if (index == null) {
-                        finalVertices.add(vertices.get(vIdx));
-                        if (tIdx != -1) finalTextures.add(textures.get(tIdx));
-                        if (nIdx != -1) finalNormals.add(normals.get(nIdx));
+                        Vector3f v = vertices.get(vIdx);
+                        Vector2f t = (tIdx != -1 && tIdx < textures.size())
+                                ? textures.get(tIdx) : new Vector2f(0, 0);
+                        Vector3f n = (nIdx != -1 && nIdx < normals.size())
+                                ? normals.get(nIdx) : new Vector3f(0, 0, 0);
+
+                        finalVertices.add(v);
+                        finalTextures.add(t);
+                        finalNormals.add(n);
+
                         index = finalVertices.size() - 1;
                         uniqueVertexMap.put(key, index);
                     }
@@ -201,7 +198,7 @@ public class OBJLoader {
                     for(int i = 1; i < tokens.length; i++){
                         texturePath.append(tokens[i]);
                     }
-                        texturePath = new StringBuilder("textures/" + Paths.get(texturePath.toString()).getFileName().toString());
+                    texturePath = new StringBuilder("textures/" + Paths.get(texturePath.toString()).getFileName().toString());
                     try {
                         Texture texture = new Texture(TextureLoader.loadTexture(texturePath.toString()));
                         currentMaterial.setAlbedoTexture(texture);
