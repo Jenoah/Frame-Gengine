@@ -41,6 +41,8 @@ public class GamePanel extends EditorPanel {
     private int frameTimeIteration = 0;
     private float frameTimeAverage = 0f;
 
+    private GizmoMovement gizmoMovement = null;
+
     private final ImVec2 availableWindowSpace = new ImVec2();
 
     float offsetX = 36f;
@@ -99,6 +101,21 @@ public class GamePanel extends EditorPanel {
             ImGui.pushTextWrapPos(sizeX / 2f);
             ImGui.text("Stats: " + RenderManager.getMetrics());
             ImGui.popTextWrapPos();
+        }
+
+        if(!EngineSettings.isInGame){
+            ImGui.setCursorPos(sizeX / 2f - 48f, 24);
+            if(ImGui.button("M", 32f, 32f) && gizmoMovement != null){
+                gizmoMovement.setTransformMode(GizmoMovement.TransformMode.Move);
+            }
+            ImGui.setCursorPos(sizeX / 2f, 24);
+            if(ImGui.button("R", 32f, 32f) && gizmoMovement != null){
+                gizmoMovement.setTransformMode(GizmoMovement.TransformMode.Rotate);
+            }
+            ImGui.setCursorPos(sizeX / 2f + 48f, 24);
+            if(ImGui.button("S", 32f, 32f) && gizmoMovement != null){
+                gizmoMovement.setTransformMode(GizmoMovement.TransformMode.Scale);
+            }
         }
     }
 
@@ -177,7 +194,7 @@ public class GamePanel extends EditorPanel {
 
         DirectConstraint directConstraint = new DirectConstraint();
         MoveOnAxis moveGizmoOnAxis = new MoveOnAxis();
-        GizmoMovement gizmoMovement = new GizmoMovement(moveGizmoOnAxis);
+        gizmoMovement = new GizmoMovement(moveGizmoOnAxis);
         directConstraint.runInEditor = true;
         if(hierarchyPanel != null) hierarchyPanel.setGizmo(gizmo);
 
@@ -202,6 +219,7 @@ public class GamePanel extends EditorPanel {
 
     private void removeGizmo(){
         if(SceneManager.currentScene == null) return;
+        gizmoMovement = null;
         GameObject gizmo = SceneManager.currentScene.getGameObjectByName(EngineSettings.editorGizmoName);
         if(gizmo == null) return;
         if(hierarchyPanel != null) hierarchyPanel.setGizmo(null);

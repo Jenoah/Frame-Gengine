@@ -28,9 +28,11 @@ public class GizmoMovement extends Component {
     private final MoveOnAxis moveOnAxis;
 
     private final GameObject xAxis, yAxis, zAxis;
-    private DebugRenderer.DebugMesh xAxisLine, yAxisLine, zAxisLine = null;
+    private DebugRenderer.DebugMesh xAxisLine = null, yAxisLine = null, zAxisLine = null;
+    private DebugRenderer.DebugMesh xAxisCircle = null, yAxisCircle = null, zAxisCircle = null;
     private Camera camera;
     private boolean isDragging = false;
+    private TransformMode transformMode = TransformMode.Move;
 
     public GizmoMovement(MoveOnAxis moveOnAxis){
         this.moveOnAxis = moveOnAxis;
@@ -40,14 +42,6 @@ public class GizmoMovement extends Component {
         this.xAxis = new GameObject("x-axis");
         this.yAxis = new GameObject("y-axis");
         this.zAxis = new GameObject("z-axis");
-
-        this.xAxis.setPosition(Calculus.multiplyVector(Constants.VECTOR3_RIGHT, 0.8f));
-        this.yAxis.setPosition(Calculus.multiplyVector(Constants.VECTOR3_UP, 0.8f));
-        this.zAxis.setPosition(Calculus.multiplyVector(Constants.VECTOR3_FORWARD, 0.8f));
-
-        this.xAxis.setRotation(new Quaternionf().fromAxisAngleRad(Constants.VECTOR3_BACK, Math.toRadians(270f)));
-        this.yAxis.setRotation(Constants.QUATERNION_LEFT);
-        this.zAxis.setRotation(Constants.QUATERNION_DOWN);
 
         this.xAxis.setScale(0.2f);
         this.yAxis.setScale(0.2f);
@@ -75,25 +69,27 @@ public class GizmoMovement extends Component {
         this.yAxis.setParent(root);
         this.zAxis.setParent(root);
 
-        updateAxisLines();
+        setTransformMode(TransformMode.Move);
     }
 
     @Override
     public void enable() {
         super.enable();
-        updateAxisLines();
+        setTransformMode(this.transformMode);
     }
 
     private void updateAxisLines(){
-        if(xAxisLine == null) xAxisLine = RenderManager.debugLine(Constants.VECTOR3_ZERO, Constants.VECTOR3_RIGHT, Constants.COLOR_RED, true);
-        if(yAxisLine == null) yAxisLine = RenderManager.debugLine(Constants.VECTOR3_ZERO, Constants.VECTOR3_UP, Constants.COLOR_GREEN, true);
-        if(zAxisLine == null) zAxisLine = RenderManager.debugLine(Constants.VECTOR3_ZERO, Constants.VECTOR3_FORWARD, Constants.COLOR_BLUE, true);
-
         Vector3f rootPosition = ObjectPool.VECTOR3F_POOL.obtain().set(root.getPosition());
 
-        xAxisLine.worldPosition.set(rootPosition);
-        yAxisLine.worldPosition.set(rootPosition);
-        zAxisLine.worldPosition.set(rootPosition);
+        if(this.transformMode == TransformMode.Move) {
+            if(xAxisLine != null) xAxisLine.worldPosition.set(rootPosition);
+            if(yAxisLine != null) yAxisLine.worldPosition.set(rootPosition);
+            if(zAxisLine != null) zAxisLine.worldPosition.set(rootPosition);
+        }else if(this.transformMode == TransformMode.Rotate){
+            if(xAxisCircle != null) xAxisCircle.worldPosition.set(rootPosition);
+            if(yAxisCircle != null) yAxisCircle.worldPosition.set(rootPosition);
+            if(zAxisCircle != null) zAxisCircle.worldPosition.set(rootPosition);
+        }
 
         ObjectPool.VECTOR3F_POOL.free(rootPosition);
     }
@@ -101,6 +97,11 @@ public class GizmoMovement extends Component {
     @Override
     public void disable() {
         super.disable();
+        disableMove();
+        disableRotate();
+    }
+
+    private void disableMove(){
         if(xAxisLine != null){
             xAxisLine.persistent = false;
             xAxisLine = null;
@@ -113,6 +114,74 @@ public class GizmoMovement extends Component {
             zAxisLine.persistent = false;
             zAxisLine = null;
         }
+    }
+
+    private void enableMove(){
+        if (xAxisLine == null) xAxisLine = RenderManager.debugLine(Constants.VECTOR3_ZERO, Constants.VECTOR3_RIGHT, Constants.COLOR_RED, true);
+        if (yAxisLine == null) yAxisLine = RenderManager.debugLine(Constants.VECTOR3_ZERO, Constants.VECTOR3_UP, Constants.COLOR_GREEN, true);
+        if (zAxisLine == null) zAxisLine = RenderManager.debugLine(Constants.VECTOR3_ZERO, Constants.VECTOR3_FORWARD, Constants.COLOR_BLUE, true);
+
+        this.xAxis.setPosition(Calculus.multiplyVector(Constants.VECTOR3_RIGHT, 0.8f));
+        this.yAxis.setPosition(Calculus.multiplyVector(Constants.VECTOR3_UP, 0.8f));
+        this.zAxis.setPosition(Calculus.multiplyVector(Constants.VECTOR3_FORWARD, 0.8f));
+
+        this.xAxis.setRotation(new Quaternionf().fromAxisAngleRad(Constants.VECTOR3_BACK, Math.toRadians(270f)));
+        this.yAxis.setRotation(Constants.QUATERNION_LEFT);
+        this.zAxis.setRotation(Constants.QUATERNION_DOWN);
+    }
+
+    private void disableRotate(){
+        if(xAxisCircle != null){
+            xAxisCircle.persistent = false;
+            xAxisCircle = null;
+        }
+        if(yAxisCircle != null){
+            yAxisCircle.persistent = false;
+            yAxisCircle = null;
+        }
+        if(zAxisCircle != null){
+            zAxisCircle.persistent = false;
+            zAxisCircle = null;
+        }
+    }
+
+    private void enableRotate(){
+        if(xAxisCircle == null){
+            xAxisCircle = RenderManager.debugCircle(Constants.VECTOR3_ZERO, 1f, Constants.COLOR_RED, true);
+            xAxisCircle.worldRotation = Constants.QUATERNION_FORWARD;
+        }
+        if(yAxisCircle == null){
+            yAxisCircle = RenderManager.debugCircle(Constants.VECTOR3_ZERO, 1f, Constants.COLOR_GREEN, true);
+            yAxisCircle.worldRotation = Constants.QUATERNION_UP;
+        }
+        if(zAxisCircle == null){
+            zAxisCircle = RenderManager.debugCircle(Constants.VECTOR3_ZERO, 1f, Constants.COLOR_BLUE, true);
+            zAxisCircle.worldRotation = Constants.QUATERNION_RIGHT;
+        }
+
+        this.xAxis.setPosition(Constants.VECTOR3_FORWARD);
+        this.xAxis.setRotation(Constants.QUATERNION_LEFT);
+
+        this.yAxis.setPosition(Constants.VECTOR3_RIGHT);
+        this.yAxis.setRotation(Constants.QUATERNION_DOWN);
+
+        this.zAxis.setPosition(Constants.VECTOR3_UP);
+        this.zAxis.setRotation(new Quaternionf().fromAxisAngleRad(Constants.VECTOR3_BACK, Math.toRadians(270f)));
+    }
+
+    public void setTransformMode(TransformMode transformMode){
+        this.transformMode = transformMode;
+        if(!this.isEnabled) return;
+
+        if(this.transformMode == TransformMode.Move){
+            disableRotate();
+            enableMove();
+        }else if (this.transformMode == TransformMode.Rotate){
+            disableMove();
+            enableRotate();
+        }
+
+        updateAxisLines();
     }
 
     @Override
@@ -144,7 +213,13 @@ public class GizmoMovement extends Component {
             }
         }
 
-        if(isDragging) move(mouseRay);
+        if(isDragging){
+            if(transformMode == TransformMode.Move){
+                move(mouseRay);
+            }else if(transformMode == TransformMode.Rotate){
+                rotate(mouseRay);
+            }
+        }
     }
 
     private void move(Raycast.Ray mouseRay){
@@ -152,7 +227,18 @@ public class GizmoMovement extends Component {
         updateAxisLines();
     }
 
+    private void rotate(Raycast.Ray mouseRay){
+        //TODO: Implement/create rotateOnAxis component
+        updateAxisLines();
+    }
+
     public final boolean isCurrentlyMoving(){
         return isDragging;
+    }
+
+    public enum TransformMode{
+        Move,
+        Rotate,
+        Scale
     }
 }

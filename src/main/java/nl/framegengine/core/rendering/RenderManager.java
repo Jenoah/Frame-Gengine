@@ -164,6 +164,18 @@ public class RenderManager {
         return debugRenderer.drawLine(startPoint, endPoint, color, persistent);
     }
 
+    public static DebugRenderer.DebugMesh debugCircle(Vector3f worldPosition, float radius){
+        return debugRenderer.drawCircle(worldPosition, radius);
+    }
+
+    public static DebugRenderer.DebugMesh debugCircle(Vector3f worldPosition, float radius, Vector3f color){
+        return debugRenderer.drawCircle(worldPosition, radius, color, false);
+    }
+
+    public static DebugRenderer.DebugMesh debugCircle(Vector3f worldPosition, float radius, Vector3f color, boolean persistent){
+        return debugRenderer.drawCircle(worldPosition, radius, color, persistent);
+    }
+
     public static DebugRenderer.DebugMesh debugMesh(Vector3f worldPosition, Mesh mesh){
         return debugRenderer.drawMesh(worldPosition, mesh);
     }
@@ -175,7 +187,6 @@ public class RenderManager {
     public static DebugRenderer.DebugMesh debugMesh(Vector3f worldPosition, Mesh mesh, Vector3f color, boolean persistent){
         return debugRenderer.drawMesh(worldPosition, mesh, color, persistent);
     }
-
 
 
 

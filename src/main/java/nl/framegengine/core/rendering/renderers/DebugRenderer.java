@@ -113,10 +113,10 @@ public class DebugRenderer implements IRenderer {
         if(debugLines.isEmpty()) return;
 
         debugLines.forEach(debugMesh -> {
-        debugShader.prepare(debugMesh.worldPosition, debugMesh.worldRotation, Constants.VECTOR3_ONE, mainCamera);
+            debugShader.prepare(debugMesh.worldPosition, debugMesh.worldRotation, Constants.VECTOR3_ONE, mainCamera);
             bind(debugMesh.mesh);
             debugShader.setColor(debugMesh.color);
-            GL11.glDrawArrays(GL11.GL_LINES, 0, debugMesh.mesh.getVertices().length);
+            GL11.glDrawArrays(GL11.GL_LINE_LOOP, 0, debugMesh.mesh.getVertices().length);
             unbind();
         });
 
@@ -216,6 +216,31 @@ public class DebugRenderer implements IRenderer {
 
     public DebugMesh drawLine(Vector3f startPoint, Vector3f endPoint, Vector3f color, boolean persistent){
         DebugMesh debugMesh = new DebugMesh(startPoint, endPoint, color, persistent);
+        debugLines.add(debugMesh);
+        return debugMesh;
+    }
+
+    public DebugMesh drawCircle(Vector3f worldPosition, float radius) {
+        return drawCircle(worldPosition, radius, Constants.COLOR_RED, false);
+    }
+
+    public DebugMesh drawCircle(Vector3f worldPosition, float radius, Vector3f color) {
+        return drawCircle(worldPosition, radius, color, false);
+    }
+
+
+    public DebugMesh drawCircle(Vector3f worldPosition, float radius, Vector3f color, boolean persistent){
+        int numSegments = 48;
+        Vector3f[] vertices = new Vector3f[numSegments];
+
+        for (int i = 0; i < numSegments; i++) {
+            float angle = (float) (2.0f * Math.PI * i / numSegments);
+            vertices[i] = new Vector3f((float) Math.cos(angle) * radius, (float) Math.sin(angle) * radius, 0f);
+        }
+
+        Mesh mesh = new Mesh(vertices);
+
+        DebugMesh debugMesh = new DebugMesh(mesh, worldPosition, color, persistent);
         debugLines.add(debugMesh);
         return debugMesh;
     }
