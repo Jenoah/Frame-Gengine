@@ -1,7 +1,7 @@
 package nl.framegengine.editor.sceneComponents;
 
 import nl.framegengine.core.components.Component;
-import nl.framegengine.core.components.constraint.MoveOnAxis;
+import nl.framegengine.core.components.constraint.MoveOnAxisConstraint;
 import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.entity.GameObject;
