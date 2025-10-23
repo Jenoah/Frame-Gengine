@@ -171,7 +171,6 @@ public class Raycast {
     }
 
     public static Vector3f closestPointOnLine(Vector3f currentPosition, Vector3f constraintAxis, Vector3f targetPosition, Vector3f targetDirection) {
-        // Normalize directions (important for correct projection calculations)
         constraintAxis = ObjectPool.VECTOR3F_POOL.obtain().set(constraintAxis).normalize();
         targetDirection = ObjectPool.VECTOR3F_POOL.obtain().set(targetDirection).normalize();
 
