@@ -5,7 +5,7 @@ import imgui.ImVec2;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import nl.framegengine.core.components.constraint.DirectConstraint;
-import nl.framegengine.core.components.constraint.MoveOnAxis;
+import nl.framegengine.core.components.constraint.MoveOnAxisConstraint;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.engine.EngineManager;
 import nl.framegengine.core.engine.WindowManager;
