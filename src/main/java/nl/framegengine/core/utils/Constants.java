@@ -67,6 +67,8 @@ public class Constants {
     public static final Vector3f AMBIENT_COLOR = new Vector3f(0.4f, 0.4f, 0.6f);
 
     public static final float DEGREES_90_IN_RADIANS = 1.57f;
+    public static final float DEGREES_180_IN_RADIANS = 3.14f;
+    public static final float DEGREES_270_IN_RADIANS = 4.71f;
 
     public static final Vector3f[] cornerTable = new Vector3f[] {
             new Vector3f(0, 0, 0),
