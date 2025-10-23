@@ -24,6 +24,17 @@ public class Raycast {
             this.origin.set(origin);
             this.direction.set(direction);
         }
+
+        public Ray set(Ray ray){
+            this.origin.set(ray.origin);
+            this.direction.set(ray.direction);
+            return this;
+        }
+
+        @Override
+        public String toString() {
+            return "Origin: " + origin.x + ", " + origin.y + ", " + origin.z + " || Direction: " + direction.x + ", " + direction.y + ", " + direction.z;
+        }
     }
 
     public static class RayHit {
