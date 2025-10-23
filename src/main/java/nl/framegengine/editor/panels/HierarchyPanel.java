@@ -52,6 +52,7 @@ public class HierarchyPanel extends EditorPanel {
         if (gizmo != null && currentlySelectedGameObject != null
                 && !gizmo.isSelfOrChild(currentlySelectedGameObject)) {
             gizmo.setPosition(currentlySelectedGameObject.getPosition());
+            gizmo.setRotation(currentlySelectedGameObject.getRotation());
             gizmo.getComponent(DirectConstraint.class).setConnectedObject(currentlySelectedGameObject);
         }
     }
