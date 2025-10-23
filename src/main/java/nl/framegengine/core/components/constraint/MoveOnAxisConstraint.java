@@ -6,12 +6,12 @@ import nl.framegengine.core.utils.Calculus;
 import nl.framegengine.core.utils.ObjectPool;
 import org.joml.Vector3f;
 
-public class MoveOnAxis extends Component {
+public class MoveOnAxisConstraint extends Component {
 
     private final Vector3f constraintAxis = new Vector3f(0, 1, 0);
     private final Vector3f offset = new Vector3f(0);
 
-    public MoveOnAxis(){}
+    public MoveOnAxisConstraint(){}
 
     public void move(Vector3f targetPosition, Vector3f targetDirection){
         if(root == null) return;
