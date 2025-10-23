@@ -192,6 +192,7 @@ public class GamePanel extends EditorPanel {
         GameObject gizmo = new GameObject(EngineSettings.editorGizmoName);
         gizmo.translateLocal(Constants.VECTOR3_UP);
 
+        MoveOnAxisConstraint moveGizmoOnAxis = new MoveOnAxisConstraint();
         DirectConstraint directConstraint = new DirectConstraint();
         MoveOnAxis moveGizmoOnAxis = new MoveOnAxis();
         gizmoMovement = new GizmoMovement(moveGizmoOnAxis);
