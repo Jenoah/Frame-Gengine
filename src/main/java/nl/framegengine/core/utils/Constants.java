@@ -18,6 +18,7 @@ public class Constants {
 
     //Vector 3
     public static final Vector3f VECTOR3_UP = new Vector3f(0, 1, 0);
+    public static final Vector3f VECTOR3_DOWN = new Vector3f(0, -1, 0);
     public static final Vector3f VECTOR3_FORWARD = new Vector3f(0, 0, -1);
     public static final Vector3f VECTOR3_BACK = new Vector3f(0, 0, 1);
     public static final Vector3f VECTOR3_RIGHT = new Vector3f(1, 0, 0);
