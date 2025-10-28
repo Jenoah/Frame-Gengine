@@ -158,12 +158,12 @@ public class Mesh implements IJsonSerializable {
         int vbo = GL15.glGenBuffers();
         vbos.add(vbo);
         GL30.glBindBuffer(GL30.GL_ELEMENT_ARRAY_BUFFER, vbo);
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            IntBuffer buffer = stack.mallocInt(triangles.length);
-            buffer.put(triangles);
-            buffer.flip();
-            GL30.glBufferData(GL30.GL_ELEMENT_ARRAY_BUFFER, buffer, GL30.GL_STATIC_DRAW);
-        }
+        IntBuffer buffer = MemoryUtil.memAllocInt(triangles.length);
+        buffer.put(triangles);
+        buffer.flip();
+        GL30.glBufferData(GL30.GL_ELEMENT_ARRAY_BUFFER, buffer, GL30.GL_STATIC_DRAW);
+        MemoryUtil.memFree(buffer);
+
         return vbo;
     }
 
@@ -171,14 +171,13 @@ public class Mesh implements IJsonSerializable {
         int vbo = GL15.glGenBuffers();
         vbos.add(vbo);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            FloatBuffer buffer = stack.mallocFloat(data.length);
-            buffer.put(data);
-            buffer.flip();
-            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
-            GL20.glVertexAttribPointer(attributeNumber, vertexCount, GL11.GL_FLOAT, false, 0, 0);
-        }
+        FloatBuffer buffer = MemoryUtil.memAllocFloat(data.length);
+        buffer.put(data);
+        buffer.flip();
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
+        GL20.glVertexAttribPointer(attributeNumber, vertexCount, GL11.GL_FLOAT, false, 0, 0);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+        MemoryUtil.memFree(buffer);
         return vbo;
     }
 

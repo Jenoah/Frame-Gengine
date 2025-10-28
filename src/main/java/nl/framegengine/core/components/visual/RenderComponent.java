@@ -4,7 +4,7 @@ import nl.framegengine.core.components.Component;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.entity.SceneManager;
-import nl.framegengine.core.modelLoaders.OBJLoader.OBJLoader;
+import nl.framegengine.core.modelLoaders.StaticMeshLoader;
 import nl.framegengine.core.rendering.RenderManager;
 import nl.framegengine.core.shaders.ShaderManager;
 import nl.framegengine.core.utils.AABB;
@@ -219,7 +219,7 @@ public class RenderComponent extends Component {
                 return this;
             }
 
-            Set<MeshMaterialSet> mms = OBJLoader.loadOBJModel(meshPath);
+            Set<MeshMaterialSet> mms = StaticMeshLoader.load(meshPath, "");
             mms.forEach(meshMaterialSet -> {
                 if(uvScale != 1f) meshMaterialSet.getMesh().setUVScale(uvScale);
                 meshMaterialSet.setRoot(getRoot());

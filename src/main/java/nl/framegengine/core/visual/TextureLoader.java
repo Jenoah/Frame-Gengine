@@ -1,5 +1,6 @@
 package nl.framegengine.core.visual;
 
+import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.utils.Constants;
 import nl.framegengine.editor.ManifestHelper;
 import org.joml.Math;
@@ -47,7 +48,8 @@ public class TextureLoader {
             } else {
                 InputStream is = TextureLoader.class.getResourceAsStream(fileName);
                 if (is == null) {
-                    throw new Exception("Image file " + fileName + " could not be located in filesystem or resource folder: " + STBImage.stbi_failure_reason());
+                    Debug.logError("Image file " + fileName + " could not be located in filesystem or resource folder: " + STBImage.stbi_failure_reason());
+                    return -1;
                 }
                 byte[] bytes = is.readAllBytes();
                 ByteBuffer buffer = BufferUtils.createByteBuffer(bytes.length).put(bytes);
