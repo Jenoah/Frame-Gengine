@@ -130,18 +130,18 @@ public class Mesh implements IJsonSerializable {
                 this.triangles = triangleArray;
             }
         }
-        if(vertexFloatArray != null){
+        if(vertexFloatArray != null && vertexFloatArray.length > 0){
             vertexVBOID = storeDataInAttributeList(0, this.dimension, vertexFloatArray);
             vertexCount = vertexFloatArray.length;
             this.vertices = vertexFloatArray;
         }
 
-        if(uvFloatArray != null){
+        if(uvFloatArray != null && uvFloatArray.length > 0){
             uvVBOID = storeDataInAttributeList(1, 2, uvFloatArray);
             this.uvs = uvFloatArray;
         }
 
-        if(normals != null) {
+        if(normals != null && normals.length > 0) {
             normalVBOID = storeDataInAttributeList(2, 3, normals);
             this.normals = normals;
         }
@@ -155,6 +155,10 @@ public class Mesh implements IJsonSerializable {
     }
 
     private int storeIndicesBuffer(int[] triangles){
+        if (triangles == null || triangles.length == 0) {
+            throw new IllegalArgumentException("Index array is empty or null!");
+        }
+
         int vbo = GL15.glGenBuffers();
         vbos.add(vbo);
         GL30.glBindBuffer(GL30.GL_ELEMENT_ARRAY_BUFFER, vbo);
@@ -162,6 +166,12 @@ public class Mesh implements IJsonSerializable {
         buffer.put(triangles);
         buffer.flip();
         GL30.glBufferData(GL30.GL_ELEMENT_ARRAY_BUFFER, buffer, GL30.GL_STATIC_DRAW);
+
+        int error = GL11.glGetError();
+        if (error != GL11.GL_NO_ERROR) {
+            Debug.logConsoleError("OpenGL error (storeIndicesBuffer) (data length: " + triangles.length + "): " + error);
+        }
+
         MemoryUtil.memFree(buffer);
 
         return vbo;
@@ -169,6 +179,7 @@ public class Mesh implements IJsonSerializable {
 
     private int storeDataInAttributeList(int attributeNumber, int vertexCount, float[] data){
         int vbo = GL15.glGenBuffers();
+
         vbos.add(vbo);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
         FloatBuffer buffer = MemoryUtil.memAllocFloat(data.length);
@@ -177,6 +188,12 @@ public class Mesh implements IJsonSerializable {
         GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
         GL20.glVertexAttribPointer(attributeNumber, vertexCount, GL11.GL_FLOAT, false, 0, 0);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+
+        int error = GL11.glGetError();
+        if (error != GL11.GL_NO_ERROR) {
+            Debug.logConsoleError("OpenGL error (storeDataInAttributeList) (data length: " + attributeNumber + "/" + data.length + "): " + error);
+        }
+
         MemoryUtil.memFree(buffer);
         return vbo;
     }

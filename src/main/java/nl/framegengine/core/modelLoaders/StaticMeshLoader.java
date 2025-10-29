@@ -23,7 +23,9 @@ import static org.lwjgl.assimp.Assimp.*;
 public class StaticMeshLoader {
 
     public static Set<MeshMaterialSet> load(String resourcePath, String texturesDir) {
-        return load(resourcePath, texturesDir, aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
+        return load(resourcePath, texturesDir,
+                aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals |
+                        aiProcess_OptimizeMeshes | aiProcess_ImproveCacheLocality | aiProcess_OptimizeGraph);
     }
 
     public static Set<MeshMaterialSet> load(String resourcePath, String texturesDir, int flags) {
