@@ -7,6 +7,7 @@ import nl.framegengine.core.shaders.Shader;
 import nl.framegengine.core.shaders.SimpleLitShader;
 import nl.framegengine.core.visual.MeshMaterialSet;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.*;
 
 import java.util.*;
@@ -17,14 +18,15 @@ public class ComponentRenderer implements IRenderer {
 
     // Using more efficient collection for shader-based batching
     private final Map<Shader, List<MeshMaterialSet>> sortedRenderObjects = new HashMap<>();
-    private final Map<Shader, List<MeshMaterialSet>> sortedTransparentRenderObjects = new HashMap<>();
+    private final List<MeshMaterialSet> sortedTransparentRenderObjects = new ArrayList<>();
 
     // Caching sorted collections for better iteration performance
     private final List<Map.Entry<Shader, List<MeshMaterialSet>>> cachedSortedEntries = new ArrayList<>();
-    private final List<Map.Entry<Shader, List<MeshMaterialSet>>> cachedTransparentEntries = new ArrayList<>();
+    private final List<MeshMaterialSet> cachedTransparentEntries = new ArrayList<>();
 
     // Flag to track if cache needs updating
     private boolean needsRebatch = true;
+    private boolean needsTransparentRebatch = true;
 
     private Matrix4f shadowSpaceMatrix = new Matrix4f();
     private int shadowMapID = 0;
@@ -41,6 +43,8 @@ public class ComponentRenderer implements IRenderer {
     private boolean lastCullState = true;
     private boolean lastBlendState = false;
 
+    private final Vector3f previousCameraPosition = new Vector3f(0);
+
     @Override
     public void init() throws Exception {  }
 
@@ -48,11 +52,23 @@ public class ComponentRenderer implements IRenderer {
     public void render() {
         if ((sortedRenderObjects.isEmpty() && sortedTransparentRenderObjects.isEmpty()) || mainCamera == null) return;
 
-        // Update cached collections if needed
-        if (needsRebatch) { updateRenderBatches(); }
+        if(mainCamera.getPosition().distanceSquared(previousCameraPosition) > 10){
+            previousCameraPosition.set(mainCamera.getPosition());
+            needsTransparentRebatch = true;
+        }
 
-        renderPass(cachedSortedEntries);
+        // Update cached collections if needed
+        if (needsRebatch) updateRenderBatches(false);
+        if (needsTransparentRebatch) updateRenderBatches(true);
+
+
+        //Render opaque objects
+        renderPassShaderList(cachedSortedEntries);
+
+        //Render transparent objects
+        GL11.glDepthMask(false);
         renderPass(cachedTransparentEntries);
+        GL11.glDepthMask(true);
 
         // Reset state when done
         if (isRenderingOnTop) {
@@ -67,10 +83,15 @@ public class ComponentRenderer implements IRenderer {
     }
 
     private void updateRenderBatches() {
-        sortEntries(sortedRenderObjects, cachedSortedEntries, false);
+        updateRenderBatches(false);
+    }
+
+    private void updateRenderBatches(boolean transparentOnly) {
+        if(!transparentOnly) sortEntries(sortedRenderObjects, cachedSortedEntries, false);
         sortEntries(sortedTransparentRenderObjects, cachedTransparentEntries, true);
 
         needsRebatch = false;
+        needsTransparentRebatch = false;
     }
 
     private List<Map.Entry<Shader, List<MeshMaterialSet>>> sortEntries(Map<Shader, List<MeshMaterialSet>> entryList, List<Map.Entry<Shader, List<MeshMaterialSet>>> outputList, boolean backToFront){
@@ -86,7 +107,17 @@ public class ComponentRenderer implements IRenderer {
         return outputList;
     }
 
-    private void renderPass(List<Map.Entry<Shader, List<MeshMaterialSet>>> batchEntries) {
+    private List<MeshMaterialSet> sortEntries(List<MeshMaterialSet> entryList, List<MeshMaterialSet> outputList, boolean backToFront){
+        outputList.clear();
+
+        entryList.sort(Comparator.comparingDouble(mms -> mms.getRoot().getRenderCameraSquaredDistance()));
+        if(backToFront) entryList = entryList.reversed();
+
+        outputList.addAll(entryList);
+        return outputList;
+    }
+
+    private void renderPassShaderList(List<Map.Entry<Shader, List<MeshMaterialSet>>> batchEntries) {
         for (Map.Entry<Shader, List<MeshMaterialSet>> entry : batchEntries) {
             Shader shader = entry.getKey();
             List<MeshMaterialSet> meshMaterialSetList = entry.getValue();
@@ -116,38 +147,69 @@ public class ComponentRenderer implements IRenderer {
         }
     }
 
+    private void renderPass(List<MeshMaterialSet> batchEntries) {
+        if (batchEntries.isEmpty()) return;
+
+        for (MeshMaterialSet entry : batchEntries) {
+            Shader shader = entry.material.getShader();
+
+            // Bind shader only when different from last one
+            if (shader != lastBoundShader) {
+                if (lastBoundShader != null) {
+                    lastBoundShader.unbind();
+                }
+
+                if (recordMetrics) metrics.recordShaderBind();
+                shader.bind();
+                shader.render(mainCamera);
+                lastBoundShader = shader;
+            }
+
+            // Set wireframe state only when needed
+            if (wireframeMode != lastWireframeState) {
+                GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, wireframeMode ? GL11.GL_LINE : GL11.GL_FILL);
+                lastWireframeState = wireframeMode;
+            }
+
+            // Process each mesh material set
+            renderPass(entry);
+        }
+    }
+
     private void renderPass(Shader shader, List<MeshMaterialSet> meshMaterialSetList) {
         if(wireframeMode) GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
 
-        meshMaterialSetList.forEach(meshMaterialSet -> {
-            if (!meshMaterialSet.getRoot().isEnabled() || !mainCamera.isInFrustumAABB(meshMaterialSet.getRoot())) return;
-            if (recordMetrics) metrics.recordStateChange();
-
-            bind(meshMaterialSet);
-            prepareShadow(meshMaterialSet);
-            shader.prepare(meshMaterialSet, mainCamera);
-
-            if(meshMaterialSet.material.isOnTop() != isRenderingOnTop){
-                isRenderingOnTop = meshMaterialSet.material.isOnTop();
-                if(isRenderingOnTop) {
-                    GL11.glDepthRange(0, 0.01);
-                }else{
-                    GL11.glDepthRange(0.01, 1.0);
-                }
-            }
-
-            if (recordMetrics) metrics.recordDrawCall();
-            if(meshMaterialSet.getMesh().isInstanced()){
-                GL33.glDrawElementsInstanced(GL11.GL_TRIANGLES, meshMaterialSet.getMesh().getVertexCount(), GL11.GL_UNSIGNED_INT, 0, meshMaterialSet.getMesh().getInstanceCount());
-            }else{
-                if(recordMetrics) metrics.recordVertexCount(meshMaterialSet.getMesh().getVertexCount());
-                GL11.glDrawElements(GL11.GL_TRIANGLES, meshMaterialSet.getMesh().getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
-            }
-
-            unbind();
-        });
+        meshMaterialSetList.forEach(this::renderPass);
 
         if(wireframeMode) GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
+    }
+
+    private void renderPass(MeshMaterialSet meshMaterialSet) {
+        if (!meshMaterialSet.getRoot().isEnabled() || !mainCamera.isInFrustumAABB(meshMaterialSet.getRoot())) return;
+        if (recordMetrics) metrics.recordStateChange();
+
+        bind(meshMaterialSet);
+        prepareShadow(meshMaterialSet);
+        meshMaterialSet.material.getShader().prepare(meshMaterialSet, mainCamera);
+
+        if(meshMaterialSet.material.isOnTop() != isRenderingOnTop){
+            isRenderingOnTop = meshMaterialSet.material.isOnTop();
+            if(isRenderingOnTop) {
+                GL11.glDepthRange(0, 0.01);
+            }else{
+                GL11.glDepthRange(0.01, 1.0);
+            }
+        }
+
+        if (recordMetrics) metrics.recordDrawCall();
+        if(meshMaterialSet.getMesh().isInstanced()){
+            GL33.glDrawElementsInstanced(GL11.GL_TRIANGLES, meshMaterialSet.getMesh().getVertexCount(), GL11.GL_UNSIGNED_INT, 0, meshMaterialSet.getMesh().getInstanceCount());
+        }else{
+            if(recordMetrics) metrics.recordVertexCount(meshMaterialSet.getMesh().getVertexCount());
+            GL11.glDrawElements(GL11.GL_TRIANGLES, meshMaterialSet.getMesh().getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
+        }
+
+        unbind();
     }
 
     public void bind(MeshMaterialSet meshMaterialSet) {
@@ -171,7 +233,7 @@ public class ComponentRenderer implements IRenderer {
         }
 
         // Only change blend/cull state when needed
-        boolean needsBlend = meshMaterialSet.material.isDoubleSided();
+        boolean needsBlend = meshMaterialSet.material.isDoubleSided() || meshMaterialSet.material.isTransparent();
         if (needsBlend != lastBlendState) {
             if (needsBlend) {
                 GL11.glEnable(GL11.GL_BLEND);
@@ -226,12 +288,8 @@ public class ComponentRenderer implements IRenderer {
         needsRebatch = true;
         renderComponent.getMeshMaterialSets().forEach(meshMaterialSet -> {
             if(meshMaterialSet.material.isTransparent()){
-                if (!sortedTransparentRenderObjects.containsKey(meshMaterialSet.material.getShader())) {
-                    List<MeshMaterialSet> meshMaterialSets = new ArrayList<>();
-                    meshMaterialSets.add(meshMaterialSet);
-                    sortedTransparentRenderObjects.put(meshMaterialSet.material.getShader(), meshMaterialSets);
-                } else {
-                    sortedTransparentRenderObjects.get(meshMaterialSet.material.getShader()).add(meshMaterialSet);
+                if(!sortedTransparentRenderObjects.contains(meshMaterialSet)) {
+                    sortedTransparentRenderObjects.add(meshMaterialSet);
                 }
             }else{
                 if (!sortedRenderObjects.containsKey(meshMaterialSet.material.getShader())) {
@@ -250,7 +308,7 @@ public class ComponentRenderer implements IRenderer {
         needsRebatch = true;
         renderComponent.getMeshMaterialSets().forEach(meshMaterialSet -> {
             if(meshMaterialSet.material.isTransparent()){
-                sortedTransparentRenderObjects.get(meshMaterialSet.material.getShader()).remove(meshMaterialSet);
+                sortedTransparentRenderObjects.remove(meshMaterialSet);
             }else{
                 sortedRenderObjects.get(meshMaterialSet.material.getShader()).remove(meshMaterialSet);
             }
