@@ -103,4 +103,12 @@ public class Calculus {
     public static Vector3f cross(Vector3f a, Vector3f b) {
         return a.cross(b);
     }
+
+//    Float
+
+    public static float signedAngle2D(Vector2f from, Vector2f to) {
+        float cross = from.x * to.y - from.y * to.x;
+        float dot = from.x * to.x + from.y * to.y;
+        return (float) Math.atan2(-cross, dot);
+    }
 }

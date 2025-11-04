@@ -12,9 +12,7 @@ import nl.framegengine.core.visual.Mesh;
 import nl.framegengine.core.visual.MeshMaterialSet;
 import nl.framegengine.core.visual.Texture;
 import nl.framegengine.editor.EngineSettings;
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
+import org.joml.*;
 
 public class Camera extends GameObject {
 
@@ -224,5 +222,17 @@ public class Camera extends GameObject {
         }
 
         return this;
+    }
+
+    public Vector2f projectToScreen(Vector3f worldPos) {
+        Vector4f clipSpace = ObjectPool.VECTOR4F_POOL.obtain().set(worldPos, 1.0f).mul(getViewProjectionMatrix());
+        clipSpace.div(clipSpace.w);
+
+        float x = (clipSpace.x * 0.5f + 0.5f) * WindowManager.getInstance().getWidth();
+        float y = (1.0f - (clipSpace.y * 0.5f + 0.5f)) * WindowManager.getInstance().getHeight(); // flip Y if needed
+
+        ObjectPool.VECTOR4F_POOL.free(clipSpace);
+
+        return new Vector2f(x, y);
     }
 }
