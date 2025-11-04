@@ -1,6 +1,7 @@
 package nl.framegengine.core.engine;
 
 import nl.framegengine.core.shaders.ShaderManager;
+import nl.framegengine.core.visual.TextureLoader;
 import nl.framegengine.editor.EngineSettings;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.Scene;
@@ -25,6 +26,8 @@ public class GameInstance implements ILogic{
         Debug.logConsole("Loading window settings");
         window.setClearColor(0, 0, 0, 0);
         window.setWindowIcon("textures/FrameGengine_icon.png");
+
+        TextureLoader.setDefaultTextureId(TextureLoader.loadTexture("textures/texture_not_found.png"));
 
         Scene level = SceneManager.loadScene(EngineSettings.currentProjectDirectory + File.separator + EngineSettings.currentLevelPath);
 

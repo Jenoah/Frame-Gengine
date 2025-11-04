@@ -1,5 +1,6 @@
 package nl.framegengine.core.visual;
 
+import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.utils.Constants;
 import nl.framegengine.editor.ManifestHelper;
 import org.joml.Math;
@@ -24,6 +25,7 @@ public class TextureLoader {
     private static boolean pointFilter = false;
     private static boolean repeatTexture = true;
     private static boolean isNormalMap = false;
+    private static int defaultTextureID = 0;
 
     public static int loadTexture(String fileName){
         String textureGUID = ManifestHelper.getGuidByPath(ManifestHelper.manifestFileType.TEXTURE, fileName);
@@ -47,7 +49,8 @@ public class TextureLoader {
             } else {
                 InputStream is = TextureLoader.class.getResourceAsStream(fileName);
                 if (is == null) {
-                    throw new Exception("Image file " + fileName + " could not be located in filesystem or resource folder: " + STBImage.stbi_failure_reason());
+                    Debug.logConsoleError("Image file " + fileName + " could not be located in filesystem or resource folder: " + STBImage.stbi_failure_reason());
+                    return defaultTextureID;
                 }
                 byte[] bytes = is.readAllBytes();
                 ByteBuffer buffer = BufferUtils.createByteBuffer(bytes.length).put(bytes);
@@ -57,13 +60,15 @@ public class TextureLoader {
             }
 
             if(imageBuffer == null){
-                throw new Exception("Image file " + fileName + " could not be loaded because " + STBImage.stbi_failure_reason());
+                Debug.logConsoleError("Image file " + fileName + " could not be loaded because " + STBImage.stbi_failure_reason());
+                return defaultTextureID;
             }
 
             width = w.get();
             height = h.get();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            Debug.logConsoleError(e.getMessage());
+            return defaultTextureID;
         }
 
         int id = GL11.glGenTextures();
@@ -95,13 +100,9 @@ public class TextureLoader {
             GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
         }
 
-        if(pointFilter) {
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST_MIPMAP_LINEAR);
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-        } else {
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
-            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-        }
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST_MIPMAP_LINEAR);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, pointFilter ? GL11.GL_NEAREST : GL11.GL_LINEAR);
+
         GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL14.GL_TEXTURE_LOD_BIAS, 0f);
 
         if(Constants.USE_ANISOTROPIC && GL.createCapabilities().GL_EXT_texture_filter_anisotropic){
@@ -170,29 +171,29 @@ public class TextureLoader {
     }
 
     private static TextureData getTextureData(String fileName){
-            ByteBuffer imageBuffer;
-            int width, height;
-            IntBuffer comp;
+        ByteBuffer imageBuffer;
+        int width, height;
+        IntBuffer comp;
 
-            try(MemoryStack stack = MemoryStack.stackPush()){
-                IntBuffer w = stack.mallocInt(1);
-                IntBuffer h = stack.mallocInt(1);
-                comp = stack.mallocInt(1);
+        try(MemoryStack stack = MemoryStack.stackPush()){
+            IntBuffer w = stack.mallocInt(1);
+            IntBuffer h = stack.mallocInt(1);
+            comp = stack.mallocInt(1);
 
-                stbi_set_flip_vertically_on_load(false);
-                imageBuffer = STBImage.stbi_load(fileName, w, h, comp, 4);
-                if(imageBuffer == null){
-                    throw new Exception("Image file " + fileName + " could not be loaded because " + STBImage.stbi_failure_reason());
-                }
-
-                width = w.get();
-                height = h.get();
-
-                return new TextureData(imageBuffer, width, height);
-
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            stbi_set_flip_vertically_on_load(false);
+            imageBuffer = STBImage.stbi_load(fileName, w, h, comp, 4);
+            if(imageBuffer == null){
+                throw new Exception("Image file " + fileName + " could not be loaded because " + STBImage.stbi_failure_reason());
             }
+
+            width = w.get();
+            height = h.get();
+
+            return new TextureData(imageBuffer, width, height);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
@@ -235,5 +236,9 @@ public class TextureLoader {
             if (id == textureId) guid.set(textureGuid);
         });
         return guid.get();
+    }
+
+    public static void setDefaultTextureId(int id){
+        defaultTextureID = id;
     }
 }
