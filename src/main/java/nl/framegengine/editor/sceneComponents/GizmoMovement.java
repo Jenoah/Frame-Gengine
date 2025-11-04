@@ -142,9 +142,9 @@ public class GizmoMovement extends Component {
 
         Vector3f rootPosition = root.getPosition();
 
-        this.xAxis.setWorldPosition(Calculus.addVectors(rootPosition, Calculus.multiplyVector(Constants.VECTOR3_RIGHT, 0.81f)));
-        this.yAxis.setWorldPosition(Calculus.addVectors(rootPosition, Calculus.multiplyVector(Constants.VECTOR3_UP, 0.81f)));
-        this.zAxis.setWorldPosition(Calculus.addVectors(rootPosition, Calculus.multiplyVector(Constants.VECTOR3_FORWARD, 0.81f)));
+        this.xAxis.setWorldPosition(Calculus.addVectors(rootPosition, Calculus.multiplyVector(Constants.VECTOR3_RIGHT, 0.8f)));
+        this.yAxis.setWorldPosition(Calculus.addVectors(rootPosition, Calculus.multiplyVector(Constants.VECTOR3_UP, 0.8f)));
+        this.zAxis.setWorldPosition(Calculus.addVectors(rootPosition, Calculus.multiplyVector(Constants.VECTOR3_FORWARD, 0.8f)));
 
         this.xAxis.setWorldRotation(new Quaternionf().fromAxisAngleRad(Constants.VECTOR3_BACK, Math.toRadians(270f)));
         this.yAxis.setWorldRotation(Constants.QUATERNION_LEFT);
