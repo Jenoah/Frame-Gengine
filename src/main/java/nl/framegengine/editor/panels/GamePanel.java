@@ -158,8 +158,8 @@ public class GamePanel extends EditorPanel {
         Scene gameplayScene = new Scene();
         gameplayScene.deserializeFromJson(editingSceneJson);
         gameplayScene.setLevelName(gameplayScene.getLevelName() + " - Gameplay");
-        SceneManager.setCurrentScene(gameplayScene);
         EngineSettings.isInGame = true;
+        SceneManager.setCurrentScene(gameplayScene);
         ImGuiHelper.hideProgressBar();
     }
 
@@ -168,6 +168,7 @@ public class GamePanel extends EditorPanel {
             EngineSettings.isInGame = false;
             SceneManager.setCurrentScene((Scene)new Scene().deserializeFromJson(editingSceneJson));
             GameObject gizmo = addGizmo();
+            if(gizmo == null) return;
             addEditorCamera(gizmo);
             gizmo.setEnabled(false);
         }
@@ -268,6 +269,7 @@ public class GamePanel extends EditorPanel {
             editorGameLauncher.run(sizeX, sizeY - 20);
             if(!EngineSettings.isInGame){
                 GameObject gizmo = addGizmo();
+                if(gizmo == null) return;
                 gizmo.setEnabled(false);
                 addEditorCamera(gizmo);
             }
