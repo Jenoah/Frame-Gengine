@@ -100,7 +100,8 @@ public class ComponentRenderer implements IRenderer {
         for (Map.Entry<Shader, List<MeshMaterialSet>> entry : entryList.entrySet()){
             List<MeshMaterialSet> list = entry.getValue();
             list.sort(Comparator.comparingDouble(mms -> mms.getRoot().getRenderCameraSquaredDistance()));
-            if(backToFront) entry.setValue(list.reversed()); //TODO: This doesn't work and it allocates a new list which is not needed
+            if(backToFront) list.sort(Collections.reverseOrder());
+            entry.setValue(list);
             outputList.add(entry);
         }
 
