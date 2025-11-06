@@ -192,7 +192,7 @@ public class GizmoMovement extends Component {
 
     public void setTransformMode(TransformMode transformMode){
         this.transformMode = transformMode;
-        if(!this.isEnabled) return;
+        if(!this.getEnabled()) return;
 
         if(this.transformMode == TransformMode.Move){
             disableRotate();

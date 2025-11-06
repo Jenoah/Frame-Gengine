@@ -267,7 +267,7 @@ public class MarchingChunk {
     public void setActive(boolean active){
         if(chunkEntity == null) return;
         chunkEntity.setEnabled(active);
-        if(surfaceFeatureRenderComponent != null) surfaceFeatureRenderComponent.isEnabled = active;
+        if(surfaceFeatureRenderComponent != null) active ? surfaceFeatureRenderComponent.enable() : surfaceFeatureRenderComponent.disable();
     }
 
     //REGION Surface features
