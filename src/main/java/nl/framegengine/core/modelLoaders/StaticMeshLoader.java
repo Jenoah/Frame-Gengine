@@ -60,6 +60,7 @@ public class StaticMeshLoader {
         for (int i = 0; i < numMeshes; i++) {
             AIMesh aiMesh = AIMesh.create(aiMeshes.get(i));
             MeshMaterialSet mms = processMesh(aiMesh, materials);
+            mms.getMesh().setMeshPath(resourcePath);
             meshMaterialSets.add(mms);
         }
 

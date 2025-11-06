@@ -121,6 +121,7 @@ public class Mesh implements IJsonSerializable {
     }
 
     private void load(float[] vertexFloatArray, float[] uvFloatArray, int[] triangleArray, float[] normals){
+        GL11.glGetError(); //Resets OPEN GLs error flag
         vaoID = GL30.glGenVertexArrays();
         GL30.glBindVertexArray(vaoID);
 
