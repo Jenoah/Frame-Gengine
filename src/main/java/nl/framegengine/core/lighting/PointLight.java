@@ -29,7 +29,7 @@ public class PointLight extends Light {
             Material proxyMaterial = new Material(ShaderManager.billboardShader);
             proxyMaterial.castShadow(false).receiveShadows(false);
             String texturePath = "textures/pointLight.png";
-            proxyMaterial.setAlbedoTexture(new Texture(texturePath, false, false)).setDoubleSided(true).setTransparent(true);
+            proxyMaterial.setAlbedoTexture(new Texture(texturePath, false, false)).setTransparent(true);
             proxyMaterial.setDiffuseColor(new Vector4f(color.x, color.y, color.z, 1f));
             Mesh proxyMesh = PrimitiveLoader.getQuadMesh();
 

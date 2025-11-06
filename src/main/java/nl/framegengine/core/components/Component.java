@@ -15,8 +15,7 @@ public class Component implements IJsonSerializable {
     protected boolean hasInitiated = false;
     public boolean runInEditor = false;
 
-    //TODO: MAKE isEnabled LOOK AT THE isEnabled STATE OF THE root
-    public boolean isEnabled = true;
+    private boolean isEnabled = true;
 
     public void initiate(){
         if(hasInitiated) return;
@@ -42,9 +41,7 @@ public class Component implements IJsonSerializable {
         isEnabled = false;
     }
 
-    public final boolean getEnabled(){
-        return isEnabled;
-    }
+    public final boolean getEnabled(){ return root.isEnabled() && isEnabled; }
 
     public void cleanUp(){ }
 

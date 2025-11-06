@@ -155,7 +155,7 @@ public class Raycast {
         float closestDistance = Float.POSITIVE_INFINITY;
 
         for (GameObject gameObject : SceneManager.currentScene.getSortedGameObjects()) {
-            if((excludedObjects != null && excludedObjects.contains(gameObject)) || !gameObject.isShowInEditor()) continue;
+            if((excludedObjects != null && excludedObjects.contains(gameObject)) || !gameObject.isShowInEditor() || !gameObject.isEnabled()) continue;
             Float t = intersectRay(ray, gameObject.getAabb());
             if (t != null && t < closestDistance) {
                 closestDistance = t;

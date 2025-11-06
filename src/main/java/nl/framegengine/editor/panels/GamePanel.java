@@ -6,6 +6,7 @@ import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import nl.framegengine.core.components.constraint.DirectConstraint;
 import nl.framegengine.core.components.constraint.MoveOnAxisConstraint;
+import nl.framegengine.core.components.constraint.RotateOnAxisConstraint;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.engine.EngineManager;
 import nl.framegengine.core.engine.WindowManager;
@@ -157,8 +158,8 @@ public class GamePanel extends EditorPanel {
         Scene gameplayScene = new Scene();
         gameplayScene.deserializeFromJson(editingSceneJson);
         gameplayScene.setLevelName(gameplayScene.getLevelName() + " - Gameplay");
-        SceneManager.setCurrentScene(gameplayScene);
         EngineSettings.isInGame = true;
+        SceneManager.setCurrentScene(gameplayScene);
         ImGuiHelper.hideProgressBar();
     }
 
@@ -167,6 +168,7 @@ public class GamePanel extends EditorPanel {
             EngineSettings.isInGame = false;
             SceneManager.setCurrentScene((Scene)new Scene().deserializeFromJson(editingSceneJson));
             GameObject gizmo = addGizmo();
+            if(gizmo == null) return;
             addEditorCamera(gizmo);
             gizmo.setEnabled(false);
         }
@@ -192,15 +194,16 @@ public class GamePanel extends EditorPanel {
         GameObject gizmo = new GameObject(EngineSettings.editorGizmoName);
         gizmo.translateLocal(Constants.VECTOR3_UP);
 
-        MoveOnAxisConstraint moveGizmoOnAxis = new MoveOnAxisConstraint();
         DirectConstraint directConstraint = new DirectConstraint();
-        MoveOnAxis moveGizmoOnAxis = new MoveOnAxis();
-        gizmoMovement = new GizmoMovement(moveGizmoOnAxis);
+        MoveOnAxisConstraint moveGizmoOnAxis = new MoveOnAxisConstraint();
+        RotateOnAxisConstraint rotateGizmoOnAxis = new RotateOnAxisConstraint();
+        gizmoMovement = new GizmoMovement(moveGizmoOnAxis, rotateGizmoOnAxis);
         directConstraint.runInEditor = true;
         if(hierarchyPanel != null) hierarchyPanel.setGizmo(gizmo);
 
         gizmo.addComponent(directConstraint);
         gizmo.addComponent(moveGizmoOnAxis);
+        gizmo.addComponent(rotateGizmoOnAxis);
         gizmo.addComponent(gizmoMovement);
         gizmo.setShowInEditor(false);
         gizmo.canBeSaved(false);
@@ -266,6 +269,7 @@ public class GamePanel extends EditorPanel {
             editorGameLauncher.run(sizeX, sizeY - 20);
             if(!EngineSettings.isInGame){
                 GameObject gizmo = addGizmo();
+                if(gizmo == null) return;
                 gizmo.setEnabled(false);
                 addEditorCamera(gizmo);
             }
