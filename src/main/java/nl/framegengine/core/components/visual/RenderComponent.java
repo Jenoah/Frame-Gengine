@@ -12,6 +12,7 @@ import nl.framegengine.core.utils.Constants;
 import nl.framegengine.core.utils.IJsonSerializable;
 import nl.framegengine.core.utils.JsonHelper;
 import nl.framegengine.core.visual.Material;
+import nl.framegengine.core.visual.MaterialManager;
 import nl.framegengine.core.visual.Mesh;
 import nl.framegengine.core.visual.MeshMaterialSet;
 import org.joml.Vector3f;
@@ -223,7 +224,7 @@ public class RenderComponent extends Component {
             mms.forEach(meshMaterialSet -> {
                 if(uvScale != 1f) meshMaterialSet.getMesh().setUVScale(uvScale);
                 meshMaterialSet.setRoot(getRoot());
-                meshMaterialSet.material = mat;
+                if(mat != MaterialManager.defaultMaterial) meshMaterialSet.material = mat;
             });
             meshMaterialSets.addAll(mms);
         }
