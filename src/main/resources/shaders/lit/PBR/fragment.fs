@@ -17,6 +17,7 @@ struct Material {
     int hasTexture;
     float reflectance;
     float roughness;
+    float metallic;
 };
 
 struct DirectionalLight {
@@ -60,7 +61,6 @@ uniform int hasNormalMap = 0;
 uniform int hasRoughnessMap = 0;
 uniform int hasMetallicMap = 0;
 uniform int hasAOMap;
-uniform float metallic = .1;
 uniform float specularPower = 0;
 uniform float shadowBias;
 uniform int shadowPCFCount = 2;
@@ -137,7 +137,7 @@ vec3 getNormal()
 }
 
 float getRoughness() { return (hasRoughnessMap == 1) ? texture(roughnessMap, UV).r * material.roughness : material.roughness; }
-float getMetallic()  { return (hasMetallicMap == 1)  ? texture(metallicMap, UV).r  : metallic; }
+float getMetallic()  { return (hasMetallicMap == 1)  ? texture(metallicMap, UV).r  : material.metallic; }
 float getAO()        { return (hasAOMap == 1)        ? texture(aoMap, UV).r        : 1.0; }
 
 // UNIFIED PBR LIGHT FUNCTION

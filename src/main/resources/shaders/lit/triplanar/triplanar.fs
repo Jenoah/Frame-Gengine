@@ -16,6 +16,7 @@ struct Material {
     int hasTexture;
     float reflectance;
     float roughness;
+    float metallic;
 };
 
 struct DirectionalLight {

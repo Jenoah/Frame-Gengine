@@ -17,6 +17,7 @@ struct Material {
     int hasTexture;
     float reflectance;
     float roughness;
+    float metallic;
 };
 
 struct DirectionalLight {
@@ -72,6 +73,7 @@ vec3 diffuse;
 
 vec4 diffuseMap;
 
+//TODO: Add metallic property
 vec4 calculatePointLight(PointLight light){
     vec3 lightDirection = normalize(light.position - fragPosition);
 

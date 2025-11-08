@@ -148,6 +148,7 @@ public class Shader {
         createUniform(uniformName + ".hasTexture");
         createUniform(uniformName + ".reflectance");
         createUniform(uniformName + ".roughness");
+        createUniform(uniformName + ".metallic");
     }
 
     //Set uniforms
@@ -193,5 +194,6 @@ public class Shader {
         setUniform(uniformName + ".hasTexture", material.hasAlbedoTexture() ? 1 : 0);
         setUniform(uniformName + ".reflectance", material.getReflectance());
         setUniform(uniformName + ".roughness", material.getRoughness());
+        setUniform(uniformName + ".metallic", material.getMetallic());
     }
 }
