@@ -240,7 +240,8 @@ public class GameObject implements IJsonSerializable {
     }
 
     public Vector3f getScale() {
-        return scale;
+        if(parent == null) return scale;
+        return Calculus.multiplyVector(scale, parent.getScale());
     }
 
     public GameObject setScale(float scale) {
