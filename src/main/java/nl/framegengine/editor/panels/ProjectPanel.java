@@ -125,7 +125,6 @@ public class ProjectPanel extends EditorPanel {
                         GameObject newObject = new GameObject(objectName);
                         newObject.addComponent(new RenderComponent(mms));
                         SceneManager.currentScene.addEntity(newObject);
-                        //TODO: Make objects appear in HierarchyPanel when not in play mode
                     }
                 }
             } else {

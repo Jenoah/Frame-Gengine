@@ -65,7 +65,6 @@ public class HierarchyPanel extends EditorPanel {
         frameCount++;
         if(SceneManager.currentScene == null) return;
         if(frameCount > 60){
-            //TODO: Make newly instantiated objects appear in the hierarchy
             hierarchyObjects = SceneManager.currentScene.getRootGameObjects();
             frameCount = 0;
         }
@@ -77,7 +76,7 @@ public class HierarchyPanel extends EditorPanel {
         ImGui.pushStyleColor(ImGuiCol.ButtonHovered, hoverButtonBackgroundColor);
         ImGui.pushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0f, 0.5f);
         for (GameObject go : hierarchyObjects) {
-            if(!go.isShowInEditor()) break;
+            if(!go.isShowInEditor()) continue;
             String goLabel = go.getName() + "##" + go.getGuid();
             if(go.getParent() == null) {
                 if(currentlySelectedGameObject == go){
