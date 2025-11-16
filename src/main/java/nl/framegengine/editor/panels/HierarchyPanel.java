@@ -174,28 +174,34 @@ public class HierarchyPanel extends EditorPanel {
             if (ImGui.beginMenu("Shape")) {
                 if (ImGui.menuItem("Cube")) {
                     if(SceneManager.currentScene != null){
-                        GameObject cubeObject = new GameObject("Cube");
                         Set<MeshMaterialSet> meshMaterialSets = StaticMeshLoader.load("/models/cube.obj");
-                        cubeObject.addComponent(new RenderComponent(meshMaterialSets));
-                        SceneManager.currentScene.addEntity(cubeObject);
+                        if(meshMaterialSets != null) {
+                            GameObject cubeObject = new GameObject("Cube");
+                            cubeObject.addComponent(new RenderComponent(meshMaterialSets));
+                            SceneManager.currentScene.addEntity(cubeObject);
+                        }
                     }
                     ImGui.closeCurrentPopup();
                 }
                 if (ImGui.menuItem("Quad")) {
                     if(SceneManager.currentScene != null){
-                        GameObject cubeObject = new GameObject("Quad");
                         Set<MeshMaterialSet> meshMaterialSets = StaticMeshLoader.load("/models/quad.obj");
-                        cubeObject.addComponent(new RenderComponent(meshMaterialSets));
-                        SceneManager.currentScene.addEntity(cubeObject);
+                        if(meshMaterialSets != null) {
+                            GameObject cubeObject = new GameObject("Quad");
+                            cubeObject.addComponent(new RenderComponent(meshMaterialSets));
+                            SceneManager.currentScene.addEntity(cubeObject);
+                        }
                     }
                     ImGui.closeCurrentPopup();
                 }
                 if (ImGui.menuItem("Sphere")) {
                     if(SceneManager.currentScene != null){
-                        GameObject sphereObject = new GameObject("Sphere");
                         Set<MeshMaterialSet> meshMaterialSets = StaticMeshLoader.load("/models/sphere.obj");
-                        sphereObject.addComponent(new RenderComponent(meshMaterialSets));
-                        SceneManager.currentScene.addEntity(sphereObject);
+                        if(meshMaterialSets != null) {
+                            GameObject sphereObject = new GameObject("Sphere");
+                            sphereObject.addComponent(new RenderComponent(meshMaterialSets));
+                            SceneManager.currentScene.addEntity(sphereObject);
+                        }
                     }
                     ImGui.closeCurrentPopup();
                 }

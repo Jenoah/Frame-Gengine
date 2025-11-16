@@ -3,18 +3,18 @@ package nl.framegengine.editor.panels;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiSelectableFlags;
-import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.modelLoaders.StaticMeshLoader;
 import nl.framegengine.core.utils.FileHelper;
-import nl.framegengine.core.visual.MeshMaterialSet;
-import nl.framegengine.editor.*;
+import nl.framegengine.editor.EditorPanel;
+import nl.framegengine.editor.EngineSettings;
+import nl.framegengine.editor.ImGuiHelper;
+import nl.framegengine.editor.ManifestHelper;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Set;
 
 public class ProjectPanel extends EditorPanel {
     public ProjectPanel(int posX, int posY, int sizeX, int sizeY) {
@@ -119,13 +119,8 @@ public class ProjectPanel extends EditorPanel {
                 EngineSettings.saveSettings();
             }else if(ManifestHelper.pathToManifestFileType(selectedFile.toPath()) == ManifestHelper.manifestFileType.MODEL){
                 if(SceneManager.currentScene != null){
-                    Set<MeshMaterialSet> mms = StaticMeshLoader.load(selectedFile.getPath());
-                    if(!mms.isEmpty()){
-                        String objectName = FileHelper.getFileName(selectedFile.getName());
-                        GameObject newObject = new GameObject(objectName);
-                        newObject.addComponent(new RenderComponent(mms));
-                        SceneManager.currentScene.addEntity(newObject);
-                    }
+                    GameObject importedObject = StaticMeshLoader.loadIntoGameObject(selectedFile.getPath());
+                    if(importedObject != null) SceneManager.currentScene.addEntity(importedObject);
                 }
             } else {
                 FileHelper.openFile(selectedFile);

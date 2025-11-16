@@ -1,9 +1,14 @@
 package nl.framegengine.core.modelLoaders;
 
+import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.debugging.Debug;
+import nl.framegengine.core.entity.GameObject;
+import nl.framegengine.core.utils.AABB;
 import nl.framegengine.core.utils.Conversion;
+import nl.framegengine.core.utils.FileHelper;
 import nl.framegengine.core.visual.*;
 import nl.framegengine.editor.EngineSettings;
+import org.joml.Matrix4f;
 import org.joml.Vector4f;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.assimp.*;
@@ -13,10 +18,7 @@ import java.net.URL;
 import java.nio.IntBuffer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.lwjgl.assimp.Assimp.*;
 
@@ -33,6 +35,57 @@ public class StaticMeshLoader {
     }
 
     public static Set<MeshMaterialSet> load(String resourcePath, String texturesDir, int flags) {
+        AIScene aiScene = pathToAIScene(resourcePath, flags);
+        if(aiScene == null) return null;
+
+        int numMaterials = aiScene.mNumMaterials();
+        PointerBuffer aiMaterials = aiScene.mMaterials();
+        List<Material> materials = aiSceneToMaterialList(aiScene, texturesDir);
+
+        int numMeshes = aiScene.mNumMeshes();
+        PointerBuffer aiMeshes = aiScene.mMeshes();
+        Set<MeshMaterialSet> meshMaterialSets = new HashSet<>();
+
+        for (int i = 0; i < numMeshes; i++) {
+            AIMesh aiMesh = AIMesh.create(aiMeshes.get(i));
+            MeshMaterialSet mms = processMesh(aiMesh, materials);
+            mms.getMesh().setMeshPath(resourcePath);
+            meshMaterialSets.add(mms);
+        }
+
+        return meshMaterialSets;
+    }
+
+    public static GameObject loadIntoGameObject(String resourcePath) {
+        return loadIntoGameObject(resourcePath, "");
+    }
+
+    public static GameObject loadIntoGameObject(String resourcePath, String texturesDir) {
+        return loadIntoGameObject(resourcePath, texturesDir, aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
+    }
+
+    public static GameObject loadIntoGameObject(String resourcePath, String texturesDir, int flags){
+        AIScene aiScene = pathToAIScene(resourcePath, flags);
+        if(aiScene == null) return null;
+
+        int numMaterials = aiScene.mNumMaterials();
+        PointerBuffer aiMaterials = aiScene.mMaterials();
+        List<Material> materials = aiSceneToMaterialList(aiScene, texturesDir);
+
+        if(aiScene.mRootNode() == null) return null;
+
+        GameObject rootGameObject = aiSceneToHierarchicalGameObject(aiScene, aiScene.mRootNode(), materials, resourcePath);
+        processTransform(rootGameObject, new Matrix4f());
+
+        if(rootGameObject.getName().equals("RootNode")) rootGameObject.setName(FileHelper.getFileName(resourcePath));
+        if(rootGameObject.getChildren().size() == 1){
+            return rootGameObject.getChildren().getFirst().setParent(null);
+        }
+
+        return rootGameObject;
+    }
+
+    private static AIScene pathToAIScene(String resourcePath, int flags){
         Path filePath = Path.of(EngineSettings.currentProjectDirectory, resourcePath);
         if(filePath.toFile().exists()){
             resourcePath = filePath.toString();
@@ -42,14 +95,19 @@ public class StaticMeshLoader {
                 if(resource != null) resourcePath = Paths.get(resource.toURI()).toAbsolutePath().toString();
             } catch (URISyntaxException e) {
                 Debug.logError("Error loading model at " + resourcePath + ". " + e.getMessage());
+                return null;
             }
         }
         AIScene aiScene = aiImportFile(resourcePath, flags);
         if (aiScene == null) {
             Debug.logError("Error loading model at " + resourcePath + ". " + aiGetErrorString());
-            return new HashSet<>();
+            return null;
         }
 
+        return aiScene;
+    }
+
+    private static List<Material> aiSceneToMaterialList(AIScene aiScene, String texturesDir){
         int numMaterials = aiScene.mNumMaterials();
         PointerBuffer aiMaterials = aiScene.mMaterials();
         List<Material> materials = new ArrayList<>();
@@ -58,18 +116,42 @@ public class StaticMeshLoader {
             materials.add(processMaterial(aiMaterial, texturesDir));
         }
 
-        int numMeshes = aiScene.mNumMeshes();
-        PointerBuffer aiMeshes = aiScene.mMeshes();
-        Set<MeshMaterialSet> meshMaterialSets = new HashSet<>();
-        //TODO: Import as separate objects within parent instead of one object with all MeshMaterialSets
-        for (int i = 0; i < numMeshes; i++) {
-            AIMesh aiMesh = AIMesh.create(aiMeshes.get(i));
-            MeshMaterialSet mms = processMesh(aiMesh, materials);
-            mms.getMesh().setMeshPath(resourcePath);
-            meshMaterialSets.add(mms);
+        return materials;
+    }
+
+    private static GameObject aiSceneToHierarchicalGameObject(AIScene aiScene, AINode aiNode, List<Material> materials, String resourcePath){
+        GameObject rootObject = new GameObject(aiNode.mName().dataString());
+
+        rootObject.setMatrix(Conversion.toMatrix4F(aiNode.mTransformation()));
+
+        int childNodeCount = aiNode.mNumMeshes();
+        if(childNodeCount > 0){
+            IntBuffer nodeMeshes = aiNode.mMeshes();
+            for(int i = 0; i < childNodeCount; i++){
+                AIMesh aiMesh = AIMesh.create(aiScene.mMeshes().get(nodeMeshes.get(i)));
+                MeshMaterialSet mms = processMesh(aiMesh, materials);
+                mms.getMesh().setMeshPath(resourcePath);
+                rootObject.addComponent(new RenderComponent(mms));
+                rootObject.setAabb(new AABB(Conversion.toVector3F(aiMesh.mAABB().mMin()), Conversion.toVector3F(aiMesh.mAABB().mMax())));
+            }
         }
 
-        return meshMaterialSets;
+        for(int i=0; i<aiNode.mNumChildren(); i++) {
+            AINode child = AINode.create(aiNode.mChildren().get(i));
+            GameObject childObject = aiSceneToHierarchicalGameObject(aiScene, child, materials, resourcePath);
+            rootObject.addChild(childObject);
+        }
+
+        return rootObject;
+    }
+
+    private static void processTransform(GameObject gameObject, Matrix4f parentTransform){
+        Matrix4f worldTransform = new Matrix4f(parentTransform).mul(gameObject.getMatrix());
+        gameObject.setMatrix(worldTransform);
+
+        for (GameObject child : gameObject.getChildren()) {
+            processTransform(child, worldTransform);
+        }
     }
 
     private static Material processMaterial(AIMaterial aiMaterial, String texturesDir){
