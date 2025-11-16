@@ -1,5 +1,5 @@
 {
-  "guid": "",
+  "guid": "{{GUIDHERE}}",
   "shader": "nl.framegengine.core.shaders.PBRShader",
   "diffuseColor": {
     "x": 0.8,

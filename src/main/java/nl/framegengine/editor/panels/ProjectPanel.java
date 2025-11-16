@@ -142,7 +142,12 @@ public class ProjectPanel extends EditorPanel {
     private void createNewMaterial(String path, String fileName){
         try {
             String classTemplate = FileHelper.loadResource("/templates/default_material.mtrl");
-            FileHelper.writeToFile(classTemplate, new File(path, (fileName + ".mtrl")).getAbsolutePath());
+            File materialFile = new File(path, (fileName + ".mtrl"));
+
+            String newGuid = java.util.UUID.randomUUID().toString();
+            classTemplate = classTemplate.replace("{{GUIDHERE}}", newGuid);
+
+            FileHelper.writeToFile(classTemplate, materialFile.getAbsolutePath());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
