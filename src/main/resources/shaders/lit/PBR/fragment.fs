@@ -136,9 +136,9 @@ vec3 getNormal()
     }
 }
 
-float getRoughness() { return (hasRoughnessMap == 1) ? texture(roughnessMap, UV).r * material.roughness : material.roughness; }
-float getMetallic()  { return (hasMetallicMap == 1)  ? texture(metallicMap, UV).r  : material.metallic; }
-float getAO()        { return (hasAOMap == 1)        ? texture(aoMap, UV).r        : 1.0; }
+float getRoughness() { return (hasRoughnessMap == 1) ? texture(roughnessMap, UV).a * material.roughness : material.roughness; }
+float getMetallic()  { return (hasMetallicMap == 1)  ? texture(metallicMap, UV).r * material.metallic  : material.metallic; }
+float getAO()        { return (hasAOMap == 1)        ? texture(aoMap, UV).g        : 1.0; }
 
 // UNIFIED PBR LIGHT FUNCTION
 vec3 calculatePBRLight(
