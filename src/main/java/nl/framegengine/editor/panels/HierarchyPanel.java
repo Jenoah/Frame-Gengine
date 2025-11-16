@@ -65,6 +65,7 @@ public class HierarchyPanel extends EditorPanel {
         frameCount++;
         if(SceneManager.currentScene == null) return;
         if(frameCount > 60){
+            //TODO: Make newly instantiated objects appear in the hierarchy
             hierarchyObjects = SceneManager.currentScene.getRootGameObjects();
             frameCount = 0;
         }

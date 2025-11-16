@@ -335,14 +335,14 @@ public class Scene implements IJsonSerializable {
     }
 
     public List<GameObject> getRootGameObjects() {
-        return gameObjects;
+        return rootGameObjects;
     }
 
     public void setLevelName(String levelName) {
         this.levelName = levelName;
     }
 
-    private void processGameObjects(){
+    public void processGameObjects(){
         rootGameObjects.clear();
 
         gameObjects.forEach(go -> {

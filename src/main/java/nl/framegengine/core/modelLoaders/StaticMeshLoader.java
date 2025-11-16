@@ -22,6 +22,10 @@ import static org.lwjgl.assimp.Assimp.*;
 
 public class StaticMeshLoader {
 
+    public static Set<MeshMaterialSet> load(String resourcePath) {
+        return load(resourcePath, "");
+    }
+
     public static Set<MeshMaterialSet> load(String resourcePath, String texturesDir) {
         return load(resourcePath, texturesDir,
                 aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals |
@@ -57,6 +61,7 @@ public class StaticMeshLoader {
         int numMeshes = aiScene.mNumMeshes();
         PointerBuffer aiMeshes = aiScene.mMeshes();
         Set<MeshMaterialSet> meshMaterialSets = new HashSet<>();
+        //TODO: Import as separate objects within parent instead of one object with all MeshMaterialSets
         for (int i = 0; i < numMeshes; i++) {
             AIMesh aiMesh = AIMesh.create(aiMeshes.get(i));
             MeshMaterialSet mms = processMesh(aiMesh, materials);
@@ -67,14 +72,13 @@ public class StaticMeshLoader {
         return meshMaterialSets;
     }
 
-    private static void processMaterial(AIMaterial aiMaterial, List<Material> materials, String texturesDir){
+    private static Material processMaterial(AIMaterial aiMaterial, String texturesDir){
         Material material = new Material();
 
         AIColor4D colour = AIColor4D.create();
         AIString path = AIString.calloc();
         Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_DIFFUSE, 0, path, (IntBuffer) null, null, null, null, null, null);
-        String textPath = path.dataString();
-        Texture texture = null;
+        String diffuseTexturePath = path.dataString();
 
         if (!textPath.isEmpty()) material.setAlbedoTexture(new Texture(TextureLoader.loadTexture(texturesDir + "/" + textPath)));
 
