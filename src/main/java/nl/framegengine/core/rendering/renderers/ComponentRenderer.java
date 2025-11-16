@@ -16,15 +16,12 @@ public class ComponentRenderer implements IRenderer {
 
     private final Set<RenderComponent> renderObjects = new LinkedHashSet<>();
 
-    // Using more efficient collection for shader-based batching
     private final Map<Shader, List<MeshMaterialSet>> sortedRenderObjects = new HashMap<>();
     private final List<MeshMaterialSet> sortedTransparentRenderObjects = new ArrayList<>();
 
-    // Caching sorted collections for better iteration performance
     private final List<Map.Entry<Shader, List<MeshMaterialSet>>> cachedSortedEntries = new ArrayList<>();
     private final List<MeshMaterialSet> cachedTransparentEntries = new ArrayList<>();
 
-    // Flag to track if cache needs updating
     private boolean needsRebatch = true;
     private boolean needsTransparentRebatch = true;
 
@@ -45,6 +42,9 @@ public class ComponentRenderer implements IRenderer {
 
     private final Vector3f previousCameraPosition = new Vector3f(0);
 
+    // Only re-sort transparent objects when camera moves significantly
+    private static final float TRANSPARENT_RESORT_THRESHOLD = 10.0f; // squared distance
+
     @Override
     public void init() throws Exception {  }
 
@@ -52,7 +52,7 @@ public class ComponentRenderer implements IRenderer {
     public void render() {
         if ((sortedRenderObjects.isEmpty() && sortedTransparentRenderObjects.isEmpty()) || mainCamera == null) return;
 
-        if(mainCamera.getPosition().distanceSquared(previousCameraPosition) > 10){
+        if(mainCamera.getPosition().distanceSquared(previousCameraPosition) > TRANSPARENT_RESORT_THRESHOLD){
             previousCameraPosition.set(mainCamera.getPosition());
             needsTransparentRebatch = true;
         }
@@ -65,9 +65,9 @@ public class ComponentRenderer implements IRenderer {
         //Render opaque objects
         renderPassShaderList(cachedSortedEntries);
 
-        //Render transparent objects
+        //Render transparent objects (no depth write, sorted by distance across all shaders)
         GL11.glDepthMask(false);
-        renderPass(cachedTransparentEntries);
+        renderPassFlat(cachedTransparentEntries);
         GL11.glDepthMask(true);
 
         // Reset state when done
@@ -82,56 +82,59 @@ public class ComponentRenderer implements IRenderer {
         }
     }
 
-    private void updateRenderBatches() {
-        updateRenderBatches(false);
-    }
-
     private void updateRenderBatches(boolean transparentOnly) {
-        if(!transparentOnly) sortEntries(sortedRenderObjects, cachedSortedEntries, false);
-        sortEntries(sortedTransparentRenderObjects, cachedTransparentEntries, true);
+        if(!transparentOnly) {
+            // Sort opaque objects by shader batches (front to back within each batch)
+            sortEntriesMap(sortedRenderObjects, cachedSortedEntries, false);
+        }
+
+        // Sort transparent objects purely by distance (back to front, ignoring shaders)
+        sortEntriesFlat(sortedTransparentRenderObjects, cachedTransparentEntries, true);
 
         needsRebatch = false;
         needsTransparentRebatch = false;
     }
 
-    private List<Map.Entry<Shader, List<MeshMaterialSet>>> sortEntries(Map<Shader, List<MeshMaterialSet>> entryList, List<Map.Entry<Shader, List<MeshMaterialSet>>> outputList, boolean backToFront){
+    private void sortEntriesMap(Map<Shader, List<MeshMaterialSet>> entryList, List<Map.Entry<Shader, List<MeshMaterialSet>>> outputList, boolean backToFront){
         outputList.clear();
+
+        Comparator<MeshMaterialSet> distanceComparator = Comparator.comparingDouble(mms -> mms.getRoot().getRenderCameraSquaredDistance());
+        if(backToFront) distanceComparator = distanceComparator.reversed();
 
         for (Map.Entry<Shader, List<MeshMaterialSet>> entry : entryList.entrySet()){
             List<MeshMaterialSet> list = entry.getValue();
-            list.sort(Comparator.comparingDouble(mms -> mms.getRoot().getRenderCameraSquaredDistance()));
-            if(backToFront) list.sort(Collections.reverseOrder());
-            entry.setValue(list);
+            list.sort(distanceComparator);
             outputList.add(entry);
         }
-
-        return outputList;
     }
 
-    private List<MeshMaterialSet> sortEntries(List<MeshMaterialSet> entryList, List<MeshMaterialSet> outputList, boolean backToFront){
+    private void sortEntriesFlat(List<MeshMaterialSet> entryList, List<MeshMaterialSet> outputList, boolean backToFront){
         outputList.clear();
 
-        entryList.sort(Comparator.comparingDouble(mms -> mms.getRoot().getRenderCameraSquaredDistance()));
-        if(backToFront) entryList = entryList.reversed();
+        Comparator<MeshMaterialSet> distanceComparator = Comparator.comparingDouble(mms -> mms.getRoot().getRenderCameraSquaredDistance());
+        if(backToFront) distanceComparator = distanceComparator.reversed();
 
+        entryList.sort(distanceComparator);
         outputList.addAll(entryList);
-        return outputList;
     }
 
     private void renderPassShaderList(List<Map.Entry<Shader, List<MeshMaterialSet>>> batchEntries) {
         for (Map.Entry<Shader, List<MeshMaterialSet>> entry : batchEntries) {
-            Shader shader = entry.getKey();
-            List<MeshMaterialSet> meshMaterialSetList = entry.getValue();
+            renderPassFlat(entry.getValue());
+        }
+    }
 
-            if (meshMaterialSetList.isEmpty()) continue;
+    private void renderPassFlat(List<MeshMaterialSet> meshMaterialSets) {
+        if (meshMaterialSets.isEmpty()) return;
+
+        for (MeshMaterialSet meshMaterialSet : meshMaterialSets) {
+            Shader shader = meshMaterialSet.material.getShader();
 
             // Bind shader only when different from last one
             if (shader != lastBoundShader) {
-                if (lastBoundShader != null) {
-                    lastBoundShader.unbind();
-                }
-
+                if (lastBoundShader != null) lastBoundShader.unbind();
                 if (recordMetrics) metrics.recordShaderBind();
+
                 shader.bind();
                 shader.render(mainCamera);
                 lastBoundShader = shader;
@@ -143,47 +146,11 @@ public class ComponentRenderer implements IRenderer {
                 lastWireframeState = wireframeMode;
             }
 
-            // Process each mesh material set
-            renderPass(shader, meshMaterialSetList);
+            // Render the individual mesh material set
+            renderPass(meshMaterialSet);
         }
     }
 
-    private void renderPass(List<MeshMaterialSet> batchEntries) {
-        if (batchEntries.isEmpty()) return;
-
-        for (MeshMaterialSet entry : batchEntries) {
-            Shader shader = entry.material.getShader();
-
-            // Bind shader only when different from last one
-            if (shader != lastBoundShader) {
-                if (lastBoundShader != null) {
-                    lastBoundShader.unbind();
-                }
-
-                if (recordMetrics) metrics.recordShaderBind();
-                shader.bind();
-                shader.render(mainCamera);
-                lastBoundShader = shader;
-            }
-
-            // Set wireframe state only when needed
-            if (wireframeMode != lastWireframeState) {
-                GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, wireframeMode ? GL11.GL_LINE : GL11.GL_FILL);
-                lastWireframeState = wireframeMode;
-            }
-
-            // Process each mesh material set
-            renderPass(entry);
-        }
-    }
-
-    private void renderPass(Shader shader, List<MeshMaterialSet> meshMaterialSetList) {
-        if(wireframeMode) GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
-
-        meshMaterialSetList.forEach(this::renderPass);
-
-        if(wireframeMode) GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
-    }
 
     private void renderPass(MeshMaterialSet meshMaterialSet) {
         if (!meshMaterialSet.getRoot().isEnabled() || !mainCamera.isInFrustumAABB(meshMaterialSet.getRoot())) return;
@@ -287,18 +254,22 @@ public class ComponentRenderer implements IRenderer {
         if(renderObjects.contains(renderComponent)) return;
         this.renderObjects.add(renderComponent);
         needsRebatch = true;
+        needsTransparentRebatch = true;
         renderComponent.getMeshMaterialSets().forEach(meshMaterialSet -> {
             if(meshMaterialSet.material.isTransparent()){
+                // Add to flat list for proper distance-based sorting
                 if(!sortedTransparentRenderObjects.contains(meshMaterialSet)) {
                     sortedTransparentRenderObjects.add(meshMaterialSet);
                 }
-            }else{
-                if (!sortedRenderObjects.containsKey(meshMaterialSet.material.getShader())) {
+            } else {
+                // Add to shader-based map for efficient batching
+                Shader shader = meshMaterialSet.material.getShader();
+                if (!sortedRenderObjects.containsKey(shader)) {
                     List<MeshMaterialSet> meshMaterialSets = new ArrayList<>();
                     meshMaterialSets.add(meshMaterialSet);
-                    sortedRenderObjects.put(meshMaterialSet.material.getShader(), meshMaterialSets);
+                    sortedRenderObjects.put(shader, meshMaterialSets);
                 } else {
-                    sortedRenderObjects.get(meshMaterialSet.material.getShader()).add(meshMaterialSet);
+                    sortedRenderObjects.get(shader).add(meshMaterialSet);
                 }
             }
         });
@@ -307,11 +278,18 @@ public class ComponentRenderer implements IRenderer {
     public void dequeue(RenderComponent renderComponent) {
         if(!renderObjects.contains(renderComponent)) return;
         needsRebatch = true;
+        needsTransparentRebatch = true;
         renderComponent.getMeshMaterialSets().forEach(meshMaterialSet -> {
             if(meshMaterialSet.material.isTransparent()){
+                // Remove from flat list
                 sortedTransparentRenderObjects.remove(meshMaterialSet);
-            }else{
-                sortedRenderObjects.get(meshMaterialSet.material.getShader()).remove(meshMaterialSet);
+            } else {
+                // Remove from shader-based map
+                Shader shader = meshMaterialSet.material.getShader();
+                List<MeshMaterialSet> list = sortedRenderObjects.get(shader);
+                if(list != null) {
+                    list.remove(meshMaterialSet);
+                }
             }
         });
 

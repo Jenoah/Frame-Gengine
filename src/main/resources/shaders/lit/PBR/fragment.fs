@@ -269,7 +269,6 @@ void main()
 
             attenuation *= intensity;
 
-            if (attenuation > 0.0)
             result += calculatePBRLight(spotLights[i].color, L, attenuation, N, V, albedo, rough, metal, shadowFactor, skybox);
         }
     }
