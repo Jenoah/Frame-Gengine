@@ -55,7 +55,7 @@ public class StaticMeshLoader {
         List<Material> materials = new ArrayList<>();
         for (int i = 0; i < numMaterials; i++) {
             AIMaterial aiMaterial = AIMaterial.create(aiMaterials.get(i));
-            processMaterial(aiMaterial, materials, texturesDir);
+            materials.add(processMaterial(aiMaterial, texturesDir));
         }
 
         int numMeshes = aiScene.mNumMeshes();
@@ -80,18 +80,41 @@ public class StaticMeshLoader {
         Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_DIFFUSE, 0, path, (IntBuffer) null, null, null, null, null, null);
         String diffuseTexturePath = path.dataString();
 
-        if (!textPath.isEmpty()) material.setAlbedoTexture(new Texture(TextureLoader.loadTexture(texturesDir + "/" + textPath)));
+        if (!diffuseTexturePath.isEmpty()) material.setAlbedoTexture(new Texture(TextureLoader.loadTexture(texturesDir + "/" + diffuseTexturePath)));
 
         int result = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_AMBIENT, aiTextureType_NONE, 0, colour);
         if (result == 0) material.setAmbientColor(new Vector4f(colour.r(), colour.g(), colour.b(), colour.a()));
 
         result = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_DIFFUSE, aiTextureType_NONE, 0, colour);
-        if (result == 0) material.setDiffuseColor(new Vector4f(colour.r(), colour.g(), colour.b(), colour.a()));
+        if (result == 0) material.setDiffuseColor(new Vector4f(colour.r(), colour.g(), colour.b(), 1));
 
         result = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_SPECULAR, aiTextureType_NONE, 0, colour);
         if (result == 0) material.setSpecularColor(new Vector4f(colour.r(), colour.g(), colour.b(), colour.a()));
 
-        materials.add(material);
+        float[] value = new float[1]; // or float value[1] in C
+        result = aiGetMaterialFloatArray(aiMaterial, AI_MATKEY_REFLECTIVITY, aiTextureType_NONE, 0, value, null);
+        if (result == 0) material.setReflectance(value[0]);
+
+        result = aiGetMaterialFloatArray(aiMaterial, AI_MATKEY_ROUGHNESS_FACTOR, aiTextureType_NONE, 0, value, null);
+        if (result == 0) material.setRoughness(value[0]);
+
+        result = aiGetMaterialFloatArray(aiMaterial, AI_MATKEY_METALLIC_FACTOR, aiTextureType_NONE, 0, value, null);
+        if (result == 0) material.setMetallic(value[0]);
+
+        result = aiGetMaterialFloatArray(aiMaterial, AI_MATKEY_OPACITY, aiTextureType_NONE, 0, value, null);
+        if (result == 0){
+            material.getDiffuseColor().w = value[0];
+            //TODO: Fix importing of transparency
+            //material.setTransparent(true);
+        }
+
+        result = aiGetMaterialFloatArray(aiMaterial, AI_MATKEY_TWOSIDED, aiTextureType_NONE, 0, value, null);
+        if (result == 0) material.setDoubleSided(value[0] == 0);
+
+        result = aiGetMaterialFloatArray(aiMaterial, AI_MATKEY_COLOR_TRANSPARENT, aiTextureType_NONE, 0, value, null);
+        if (result == 0) material.getDiffuseColor().w = 1f - value[0];
+
+        return material;
     }
 
     private static MeshMaterialSet processMesh(AIMesh aiMesh, List<Material> materials) {
