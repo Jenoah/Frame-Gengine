@@ -13,6 +13,7 @@ import org.joml.Vector4f;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.assimp.*;
 
+import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.IntBuffer;
@@ -38,8 +39,6 @@ public class StaticMeshLoader {
         AIScene aiScene = pathToAIScene(resourcePath, flags);
         if(aiScene == null) return null;
 
-        int numMaterials = aiScene.mNumMaterials();
-        PointerBuffer aiMaterials = aiScene.mMaterials();
         List<Material> materials = aiSceneToMaterialList(aiScene, texturesDir);
 
         int numMeshes = aiScene.mNumMeshes();
@@ -67,9 +66,7 @@ public class StaticMeshLoader {
     public static GameObject loadIntoGameObject(String resourcePath, String texturesDir, int flags){
         AIScene aiScene = pathToAIScene(resourcePath, flags);
         if(aiScene == null) return null;
-
-        int numMaterials = aiScene.mNumMaterials();
-        PointerBuffer aiMaterials = aiScene.mMaterials();
+        
         List<Material> materials = aiSceneToMaterialList(aiScene, texturesDir);
 
         if(aiScene.mRootNode() == null) return null;
@@ -162,7 +159,8 @@ public class StaticMeshLoader {
         Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_DIFFUSE, 0, path, (IntBuffer) null, null, null, null, null, null);
         String diffuseTexturePath = path.dataString();
 
-        if (!diffuseTexturePath.isEmpty()) material.setAlbedoTexture(new Texture(TextureLoader.loadTexture(texturesDir + "/" + diffuseTexturePath)));
+        if(!texturesDir.isEmpty() && !texturesDir.endsWith(File.separator)) texturesDir += File.separator;
+        if (!diffuseTexturePath.isEmpty()) material.setAlbedoTexture(new Texture(TextureLoader.loadTexture(texturesDir + diffuseTexturePath)));
 
         int result = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_AMBIENT, aiTextureType_NONE, 0, colour);
         if (result == 0) material.setAmbientColor(new Vector4f(colour.r(), colour.g(), colour.b(), colour.a()));
@@ -175,7 +173,7 @@ public class StaticMeshLoader {
 
         float[] value = new float[1]; // or float value[1] in C
         result = aiGetMaterialFloatArray(aiMaterial, AI_MATKEY_REFLECTIVITY, aiTextureType_NONE, 0, value, null);
-        if (result == 0) material.setReflectance(value[0]);
+        if (result == 0) material.setReflectance(1f - value[0]);
 
         result = aiGetMaterialFloatArray(aiMaterial, AI_MATKEY_ROUGHNESS_FACTOR, aiTextureType_NONE, 0, value, null);
         if (result == 0) material.setRoughness(value[0]);
