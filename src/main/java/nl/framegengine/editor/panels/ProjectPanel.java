@@ -3,6 +3,8 @@ package nl.framegengine.editor.panels;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiSelectableFlags;
+import nl.framegengine.core.entity.Scene;
+import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.editor.EditorPanel;
 import nl.framegengine.editor.EngineSettings;
 import nl.framegengine.core.debugging.Debug;
@@ -112,6 +114,12 @@ public class ProjectPanel extends EditorPanel {
             if (extension.equals("lvl")) {
                 Debug.log("Loading level " + selectedFile.getName());
                 EngineSettings.currentLevelPath = new File(EngineSettings.currentProjectDirectory).toURI().relativize(selectedFile.toURI()).getPath();
+                try {
+                    Scene scene = SceneManager.loadScene(EngineSettings.currentLevelPath);
+                    SceneManager.setCurrentScene(scene);
+                } catch (Exception e) {
+                    Debug.logConsoleError("Error loading scene: " + e.getMessage());
+                }
                 EngineSettings.saveSettings();
             } else {
                 FileHelper.openFile(selectedFile);
