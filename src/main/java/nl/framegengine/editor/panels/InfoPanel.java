@@ -31,7 +31,7 @@ import java.util.Set;
 public class InfoPanel extends EditorPanel {
 
     private IJsonSerializable currentlySelectedObject = null;
-    private List<Field> hierarchyObjects = new ArrayList<>();
+    private final List<Field> hierarchyObjects = new ArrayList<>();
 
     private String[] textureNames = new String[0];
 
@@ -80,10 +80,12 @@ public class InfoPanel extends EditorPanel {
 
         if(currentlySelectedObject == null) return;
         try {
-            hierarchyObjects.add(ClassHelper.getFieldFromObject("isEnabled", currentlySelectedObject.getClass()));
-            hierarchyObjects.add(ClassHelper.getFieldFromObject("localPosition", currentlySelectedObject.getClass()));
-            hierarchyObjects.add(ClassHelper.getFieldFromObject("localRotation", currentlySelectedObject.getClass()));
-            hierarchyObjects.add(ClassHelper.getFieldFromObject("scale", currentlySelectedObject.getClass()));
+            if(currentlySelectedObject instanceof GameObject) {
+                hierarchyObjects.add(ClassHelper.getFieldFromObject("isEnabled", currentlySelectedObject.getClass()));
+                hierarchyObjects.add(ClassHelper.getFieldFromObject("localPosition", currentlySelectedObject.getClass()));
+                hierarchyObjects.add(ClassHelper.getFieldFromObject("localRotation", currentlySelectedObject.getClass()));
+                hierarchyObjects.add(ClassHelper.getFieldFromObject("scale", currentlySelectedObject.getClass()));
+            }
         } catch (NoSuchFieldException ignored) {}
         ClassHelper.getAllPublicAndProtectedProperties(hierarchyObjects, currentlySelectedObject.getClass());
     }
