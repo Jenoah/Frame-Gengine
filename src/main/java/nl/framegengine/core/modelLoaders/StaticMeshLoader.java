@@ -117,7 +117,9 @@ public class StaticMeshLoader {
     }
 
     private static GameObject aiSceneToHierarchicalGameObject(AIScene aiScene, AINode aiNode, List<Material> materials, String resourcePath){
-        GameObject rootObject = new GameObject(aiNode.mName().dataString());
+        String objectName = aiNode.mName().dataString();
+        if(!objectName.isEmpty()) objectName = objectName.split("_\\$")[0];
+        GameObject rootObject = new GameObject(objectName);
 
         rootObject.setMatrix(Conversion.toMatrix4F(aiNode.mTransformation()));
 
