@@ -3,13 +3,14 @@ package nl.framegengine.editor.panels;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiSelectableFlags;
-import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.GameObject;
+import nl.framegengine.core.entity.Scene;
 import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.modelLoaders.StaticMeshLoader;
-import nl.framegengine.core.utils.FileHelper;
 import nl.framegengine.editor.EditorPanel;
 import nl.framegengine.editor.EngineSettings;
+import nl.framegengine.core.debugging.Debug;
+import nl.framegengine.core.utils.FileHelper;
 import nl.framegengine.editor.ImGuiHelper;
 import nl.framegengine.editor.ManifestHelper;
 
@@ -116,6 +117,12 @@ public class ProjectPanel extends EditorPanel {
             if (extension.equals("lvl")) {
                 Debug.log("Loading level " + selectedFile.getName());
                 EngineSettings.currentLevelPath = new File(EngineSettings.currentProjectDirectory).toURI().relativize(selectedFile.toURI()).getPath();
+                try {
+                    Scene scene = SceneManager.loadScene(EngineSettings.currentLevelPath);
+                    SceneManager.setCurrentScene(scene);
+                } catch (Exception e) {
+                    Debug.logConsoleError("Error loading scene: " + e.getMessage());
+                }
                 EngineSettings.saveSettings();
             }else if(ManifestHelper.pathToManifestFileType(selectedFile.toPath()) == ManifestHelper.manifestFileType.MODEL){
                 if(SceneManager.currentScene != null){
@@ -137,12 +144,7 @@ public class ProjectPanel extends EditorPanel {
     private void createNewMaterial(String path, String fileName){
         try {
             String classTemplate = FileHelper.loadResource("/templates/default_material.mtrl");
-            File materialFile = new File(path, (fileName + ".mtrl"));
-
-            String newGuid = java.util.UUID.randomUUID().toString();
-            classTemplate = classTemplate.replace("{{GUIDHERE}}", newGuid);
-
-            FileHelper.writeToFile(classTemplate, materialFile.getAbsolutePath());
+            FileHelper.writeToFile(classTemplate, new File(path, (fileName + ".mtrl")).getAbsolutePath());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
