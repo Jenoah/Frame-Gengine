@@ -496,14 +496,16 @@ public class GameObject implements IJsonSerializable {
         return guid;
     }
 
-    public void setGuid(){
+    public GameObject setGuid(){
         setGuid(String.valueOf(java.util.UUID.randomUUID()));
+        return this;
     }
 
-    public void setGuid(String guid) {
+    public GameObject setGuid(String guid) {
         this.guid = guid;
         instancedObjects.remove(getGuid());
         instancedObjects.put(getGuid(), this);
+        return this;
     }
 
     public static GameObject getByGUID(String guid){

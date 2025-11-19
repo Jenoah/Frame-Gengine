@@ -11,6 +11,7 @@ import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.utils.ClassHelper;
 import nl.framegengine.core.utils.FileHelper;
+import nl.framegengine.core.utils.IJsonSerializable;
 import nl.framegengine.core.visual.Material;
 import nl.framegengine.core.visual.Texture;
 import nl.framegengine.core.visual.TextureLoader;
@@ -29,7 +30,7 @@ import java.util.Set;
 
 public class InfoPanel extends EditorPanel {
 
-    private GameObject currentlySelectedObject = null;
+    private IJsonSerializable currentlySelectedObject = null;
     private List<Field> hierarchyObjects = new ArrayList<>();
 
     private String[] textureNames = new String[0];
@@ -43,8 +44,15 @@ public class InfoPanel extends EditorPanel {
     public void renderFrame() {
         if(currentlySelectedObject == null) return;
 
+        String objectName;
+        if(currentlySelectedObject instanceof GameObject go){
+            objectName = go.getName();
+        }else{
+            objectName = currentlySelectedObject.getClass().getSimpleName();
+        }
+
         ImGui.setWindowFontScale(2f);
-        ImGui.text(currentlySelectedObject.getName());
+        ImGui.text(objectName);
         ImGui.setWindowFontScale(1f);
         ImGui.text(currentlySelectedObject.getClass().getSimpleName());
         ImGui.newLine();
@@ -66,8 +74,8 @@ public class InfoPanel extends EditorPanel {
         ImGui.popStyleColor(4);
     }
 
-    public void setCurrentlySelectedObject(GameObject gameObject){
-        currentlySelectedObject = gameObject;
+    public void setCurrentlySelectedObject(IJsonSerializable selectedObject){
+        currentlySelectedObject = selectedObject;
         hierarchyObjects.clear();
 
         if(currentlySelectedObject == null) return;

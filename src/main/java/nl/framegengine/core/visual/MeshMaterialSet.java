@@ -41,6 +41,16 @@ public class MeshMaterialSet implements IJsonSerializable {
     }
 
     @Override
+    public String getGuid() {
+        return "NoGuid";
+    }
+
+    @Override
+    public IJsonSerializable setGuid(String guid) {
+        return null;
+    }
+
+    @Override
     public JsonObject serializeToJson() {
         JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
         JsonObject jsonObject = JsonHelper.objectToJson(this, new String[]{"root", "material"});

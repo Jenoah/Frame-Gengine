@@ -3,6 +3,13 @@ package nl.framegengine.core.utils;
 import javax.json.JsonObject;
 
 public interface IJsonSerializable {
+
+    String guid = "";
+
+    String getGuid();
+
+    IJsonSerializable setGuid(String guid);
+
     JsonObject serializeToJson();
 
     IJsonSerializable deserializeFromJson(String json);

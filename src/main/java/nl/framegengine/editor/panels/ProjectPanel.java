@@ -7,12 +7,11 @@ import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.entity.Scene;
 import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.modelLoaders.StaticMeshLoader;
-import nl.framegengine.editor.EditorPanel;
-import nl.framegengine.editor.EngineSettings;
+import nl.framegengine.core.visual.Material;
+import nl.framegengine.core.visual.MaterialManager;
+import nl.framegengine.editor.*;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.utils.FileHelper;
-import nl.framegengine.editor.ImGuiHelper;
-import nl.framegengine.editor.ManifestHelper;
 
 import java.io.File;
 import java.io.IOException;
@@ -113,8 +112,7 @@ public class ProjectPanel extends EditorPanel {
     private void selectFile(File selectedFile){
         Debug.log("Selecting " + selectedFile.getName());
         try {
-            String extension = FileHelper.getExtension(selectedFile.getName());
-            if (extension.equals("lvl")) {
+            if (ManifestHelper.pathToManifestFileType(selectedFile.toPath()) == ManifestHelper.manifestFileType.LEVEL) {
                 Debug.log("Loading level " + selectedFile.getName());
                 EngineSettings.currentLevelPath = new File(EngineSettings.currentProjectDirectory).toURI().relativize(selectedFile.toURI()).getPath();
                 try {
@@ -124,11 +122,19 @@ public class ProjectPanel extends EditorPanel {
                     Debug.logConsoleError("Error loading scene: " + e.getMessage());
                 }
                 EngineSettings.saveSettings();
-            }else if(ManifestHelper.pathToManifestFileType(selectedFile.toPath()) == ManifestHelper.manifestFileType.MODEL){
-                if(SceneManager.currentScene != null){
+            }else if(ManifestHelper.pathToManifestFileType(selectedFile.toPath()) == ManifestHelper.manifestFileType.MODEL) {
+                if (SceneManager.currentScene != null) {
                     GameObject importedObject = StaticMeshLoader.loadIntoGameObject(selectedFile.getPath());
-                    if(importedObject != null) SceneManager.currentScene.addEntity(importedObject);
+                    if (importedObject != null) SceneManager.currentScene.addEntity(importedObject);
                 }
+            }else if(ManifestHelper.pathToManifestFileType(selectedFile.toPath()) == ManifestHelper.manifestFileType.MATERIAL){
+                String materialContent = FileHelper.readFile(selectedFile.getPath());
+
+                Material material = (Material) new Material().deserializeFromJson(materialContent);
+                material = MaterialManager.loadMaterialByGuid(material.getGuid());
+
+                EditorWindow.getEditorLayout().getEditorPanelOfType(InfoPanel.class).setCurrentlySelectedObject(material);
+
             } else {
                 FileHelper.openFile(selectedFile);
             }

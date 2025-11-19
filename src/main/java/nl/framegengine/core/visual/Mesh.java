@@ -710,6 +710,16 @@ public class Mesh implements IJsonSerializable {
     }
 
     @Override
+    public String getGuid() {
+        return "NoGuid";
+    }
+
+    @Override
+    public IJsonSerializable setGuid(String guid) {
+        return null;
+    }
+
+    @Override
     public JsonObject serializeToJson() {
         return JsonHelper.objectToJson(this, new String[]{"vbos", "vaoID", "vertexVBOID", "normalVBOID", "tangentsVBOID",
                 "bitangentsVBOID", "triangleVBOID", "uvVBOID", "instanceVBOID", "vertexCount", "previousInstanceCount"});

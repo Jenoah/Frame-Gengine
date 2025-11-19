@@ -46,6 +46,16 @@ public class Component implements IJsonSerializable {
     public void cleanUp(){ }
 
     @Override
+    public String getGuid() {
+        return "NoGuid";
+    }
+
+    @Override
+    public IJsonSerializable setGuid(String guid) {
+        return null;
+    }
+
+    @Override
     public JsonObject serializeToJson() {
         return JsonHelper.objectToJson(this, new String[]{"hasInitiated"});
     }

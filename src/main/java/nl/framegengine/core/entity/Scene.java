@@ -394,6 +394,16 @@ public class Scene implements IJsonSerializable {
     }
 
     @Override
+    public String getGuid() {
+        return "NoGuid";
+    }
+
+    @Override
+    public IJsonSerializable setGuid(String guid) {
+        return null;
+    }
+
+    @Override
     public JsonObject serializeToJson() {
         JsonObjectBuilder sceneInfo = Json.createObjectBuilder();
         sceneInfo.add("levelName", this.getLevelName());

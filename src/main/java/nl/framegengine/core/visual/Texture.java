@@ -107,4 +107,10 @@ public class Texture implements IJsonSerializable {
     public final String getGuid(){
         return guid;
     }
+
+    @Override
+    public IJsonSerializable setGuid(String guid) {
+        this.guid = guid;
+        return this;
+    }
 }

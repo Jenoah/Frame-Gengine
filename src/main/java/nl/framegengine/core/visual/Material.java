@@ -244,6 +244,7 @@ public class Material implements IJsonSerializable {
 
     public final boolean isOnTop() { return isOnTop; }
 
+    @Override
     public final String getGuid(){ return guid; }
 
 //  Has Getters
