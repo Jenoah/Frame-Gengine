@@ -241,4 +241,6 @@ public class TextureLoader {
     public static void setDefaultTextureId(int id){
         defaultTextureID = id;
     }
+
+    public static int getDefaultTextureId(){ return defaultTextureID; }
 }
