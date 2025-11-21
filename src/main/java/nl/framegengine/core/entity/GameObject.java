@@ -104,9 +104,11 @@ public class GameObject implements IJsonSerializable {
         } else {
             Vector3f parentWorldPos = parent.getPosition();
             Quaternionf parentWorldRot = parent.getRotation();
+            Vector3f parentWorldScale = parent.getScale(); // Assume this returns a Vector3f
 
             Vector3f relativePos = ObjectPool.VECTOR3F_POOL.obtain().set(worldPosition).sub(parentWorldPos);
-            relativePos.rotate(parentWorldRot.conjugate()); // inverse rotate to get local position
+            relativePos.div(parentWorldScale);
+            parentWorldRot.conjugate(new Quaternionf()).transform(relativePos);
 
             setPosition(relativePos);
             ObjectPool.VECTOR3F_POOL.free(relativePos);
