@@ -175,7 +175,7 @@ public class StaticMeshLoader {
 
         float[] value = new float[1]; // or float value[1] in C
         result = aiGetMaterialFloatArray(aiMaterial, AI_MATKEY_REFLECTIVITY, aiTextureType_NONE, 0, value, null);
-        if (result == 0) material.setReflectance(1f - value[0]);
+        if (result == 0) material.setReflectance(value[0]);
 
         result = aiGetMaterialFloatArray(aiMaterial, AI_MATKEY_ROUGHNESS_FACTOR, aiTextureType_NONE, 0, value, null);
         if (result == 0) material.setRoughness(value[0]);
