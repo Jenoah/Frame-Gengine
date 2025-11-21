@@ -159,7 +159,7 @@ public class InfoPanel extends EditorPanel {
                         String rawFieldName = getRawFieldName(fieldName);
                         if(rawFieldName.equals("scale")) {
                             go.setScale(vector);
-                        }else if(rawFieldName.equals("position")) {
+                        }else if(rawFieldName.equals("localPosition")) {
                             go.setPosition(vector);
                         }else{
                             field.setAccessible(true);
