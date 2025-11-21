@@ -14,6 +14,7 @@ import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
+
 public class GameObject implements IJsonSerializable {
     private String name = "GameObject";
     private final Vector3f localPosition = new Vector3f();
@@ -244,37 +245,29 @@ public class GameObject implements IJsonSerializable {
         return Calculus.multiplyVector(scale, parent.getScale());
     }
 
-    public GameObject setScale(float scale) {
-        this.scale.set(scale);
-        if(aabb != null && getComponent(RenderComponent.class) != null) getComponent(RenderComponent.class).calculateAABB();
-        if(!children.isEmpty()) children.forEach(child -> child.setScale(child.getScale().mul(scale)));
+    public Vector3f getLocalScale() {
+        return scale;
+    }
 
-        callUpdate();
-        return this;
+    public GameObject setScale(float scale) {
+        return setScale(scale, scale, scale);
     }
 
     public GameObject setScale(Vector3f scale) {
-        this.scale.set(scale);
-        if(aabb != null && getComponent(RenderComponent.class) != null) getComponent(RenderComponent.class).calculateAABB();
-        if(!children.isEmpty()) children.forEach(child -> child.setScale(child.getScale().mul(scale)));
-
-        callUpdate();
-        return this;
+        return setScale(scale.x, scale.y, scale.z);
     }
 
     public GameObject setScale(float x, float y, float z) {
         this.scale.set(x, y, z);
         if(aabb != null && getComponent(RenderComponent.class) != null) getComponent(RenderComponent.class).calculateAABB();
+        if(!children.isEmpty()) children.forEach(child -> child.setScale(child.getLocalScale()));
 
         callUpdate();
         return this;
     }
 
     public GameObject setScale(float x, float y) {
-        this.scale.set(x, y, 0);
-        if(aabb != null && getComponent(RenderComponent.class) != null) getComponent(RenderComponent.class).calculateAABB();
-        callUpdate();
-        return this;
+        return setScale(x, y, 0);
     }
 
     public Matrix4f getMatrix(){

@@ -155,9 +155,21 @@ public class InfoPanel extends EditorPanel {
                 float[] vec3Array = new float[]{vector.x, vector.y, vector.z};
                 if (ImGui.inputFloat3(fieldName, vec3Array)) {
                     vector.set(vec3Array[0], vec3Array[1], vec3Array[2]);
-                    field.setAccessible(true);
-                    field.set(drawingObject, vector);
-                    if(drawingObject instanceof GameObject go) go.callUpdate();
+                    if(drawingObject instanceof GameObject go){
+                        String rawFieldName = getRawFieldName(fieldName);
+                        if(rawFieldName.equals("scale")) {
+                            go.setScale(vector);
+                        }else if(rawFieldName.equals("position")) {
+                            go.setPosition(vector);
+                        }else{
+                            field.setAccessible(true);
+                            field.set(drawingObject, vector);
+                        }
+                        go.callUpdate();
+                    }else{
+                        field.setAccessible(true);
+                        field.set(drawingObject, vector);
+                    }
                 }
             }
             case Vector4f vector -> {
@@ -294,6 +306,11 @@ public class InfoPanel extends EditorPanel {
         }else{
             ImGui.text("Manifest dropdown not implement for type "+ fileType.name());
         }
+    }
+
+    private String getRawFieldName(String fieldNameRaw){
+        if(!fieldNameRaw.isEmpty()) return fieldNameRaw.split("##")[0];
+        return fieldNameRaw;
     }
 
     private void updateTextureList(){
