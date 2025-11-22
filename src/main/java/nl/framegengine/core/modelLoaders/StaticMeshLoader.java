@@ -32,7 +32,8 @@ public class StaticMeshLoader {
     public static Set<MeshMaterialSet> load(String resourcePath, String texturesDir) {
         return load(resourcePath, texturesDir,
                 aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals |
-                        aiProcess_OptimizeMeshes | aiProcess_ImproveCacheLocality | aiProcess_OptimizeGraph);
+                        aiProcess_OptimizeMeshes | aiProcess_ImproveCacheLocality | aiProcess_OptimizeGraph |
+                        aiProcess_GenBoundingBoxes);
     }
 
     public static Set<MeshMaterialSet> load(String resourcePath, String texturesDir, int flags) {
@@ -60,7 +61,8 @@ public class StaticMeshLoader {
     }
 
     public static GameObject loadIntoGameObject(String resourcePath, String texturesDir) {
-        return loadIntoGameObject(resourcePath, texturesDir, aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals);
+        return loadIntoGameObject(resourcePath, texturesDir, aiProcess_JoinIdenticalVertices | aiProcess_Triangulate |
+                aiProcess_FixInfacingNormals | aiProcess_GenBoundingBoxes);
     }
 
     public static GameObject loadIntoGameObject(String resourcePath, String texturesDir, int flags){
