@@ -324,8 +324,8 @@ public class GameObject implements IJsonSerializable {
 
     public void update(){
         if(drawDebugWireframe && aabb != null){
-            worldAABB.set(getAabb()).offset(getPosition());
-            RenderManager.debugCube(worldAABB.getCenter(), getRotation(), worldAABB.getSize());
+            AABB worldAABB = getWorldAABB();
+            RenderManager.debugCube(worldAABB.getCenter(), Constants.QUATERNION_IDENTITY, worldAABB.getSize());
         }
 
         if(!isEnabled || components.isEmpty()) return;
@@ -469,6 +469,16 @@ public class GameObject implements IJsonSerializable {
     public void setAabb(AABB aabb) {
         this.aabb = aabb;
         aabb.setParentObject(this);
+    }
+
+    public AABB getWorldAABB() {
+        if (aabb == null) {
+            return null;
+        }
+        worldAABB.set(getAabb());
+        worldAABB.recalculate(getRotation());
+        worldAABB.offset(getPosition());
+        return worldAABB;
     }
 
     public final String getName() {

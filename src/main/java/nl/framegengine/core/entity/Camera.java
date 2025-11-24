@@ -138,24 +138,25 @@ public class Camera extends GameObject {
     }
 
     public boolean isInFrustumAABB(GameObject object) {
-        worldFrustumTestingAABB.set(object.getAabb()).offset(object.getPosition());
+        AABB objectWorldAABB = object.getWorldAABB();
+        if (objectWorldAABB == null) return true;
 
-        Vector3f positiveCorner = ObjectPool.VECTOR3F_POOL.obtain().set(0,0,0);
+        Vector3f positiveCorner;
 
         for (FrustumPlane plane : frustumPlanes) {
             positiveCorner = ObjectPool.VECTOR3F_POOL.obtain().set(
-                    plane.normal.x > 0 ? worldFrustumTestingAABB.max.x : worldFrustumTestingAABB.min.x,
-                    plane.normal.y > 0 ? worldFrustumTestingAABB.max.y : worldFrustumTestingAABB.min.y,
-                    plane.normal.z > 0 ? worldFrustumTestingAABB.max.z : worldFrustumTestingAABB.min.z
+                    plane.normal.x > 0 ? objectWorldAABB.max.x : objectWorldAABB.min.x,
+                    plane.normal.y > 0 ? objectWorldAABB.max.y : objectWorldAABB.min.y,
+                    plane.normal.z > 0 ? objectWorldAABB.max.z : objectWorldAABB.min.z
             );
 
             if (plane.getDistanceTo(positiveCorner) < 0) {
                 ObjectPool.VECTOR3F_POOL.free(positiveCorner);
                 return false;
             }
+            ObjectPool.VECTOR3F_POOL.free(positiveCorner);
         }
 
-        ObjectPool.VECTOR3F_POOL.free(positiveCorner);
         return true;
     }
 
