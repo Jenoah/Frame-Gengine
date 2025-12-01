@@ -153,9 +153,6 @@ public class RenderComponent extends Component {
 
         getRoot().setCenter(new Vector3f(min).lerp(max, 0.5f));
 
-        min.mul(root.getScale());
-        max.mul(root.getScale());
-
         root.setAabb(new AABB(min, max));
     }
 

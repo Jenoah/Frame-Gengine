@@ -70,9 +70,10 @@ public class GameObject implements IJsonSerializable {
             Quaternionf parentRotation = parent.getRotation();
             Vector3f rotatedLocal = scaledPosition.rotate(parentRotation);
 
+            Vector3f targetVector = new Vector3f(parent.getPosition()).add(rotatedLocal);
             ObjectPool.VECTOR3F_POOL.free(scaledPosition);
 
-            return new Vector3f(parent.getPosition()).add(rotatedLocal);
+            return targetVector;
         }
     }
 
@@ -261,7 +262,6 @@ public class GameObject implements IJsonSerializable {
 
     public GameObject setScale(float x, float y, float z) {
         this.scale.set(x, y, z);
-        if(aabb != null && getComponent(RenderComponent.class) != null) getComponent(RenderComponent.class).calculateAABB();
         if(!children.isEmpty()) children.forEach(child -> child.setScale(child.getLocalScale()));
 
         callUpdate();
@@ -324,7 +324,7 @@ public class GameObject implements IJsonSerializable {
 
     public void update(){
         if(drawDebugWireframe && aabb != null){
-            AABB worldAABB = getWorldAABB();
+            worldAABB.set(aabb.toWorld());
             RenderManager.debugCube(worldAABB.getCenter(), Constants.QUATERNION_IDENTITY, worldAABB.getSize());
         }
 
@@ -469,16 +469,6 @@ public class GameObject implements IJsonSerializable {
     public void setAabb(AABB aabb) {
         this.aabb = aabb;
         aabb.setParentObject(this);
-    }
-
-    public AABB getWorldAABB() {
-        if (aabb == null) {
-            return null;
-        }
-        worldAABB.set(getAabb());
-        worldAABB.recalculate(getRotation());
-        worldAABB.offset(getPosition());
-        return worldAABB;
     }
 
     public final String getName() {
