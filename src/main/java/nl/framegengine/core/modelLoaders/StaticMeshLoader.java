@@ -3,7 +3,6 @@ package nl.framegengine.core.modelLoaders;
 import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.GameObject;
-import nl.framegengine.core.utils.AABB;
 import nl.framegengine.core.utils.Conversion;
 import nl.framegengine.core.utils.FileHelper;
 import nl.framegengine.core.visual.*;
@@ -19,7 +18,10 @@ import java.net.URL;
 import java.nio.IntBuffer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static org.lwjgl.assimp.Assimp.*;
 
@@ -132,8 +134,15 @@ public class StaticMeshLoader {
                 AIMesh aiMesh = AIMesh.create(aiScene.mMeshes().get(nodeMeshes.get(i)));
                 MeshMaterialSet mms = processMesh(aiMesh, materials);
                 mms.getMesh().setMeshPath(resourcePath);
-                rootObject.addComponent(new RenderComponent(mms));
-                rootObject.setAabb(new AABB(Conversion.toVector3F(aiMesh.mAABB().mMin()), Conversion.toVector3F(aiMesh.mAABB().mMax())));
+                RenderComponent renderComponent = rootObject.getComponent(RenderComponent.class);
+                if(renderComponent != null){
+                    renderComponent.addMesh(mms);
+                }else{
+                    renderComponent = new RenderComponent(mms);
+                    rootObject.addComponent(renderComponent);
+                }
+
+                renderComponent.calculateAABB();
             }
         }
 
