@@ -208,22 +208,25 @@ public class RenderComponent extends Component {
         }
 
         if(!meshMaterialSets.isEmpty()){
-            Mesh mesh = meshMaterialSets.stream().findFirst().get().getMesh();
-            float uvScale = mesh.getUvScale();
-            String meshPath = mesh.getMeshPath();
-            Material mat = meshMaterialSets.stream().findFirst().get().material;
+            Set<MeshMaterialSet> tempMms = new HashSet<>(meshMaterialSets);
             meshMaterialSets.clear();
-            if(meshPath.isEmpty() || meshPath.isBlank()){
-                return this;
-            }
 
-            Set<MeshMaterialSet> mms = StaticMeshLoader.load(meshPath, "");
-            mms.forEach(meshMaterialSet -> {
-                if(uvScale != 1f) meshMaterialSet.getMesh().setUVScale(uvScale);
-                meshMaterialSet.setRoot(getRoot());
-                if(mat != MaterialManager.defaultMaterial) meshMaterialSet.material = mat;
+            tempMms.forEach(meshMaterialSetA -> {
+                Mesh mesh = meshMaterialSetA.getMesh();
+                float uvScale = mesh.getUvScale();
+                String meshPath = mesh.getMeshPath();
+                Material mat = meshMaterialSetA.material;
+
+                if(meshPath.isBlank()) return;
+
+                Set<MeshMaterialSet> mms = StaticMeshLoader.load(meshPath, mesh.getMeshId(), "");
+                mms.forEach(meshMaterialSetB -> {
+                    if(uvScale != 1f) meshMaterialSetB.getMesh().setUVScale(uvScale);
+                    meshMaterialSetB.setRoot(getRoot());
+                    if(mat != MaterialManager.defaultMaterial) meshMaterialSetB.material = mat;
+                });
+                meshMaterialSets.addAll(mms);
             });
-            meshMaterialSets.addAll(mms);
         }
 
 

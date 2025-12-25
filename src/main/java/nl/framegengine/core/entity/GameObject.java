@@ -32,7 +32,8 @@ public class GameObject implements IJsonSerializable {
     private float renderCameraSquaredDistance = 0;
     protected boolean canBeSaved = true;
 
-    private static final Dictionary<String, GameObject> instancedObjects = new Hashtable<>();
+    private static final Hashtable<String, GameObject> instancedObjects = new Hashtable<>();
+    private static final Hashtable<String, List<GameObject>> parentWhenPresent = new Hashtable<>();
 
     private final List<GameObject> children;
     private GameObject parent;
@@ -318,6 +319,25 @@ public class GameObject implements IJsonSerializable {
         return this;
     }
 
+    public GameObject setParentByGUID(String parentGUID){
+        GameObject parentObject = GameObject.getByGUID(parentGUID);
+        if(parentObject != null) return setParent(parentObject);
+
+        if(parentWhenPresent.containsKey(parentGUID)){
+            parentWhenPresent.get(parentGUID).add(this);
+        }else{
+            ArrayList<GameObject> parentObjects = new ArrayList<>();
+            parentObjects.add(this);
+            parentWhenPresent.put(parentGUID, parentObjects);
+        }
+
+        return this;
+    }
+
+    private void addWaitingChildren(){
+        if(parentWhenPresent.containsKey(guid)) parentWhenPresent.get(guid).forEach(go -> go.setParent(this));
+    }
+
     public GameObject getParent(){
         return this.parent;
     }
@@ -568,7 +588,7 @@ public class GameObject implements IJsonSerializable {
     @Override
     public JsonObject serializeToJson() {
         JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
-        JsonObject jsonObject = JsonHelper.objectToJson(this, new String[]{"children", "parent", "instancedObjects"});
+        JsonObject jsonObject = JsonHelper.objectToJson(this, new String[]{"children", "parent", "instancedObjects", "renderCameraSquaredDistance"});
         jsonObject.forEach(jsonObjectBuilder::add);
         if(parent != null) jsonObjectBuilder.add("parentGuid", Json.createValue(parent.guid));
         return jsonObjectBuilder.build();
@@ -585,7 +605,9 @@ public class GameObject implements IJsonSerializable {
                  IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-        if(JsonHelper.hasJsonKey(jsonInfo, "parentGuid")) setParent(GameObject.getByGUID(jsonInfo.getString("parentGuid")));
+
+        if(JsonHelper.hasJsonKey(jsonInfo, "parentGuid")) setParentByGUID(jsonInfo.getString("parentGuid"));
+        addWaitingChildren();
         return this;
     }
 }

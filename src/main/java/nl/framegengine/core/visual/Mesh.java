@@ -31,6 +31,7 @@ public class Mesh implements IJsonSerializable {
     private int[] triangles;
     private int dimension = 3;
     private String meshPath = "";
+    private int meshId = -1;
 
     private final Set<Integer> vbos = new HashSet<>();
 
@@ -707,6 +708,14 @@ public class Mesh implements IJsonSerializable {
 
     public boolean isStatic(){
         return isStatic;
+    }
+
+    public final int getMeshId() {
+        return meshId;
+    }
+
+    public void setMeshId(int meshId) {
+        this.meshId = meshId;
     }
 
     @Override

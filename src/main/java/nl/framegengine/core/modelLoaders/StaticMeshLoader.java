@@ -27,31 +27,50 @@ import static org.lwjgl.assimp.Assimp.*;
 
 public class StaticMeshLoader {
 
+    private static final int defaultFlags = aiProcess_JoinIdenticalVertices | aiProcess_Triangulate |
+            aiProcess_FixInfacingNormals | aiProcess_GenBoundingBoxes | aiProcess_ImproveCacheLocality;
+
     public static Set<MeshMaterialSet> load(String resourcePath) {
         return load(resourcePath, "");
     }
 
+    public static Set<MeshMaterialSet> load(String resourcePath, int subMeshId) {
+        return load(resourcePath, "");
+    }
+
     public static Set<MeshMaterialSet> load(String resourcePath, String texturesDir) {
-        return load(resourcePath, texturesDir,
-                aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals |
-                        aiProcess_OptimizeMeshes | aiProcess_ImproveCacheLocality | aiProcess_OptimizeGraph |
-                        aiProcess_GenBoundingBoxes);
+        return load(resourcePath, -1, texturesDir);
+    }
+
+    public static Set<MeshMaterialSet> load(String resourcePath, int subMeshId, String texturesDir) {
+        return load(resourcePath, subMeshId, texturesDir, defaultFlags);
     }
 
     public static Set<MeshMaterialSet> load(String resourcePath, String texturesDir, int flags) {
+        return load(resourcePath, -1, texturesDir, flags);
+    }
+
+    public static Set<MeshMaterialSet> load(String resourcePath, int subMeshId, String texturesDir, int flags) {
         AIScene aiScene = pathToAIScene(resourcePath, flags);
         if(aiScene == null) return null;
 
-        List<Material> materials = aiSceneToMaterialList(aiScene, texturesDir);
-
-        int numMeshes = aiScene.mNumMeshes();
         PointerBuffer aiMeshes = aiScene.mMeshes();
         Set<MeshMaterialSet> meshMaterialSets = new HashSet<>();
+        List<Material> materials = aiSceneToMaterialList(aiScene, texturesDir);
+            int numMeshes = aiScene.mNumMeshes();
 
-        for (int i = 0; i < numMeshes; i++) {
-            AIMesh aiMesh = AIMesh.create(aiMeshes.get(i));
+        if(subMeshId == -1) {
+            for (int i = 0; i < numMeshes; i++) {
+                AIMesh aiMesh = AIMesh.create(aiMeshes.get(i));
+                MeshMaterialSet mms = processMesh(aiMesh, materials);
+                mms.getMesh().setMeshPath(resourcePath);
+                meshMaterialSets.add(mms);
+            }
+        }else if(numMeshes > subMeshId){
+            AIMesh aiMesh = AIMesh.create(aiScene.mMeshes().get(subMeshId));
             MeshMaterialSet mms = processMesh(aiMesh, materials);
             mms.getMesh().setMeshPath(resourcePath);
+            mms.getMesh().setMeshId(subMeshId);
             meshMaterialSets.add(mms);
         }
 
@@ -63,8 +82,7 @@ public class StaticMeshLoader {
     }
 
     public static GameObject loadIntoGameObject(String resourcePath, String texturesDir) {
-        return loadIntoGameObject(resourcePath, texturesDir, aiProcess_JoinIdenticalVertices | aiProcess_Triangulate |
-                aiProcess_FixInfacingNormals | aiProcess_GenBoundingBoxes);
+        return loadIntoGameObject(resourcePath, texturesDir, defaultFlags);
     }
 
     public static GameObject loadIntoGameObject(String resourcePath, String texturesDir, int flags){
@@ -131,9 +149,11 @@ public class StaticMeshLoader {
         if(childNodeCount > 0){
             IntBuffer nodeMeshes = aiNode.mMeshes();
             for(int i = 0; i < childNodeCount; i++){
-                AIMesh aiMesh = AIMesh.create(aiScene.mMeshes().get(nodeMeshes.get(i)));
+                int meshIndex = nodeMeshes.get(i);
+                AIMesh aiMesh = AIMesh.create(aiScene.mMeshes().get(meshIndex));
                 MeshMaterialSet mms = processMesh(aiMesh, materials);
                 mms.getMesh().setMeshPath(resourcePath);
+                mms.getMesh().setMeshId(meshIndex);
                 RenderComponent renderComponent = rootObject.getComponent(RenderComponent.class);
                 if(renderComponent != null){
                     renderComponent.addMesh(mms);
@@ -146,9 +166,11 @@ public class StaticMeshLoader {
             }
         }
 
-        for(int i=0; i<aiNode.mNumChildren(); i++) {
-            AINode child = AINode.create(aiNode.mChildren().get(i));
-            GameObject childObject = aiSceneToHierarchicalGameObject(aiScene, child, materials, resourcePath);
+        int numChildren = aiNode.mNumChildren();
+        PointerBuffer children = aiNode.mChildren();
+        for (int i = 0; i < numChildren; i++) {
+            AINode childNode = AINode.create(children.get(i));
+            GameObject childObject = aiSceneToHierarchicalGameObject(aiScene, childNode, materials, resourcePath);
             rootObject.addChild(childObject);
         }
 
