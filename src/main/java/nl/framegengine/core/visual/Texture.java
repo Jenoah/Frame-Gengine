@@ -78,7 +78,7 @@ public class Texture implements IJsonSerializable {
     }
 
     public String getTexturePath(){
-        return texturePath.isBlank() ? texturePath : ManifestHelper.getPathByGuid(ManifestHelper.manifestFileType.TEXTURE, guid);
+        return !texturePath.isBlank() ? texturePath : ManifestHelper.getPathByGuid(ManifestHelper.manifestFileType.TEXTURE, guid);
     }
 
     @Override

@@ -191,11 +191,57 @@ public class StaticMeshLoader {
 
         AIColor4D colour = AIColor4D.create();
         AIString path = AIString.calloc();
+        
+        // Load albedo/diffuse texture
         Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_DIFFUSE, 0, path, (IntBuffer) null, null, null, null, null, null);
         String diffuseTexturePath = path.dataString();
 
         if(!texturesDir.isEmpty() && !texturesDir.endsWith(File.separator)) texturesDir += File.separator;
-        if (!diffuseTexturePath.isEmpty()) material.setAlbedoTexture(new Texture(TextureLoader.loadTexture(texturesDir + diffuseTexturePath)));
+        if (!diffuseTexturePath.isEmpty()) material.setAlbedoTexture(new Texture(texturesDir + diffuseTexturePath));
+        
+        // Load normal map
+        path.clear();
+        Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_NORMALS, 0, path, (IntBuffer) null, null, null, null, null, null);
+        String normalMapPath = path.dataString();
+        if (!normalMapPath.isEmpty()) {
+            material.setNormalMap(new Texture(texturesDir + normalMapPath, false, false, true, true));
+        }
+        
+        // Load roughness map
+        path.clear();
+        Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_DIFFUSE_ROUGHNESS, 0, path, (IntBuffer) null, null, null, null, null, null);
+        String roughnessMapPath = path.dataString();
+        if (roughnessMapPath.isEmpty()) {
+            // Try shininess as fallback
+            path.clear();
+            Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_SHININESS, 0, path, (IntBuffer) null, null, null, null, null, null);
+            roughnessMapPath = path.dataString();
+        }
+        if (!roughnessMapPath.isEmpty()) {
+            material.setRoughnessMap(new Texture(texturesDir + roughnessMapPath, false, false, true, false, true));
+        }
+        
+        // Load metallic map
+        path.clear();
+        Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_METALNESS, 0, path, (IntBuffer) null, null, null, null, null, null);
+        String metallicMapPath = path.dataString();
+        if (!metallicMapPath.isEmpty()) {
+            material.setMetallicMap(new Texture(texturesDir + metallicMapPath, false, false, true, false, true));
+        }
+        
+        // Load AO map
+        path.clear();
+        Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_AMBIENT_OCCLUSION, 0, path, (IntBuffer) null, null, null, null, null, null);
+        String aoMapPath = path.dataString();
+        if (aoMapPath.isEmpty()) {
+            // Try lightmap as fallback
+            path.clear();
+            Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_LIGHTMAP, 0, path, (IntBuffer) null, null, null, null, null, null);
+            aoMapPath = path.dataString();
+        }
+        if (!aoMapPath.isEmpty()) {
+            material.setAOMap(new Texture(texturesDir + aoMapPath, false, false, true, false, true));
+        }
 
         int result = aiGetMaterialColor(aiMaterial, AI_MATKEY_COLOR_AMBIENT, aiTextureType_NONE, 0, colour);
         if (result == 0) material.setAmbientColor(new Vector4f(colour.r(), colour.g(), colour.b(), colour.a()));
