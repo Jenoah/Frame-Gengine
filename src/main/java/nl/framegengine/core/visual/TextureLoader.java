@@ -118,7 +118,12 @@ public class TextureLoader {
         TextureLoader.repeatTexture = true;
         TextureLoader.isNormalMap = false;
 
-        if(textureGUID != null) textures.put(textureGUID, id);
+        if(textureGUID != null){
+            textures.put(textureGUID, id);
+        }else{
+            textureGUID = ManifestHelper.getGuidByPath(ManifestHelper.manifestFileType.TEXTURE, fileName);
+            if(textureGUID != null) textures.put(textureGUID, id);
+        }
 
         return id;
     }

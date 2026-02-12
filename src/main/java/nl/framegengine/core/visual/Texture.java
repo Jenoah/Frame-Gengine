@@ -31,6 +31,7 @@ public class Texture implements IJsonSerializable {
     public Texture(int id) {
         this.id = id;
         this.guid = TextureLoader.getGuidById(this.id);
+        this.texturePath = ManifestHelper.getPathByGuid(ManifestHelper.manifestFileType.TEXTURE, this.guid);
     }
 
     public Texture(String texturePath){
