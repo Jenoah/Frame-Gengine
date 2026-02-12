@@ -279,7 +279,6 @@ public class InfoPanel extends EditorPanel {
                         String texturePath = ManifestHelper.getPathByGuid(ManifestHelper.manifestFileType.TEXTURE, textureGUID);
                         if(texturePath != null && !texturePath.isEmpty()) {
                             selectedTextureID = TextureLoader.loadTexture(texturePath);
-                            Debug.log("Loaded texture " + selectedName + " from path: " + texturePath);
                         } else {
                             Debug.logError("Could not find path for texture GUID: " + textureGUID);
                             return;

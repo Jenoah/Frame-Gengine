@@ -2,17 +2,17 @@ package nl.framegengine.core.visual;
 
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.utils.Constants;
+import nl.framegengine.editor.EngineSettings;
 import nl.framegengine.editor.ManifestHelper;
 import org.joml.Math;
-import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.*;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
 
 import java.io.File;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -30,12 +30,14 @@ public class TextureLoader {
     public static int loadTexture(String fileName){
         String textureGUID = ManifestHelper.getGuidByPath(ManifestHelper.manifestFileType.TEXTURE, fileName);
         if(textures.containsKey(textureGUID)){
+            Debug.log("Loading existing texture for " + fileName);
             return textures.get(textureGUID);
         }
 
         ByteBuffer imageBuffer;
         int width = 0, height = 0, alphaFormat;
         IntBuffer comp;
+
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer w = stack.mallocInt(1);
@@ -47,16 +49,13 @@ public class TextureLoader {
             if (file.exists()) {
                 imageBuffer = STBImage.stbi_load(fileName, w, h, comp, 0);
             } else {
-                InputStream is = TextureLoader.class.getResourceAsStream(fileName);
-                if (is == null) {
+                fileName = Paths.get(EngineSettings.currentProjectDirectory, fileName).toString();
+                file = new File(fileName);
+                if (!file.exists()) {
                     Debug.logConsoleError("Image file " + fileName + " could not be located in filesystem or resource folder: " + STBImage.stbi_failure_reason());
                     return defaultTextureID;
                 }
-                byte[] bytes = is.readAllBytes();
-                ByteBuffer buffer = BufferUtils.createByteBuffer(bytes.length).put(bytes);
-                buffer.flip();
-                imageBuffer = STBImage.stbi_load_from_memory(buffer, w, h, comp, 0);
-                is.close();
+                imageBuffer = STBImage.stbi_load(fileName, w, h, comp, 0);
             }
 
             if(imageBuffer == null){
