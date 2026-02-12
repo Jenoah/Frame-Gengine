@@ -51,9 +51,9 @@ public class Material implements IJsonSerializable {
 
     public Material(Material material){
         this.shader = material.getShader();
-        this.ambientColor = material.getAmbientColor();
-        this.diffuseColor = material.getDiffuseColor();
-        this.specularColor = material.getSpecularColor();
+        this.ambientColor = new Vector4f(material.getAmbientColor());
+        this.diffuseColor = new Vector4f(material.getDiffuseColor());
+        this.specularColor = new Vector4f(material.getSpecularColor());
         this.reflectance = material.getReflectance();
         this.albedoTexture = material.getAlbedoTexture();
         this.normalMap = material.getNormalMap();
