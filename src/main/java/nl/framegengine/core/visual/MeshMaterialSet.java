@@ -60,6 +60,9 @@ public class MeshMaterialSet implements IJsonSerializable {
                 material.getGuid() != null &&
                 ManifestHelper.hasGuid(ManifestHelper.manifestFileType.MATERIAL, material.getGuid())) {
             jsonObjectBuilder.add("material", material.getGuid());
+        }else if(material != null){
+            // Material doesn't have a valid GUID in manifest - serialize the full material data
+            jsonObjectBuilder.add("materialData", material.serializeToJson());
         }else{
             jsonObjectBuilder.add("material", "");
         }
@@ -75,6 +78,11 @@ public class MeshMaterialSet implements IJsonSerializable {
             if(JsonHelper.hasJsonKey(jsonInfo, "material") &&
                     jsonInfo.get("material").getValueType() == JsonValue.ValueType.STRING){
                 this.material = MaterialManager.loadMaterialByGuid(jsonInfo.getString("material"));
+            }else if(JsonHelper.hasJsonKey(jsonInfo, "materialData") &&
+                    jsonInfo.get("materialData").getValueType() == JsonValue.ValueType.OBJECT){
+                // Deserialize full material data for non-manifest materials
+                this.material = new Material();
+                this.material.deserializeFromJson(jsonInfo.getJsonObject("materialData").toString());
             }
         } catch (Exception e) {
             Debug.logError("Error loading in data: " + e.getMessage());
