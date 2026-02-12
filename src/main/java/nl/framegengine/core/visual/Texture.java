@@ -20,6 +20,7 @@ public class Texture implements IJsonSerializable {
     private boolean flipped = false;
     private boolean repeat = true;
     private boolean isNormalMap = false;
+    private boolean isDataTexture = false;
     private String texturePath = "";
 
     public int getId() {
@@ -65,6 +66,17 @@ public class Texture implements IJsonSerializable {
         this.guid = TextureLoader.getGuidById(this.id);
     }
 
+    public Texture(String texturePath, boolean pointFilter, boolean flipped, boolean repeat, boolean isNormalMap, boolean isDataTexture){
+        this.id = TextureLoader.loadTexture(texturePath, pointFilter, flipped, repeat, isNormalMap, isDataTexture);
+        this.pointFilter = pointFilter;
+        this.flipped = flipped;
+        this.repeat = repeat;
+        this.isNormalMap = isNormalMap;
+        this.isDataTexture = isDataTexture;
+        this.texturePath = texturePath;
+        this.guid = TextureLoader.getGuidById(this.id);
+    }
+
     public String getTexturePath(){
         return texturePath.isBlank() ? texturePath : ManifestHelper.getPathByGuid(ManifestHelper.manifestFileType.TEXTURE, guid);
     }
@@ -99,7 +111,8 @@ public class Texture implements IJsonSerializable {
                     pointFilter,
                     flipped,
                     repeat,
-                    isNormalMap);
+                    isNormalMap,
+                    isDataTexture);
         }
         this.guid = TextureLoader.getGuidById(this.id);
         return this;

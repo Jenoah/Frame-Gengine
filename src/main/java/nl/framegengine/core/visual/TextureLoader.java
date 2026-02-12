@@ -25,6 +25,7 @@ public class TextureLoader {
     private static boolean pointFilter = false;
     private static boolean repeatTexture = true;
     private static boolean isNormalMap = false;
+    private static boolean isDataTexture = false;
     private static int defaultTextureID = 0;
 
     public static int loadTexture(String fileName){
@@ -35,14 +36,13 @@ public class TextureLoader {
         }
 
         ByteBuffer imageBuffer;
-        int width = 0, height = 0, alphaFormat;
-        IntBuffer comp;
+        int width = 0, height = 0, alphaFormat, components = 0;
 
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer w = stack.mallocInt(1);
             IntBuffer h = stack.mallocInt(1);
-            comp = stack.mallocInt(1);
+            IntBuffer comp = stack.mallocInt(1);
 
             stbi_set_flip_vertically_on_load(flipTexture);
             File file = new File(fileName);
@@ -65,6 +65,7 @@ public class TextureLoader {
 
             width = w.get();
             height = h.get();
+            components = comp.get(); // Store component count before stack closes
         } catch (Exception e) {
             Debug.logConsoleError(e.getMessage());
             return defaultTextureID;
@@ -75,16 +76,30 @@ public class TextureLoader {
         GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
 
         int format;
-        if (comp.get() == 3) {
+        if (components == 1) {
+            // Single-channel grayscale texture (e.g., roughness, AO, metallic maps)
+            // Use linear color space (GL_R8) for data textures, not sRGB
+            format = GL30.GL_R8;
+            alphaFormat = GL11.GL_RED;
+            
+            // Use texture swizzling to make single-channel textures appear as grayscale
+            // This maps R -> RGB so previews show as black-and-white instead of red
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL33.GL_TEXTURE_SWIZZLE_R, GL11.GL_RED);
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL33.GL_TEXTURE_SWIZZLE_G, GL11.GL_RED);
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL33.GL_TEXTURE_SWIZZLE_B, GL11.GL_RED);
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL33.GL_TEXTURE_SWIZZLE_A, GL11.GL_RED);
+        } else if (components == 3) {
             if ((width & 3) != 0) {
                 GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 2 - (width & 1));
             }
-            format = isNormalMap ? GL11.GL_RGB8 : GL21.GL_SRGB8;
+            // Use linear color space for normal maps and data textures (roughness, metallic, AO)
+            // Use sRGB for color textures (albedo)
+            format = (isNormalMap || isDataTexture) ? GL11.GL_RGB8 : GL21.GL_SRGB8;
             alphaFormat = GL11.GL_RGB;
         } else {
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA);
-            format = isNormalMap ? GL11.GL_RGBA8 : GL21.GL_SRGB8_ALPHA8;
+            format = (isNormalMap || isDataTexture) ? GL11.GL_RGBA8 : GL21.GL_SRGB8_ALPHA8;
             alphaFormat = GL11.GL_RGBA;
         }
 
@@ -117,6 +132,7 @@ public class TextureLoader {
         TextureLoader.pointFilter = false;
         TextureLoader.repeatTexture = true;
         TextureLoader.isNormalMap = false;
+        TextureLoader.isDataTexture = false;
 
         if(textureGUID != null){
             textures.put(textureGUID, id);
@@ -153,6 +169,15 @@ public class TextureLoader {
         TextureLoader.repeatTexture = repeatTexture;
         TextureLoader.flipTexture = flipTexture;
         TextureLoader.isNormalMap = isNormalMap;
+        return loadTexture(fileName);
+    }
+
+    public static int loadTexture(String fileName, boolean pointFilter, boolean flipTexture, boolean repeatTexture, boolean isNormalMap, boolean isDataTexture){
+        TextureLoader.pointFilter = pointFilter;
+        TextureLoader.repeatTexture = repeatTexture;
+        TextureLoader.flipTexture = flipTexture;
+        TextureLoader.isNormalMap = isNormalMap;
+        TextureLoader.isDataTexture = isDataTexture;
         return loadTexture(fileName);
     }
 
