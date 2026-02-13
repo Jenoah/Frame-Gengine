@@ -7,6 +7,7 @@ import nl.framegengine.core.utils.Conversion;
 import nl.framegengine.core.utils.FileHelper;
 import nl.framegengine.core.visual.*;
 import nl.framegengine.editor.EngineSettings;
+import nl.framegengine.editor.ManifestHelper;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 import org.lwjgl.PointerBuffer;
@@ -105,18 +106,39 @@ public class StaticMeshLoader {
     }
 
     private static AIScene pathToAIScene(String resourcePath, int flags){
-        Path filePath = Path.of(EngineSettings.currentProjectDirectory, resourcePath);
-        if(filePath.toFile().exists()){
-            resourcePath = filePath.toString();
-        }else{
+        // Handle builtin: prefix — skip project directory, go straight to classpath
+        if (resourcePath.startsWith(Mesh.BUILTIN_PREFIX)) {
+            resourcePath = resourcePath.substring(Mesh.BUILTIN_PREFIX.length());
             try {
                 URL resource = StaticMeshLoader.class.getResource(resourcePath);
-                if(resource != null) resourcePath = Paths.get(resource.toURI()).toAbsolutePath().toString();
+                if (resource != null) resourcePath = Paths.get(resource.toURI()).toAbsolutePath().toString();
             } catch (URISyntaxException e) {
-                Debug.logError("Error loading model at " + resourcePath + ". " + e.getMessage());
+                Debug.logError("Error loading built-in model at " + resourcePath + ". " + e.getMessage());
                 return null;
             }
+        } else {
+            // Try resolving as a manifest GUID first
+            String guidResolved = ManifestHelper.getPathByGuid(ManifestHelper.manifestFileType.MODEL, resourcePath);
+            if (guidResolved != null) {
+                resourcePath = guidResolved;
+            }
+
+            // Try project directory, then classpath
+            Path filePath = Path.of(EngineSettings.currentProjectDirectory, resourcePath);
+            if (filePath.toFile().exists()) {
+                resourcePath = filePath.toString();
+            } else {
+                try {
+                    URL resource = StaticMeshLoader.class.getResource(resourcePath);
+                    if (resource != null)
+                        resourcePath = Paths.get(resource.toURI()).toAbsolutePath().toString();
+                } catch (URISyntaxException e) {
+                    Debug.logError("Error loading model at " + resourcePath + ". " + e.getMessage());
+                    return null;
+                }
+            }
         }
+
         AIScene aiScene = aiImportFile(resourcePath, flags);
         if (aiScene == null) {
             Debug.logError("Error loading model at " + resourcePath + ". " + aiGetErrorString());

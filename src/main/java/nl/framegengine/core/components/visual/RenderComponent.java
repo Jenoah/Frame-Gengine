@@ -15,6 +15,7 @@ import nl.framegengine.core.visual.Material;
 import nl.framegengine.core.visual.MaterialManager;
 import nl.framegengine.core.visual.Mesh;
 import nl.framegengine.core.visual.MeshMaterialSet;
+import nl.framegengine.editor.ManifestHelper;
 import org.joml.Vector3f;
 
 import javax.json.Json;
@@ -191,9 +192,51 @@ public class RenderComponent extends Component {
         if(!hasMeshPaths){
             ignoredKeys.add("meshPaths");
             ignoredKeys.add("meshMaterialSets");
+        } else {
+            // Convert meshPaths to stable references before serialization:
+            // - builtin: paths stay as-is
+            // - project model paths get converted to manifest GUIDs
+            List<String> originalPaths = new ArrayList<>(meshPaths);
+            meshPaths.clear();
+            for (String path : originalPaths) {
+                meshPaths.add(toStableReference(path));
+            }
+
+            // Also update the meshPath on each MeshMaterialSet's Mesh
+            for (MeshMaterialSet mms : meshMaterialSets) {
+                String mp = mms.getMesh().getMeshPath();
+                if (mp != null && !mp.isBlank()) {
+                    mms.getMesh().setMeshPath(toStableReference(mp));
+                }
+            }
         }
 
-        return JsonHelper.objectToJson(this, ignoredKeys.toArray(new String[0]));
+        JsonObject result = JsonHelper.objectToJson(this, ignoredKeys.toArray(new String[0]));
+
+        return result;
+    }
+
+    /**
+     * Converts a mesh path to a stable serializable reference.
+     * - Paths starting with "builtin:" are returned as-is.
+     * - Paths that can be resolved to a manifest GUID are returned as the GUID.
+     * - All other paths (legacy / unresolvable) are returned as-is for backward compatibility.
+     */
+    private String toStableReference(String path) {
+        if (path == null || path.isBlank()) return path;
+        if (path.startsWith(Mesh.BUILTIN_PREFIX)) return path;
+
+        // Already a GUID? Check if the manifest knows it
+        if (ManifestHelper.hasGuid(ManifestHelper.manifestFileType.MODEL, path)) {
+            return path;
+        }
+
+        // Try to look up the GUID by path
+        String guid = ManifestHelper.getGuidByPath(ManifestHelper.manifestFileType.MODEL, path);
+        if (guid != null) return guid;
+
+        // Fallback: return path as-is (legacy compatibility)
+        return path;
     }
 
     @Override

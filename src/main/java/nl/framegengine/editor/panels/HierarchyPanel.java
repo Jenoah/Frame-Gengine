@@ -15,6 +15,7 @@ import nl.framegengine.core.lighting.DirectionalLight;
 import nl.framegengine.core.lighting.PointLight;
 import nl.framegengine.core.lighting.SpotLight;
 import nl.framegengine.core.modelLoaders.StaticMeshLoader;
+import nl.framegengine.core.visual.Mesh;
 import nl.framegengine.core.visual.MeshMaterialSet;
 import nl.framegengine.editor.EditorPanel;
 import nl.framegengine.editor.ImGuiHelper;
@@ -174,7 +175,7 @@ public class HierarchyPanel extends EditorPanel {
             if (ImGui.beginMenu("Shape")) {
                 if (ImGui.menuItem("Cube")) {
                     if(SceneManager.currentScene != null){
-                        Set<MeshMaterialSet> meshMaterialSets = StaticMeshLoader.load("/models/cube.obj");
+                        Set<MeshMaterialSet> meshMaterialSets = StaticMeshLoader.load(Mesh.BUILTIN_PREFIX + "/models/cube.obj");
                         if(meshMaterialSets != null) {
                             GameObject cubeObject = new GameObject("Cube");
                             cubeObject.addComponent(new RenderComponent(meshMaterialSets));
@@ -185,7 +186,7 @@ public class HierarchyPanel extends EditorPanel {
                 }
                 if (ImGui.menuItem("Quad")) {
                     if(SceneManager.currentScene != null){
-                        Set<MeshMaterialSet> meshMaterialSets = StaticMeshLoader.load("/models/quad.obj");
+                        Set<MeshMaterialSet> meshMaterialSets = StaticMeshLoader.load(Mesh.BUILTIN_PREFIX + "/models/quad.obj");
                         if(meshMaterialSets != null) {
                             GameObject cubeObject = new GameObject("Quad");
                             cubeObject.addComponent(new RenderComponent(meshMaterialSets));
@@ -196,7 +197,7 @@ public class HierarchyPanel extends EditorPanel {
                 }
                 if (ImGui.menuItem("Sphere")) {
                     if(SceneManager.currentScene != null){
-                        Set<MeshMaterialSet> meshMaterialSets = StaticMeshLoader.load("/models/sphere.obj");
+                        Set<MeshMaterialSet> meshMaterialSets = StaticMeshLoader.load(Mesh.BUILTIN_PREFIX + "/models/sphere.obj");
                         if(meshMaterialSets != null) {
                             GameObject sphereObject = new GameObject("Sphere");
                             sphereObject.addComponent(new RenderComponent(meshMaterialSets));

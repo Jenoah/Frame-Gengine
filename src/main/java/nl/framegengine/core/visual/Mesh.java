@@ -23,6 +23,9 @@ import java.nio.IntBuffer;
 import java.util.*;
 
 public class Mesh implements IJsonSerializable {
+
+    public static final String BUILTIN_PREFIX = "builtin:";
+
     private float[] vertices;
     private float[] normals;
     private float[] tangents;
@@ -511,6 +514,21 @@ public class Mesh implements IJsonSerializable {
     }
 
     public String getMeshPath() {
+        return meshPath;
+    }
+
+    public boolean isBuiltin() {
+        return meshPath != null && meshPath.startsWith(BUILTIN_PREFIX);
+    }
+
+    /**
+     * Returns the resource path without the builtin: prefix.
+     * If the path is not builtin, returns the meshPath as-is.
+     */
+    public String getResourcePath() {
+        if (isBuiltin()) {
+            return meshPath.substring(BUILTIN_PREFIX.length());
+        }
         return meshPath;
     }
 
