@@ -52,7 +52,7 @@ public class StaticMeshLoader {
 
     public static Set<MeshMaterialSet> load(String resourcePath, int subMeshId, String texturesDir, int flags) {
         AIScene aiScene = pathToAIScene(resourcePath, flags);
-        if(aiScene == null) return null;
+        if(aiScene == null) return new HashSet<>();
 
         PointerBuffer aiMeshes = aiScene.mMeshes();
         Set<MeshMaterialSet> meshMaterialSets = new HashSet<>();
@@ -88,7 +88,7 @@ public class StaticMeshLoader {
     public static GameObject loadIntoGameObject(String resourcePath, String texturesDir, int flags){
         AIScene aiScene = pathToAIScene(resourcePath, flags);
         if(aiScene == null) return null;
-        
+
         List<Material> materials = aiSceneToMaterialList(aiScene, texturesDir);
 
         if(aiScene.mRootNode() == null) return null;

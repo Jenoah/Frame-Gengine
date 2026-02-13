@@ -220,6 +220,7 @@ public class RenderComponent extends Component {
                 if(meshPath.isBlank()) return;
 
                 Set<MeshMaterialSet> mms = StaticMeshLoader.load(meshPath, mesh.getMeshId(), "");
+                if(mms == null || mms.isEmpty()) return;
                 mms.forEach(meshMaterialSetB -> {
                     if(uvScale != 1f) meshMaterialSetB.getMesh().setUVScale(uvScale);
                     meshMaterialSetB.setRoot(getRoot());
