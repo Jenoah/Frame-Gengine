@@ -1,0 +1,208 @@
+{
+	"levelName": "Test level",
+	"fogDensity": 0.025,
+	"fogGradient": 10,
+	"fogColor": {
+		"x": 0.7,
+		"y": 0.75,
+		"z": 0.8
+	},
+	"gameObjects": [
+		{
+			"name": "Player",
+			"guid": "playerGUID",
+			"localPosition": {
+				"x": 0,
+				"y": 6,
+				"z": 0
+			},
+			"components": [
+				{
+					"class": "PlayerMovement",
+					"moveSpeed": 5
+				}
+			]
+		},
+		{
+			"name": "Camera - Player",
+			"parentGuid": "playerGUID",
+			"goType": "Camera",
+			"isMain": true,
+			"localPosition": {
+				"x": 0,
+				"y": 1.8,
+				"z": 0
+			}
+		},
+		{
+			"name": "Barn",
+			"meshPath": "/models/barn.obj",
+			"localPosition": {
+				"x": 0,
+				"y": 6,
+				"z": -10
+			}
+		},
+		{
+			"name": "Ground block",
+			"meshPath": "/models/cube.obj",
+			"texturePath": {
+				"diffuse": "textures/rock/rock_albedo.jpg",
+				"ao": "textures/rock/rock_ao.jpg",
+				"normal": "textures/rock/rock_normal.jpg",
+				"roughness": "textures/rock/rock_roughness.jpg"
+			},
+			"localPosition": {
+				"x": 0,
+				"y": 3.5,
+				"z": -10
+			},
+			"scale": {
+				"x": 5,
+				"y": 2.5,
+				"z": 6
+			}
+		},
+		{
+			"name": "Cube",
+			"guid": "123abc",
+			"meshPath": "/models/cube.obj",
+			"localPosition": {
+				"x": 1.5,
+				"y": 6.5,
+				"z": -3
+			},
+			"scale": {
+				"x": 0.25,
+				"y": 0.25,
+				"z": 0.25
+			},
+			"components": [
+				{
+					"class": "MoveWithArrows",
+					"moveSpeed": 3
+				}
+			]
+		},
+		{
+			"name": "Directional Light",
+			"goType": "DirectionalLight",
+			"localPosition": {
+				"x": -2.5,
+				"y": 6.5,
+				"z": -4
+			},
+			"localRotation": {
+				"x": -0.3651,
+				"y": -0.1826,
+				"z": -0.0000,
+				"w": 0.9129
+			},
+			"color": {
+				"x": 1,
+				"y": 1,
+				"z": 0.75
+			},
+			"intensity": 1
+		},
+		{
+			"name": "Pointlight 1",
+			"goType": "PointLight",
+			"color": {
+				"x": 0.25,
+				"y": 0.25,
+				"z": 1
+			},
+			"localPosition": {
+				"x": 0,
+				"y": 6.5,
+				"z": -5
+			},
+			"localRotation": {
+				"x": 0,
+				"y": 0,
+				"z": 0,
+				"w": 1
+			},
+			"intensity": 5,
+			"constant": 1,
+			"linear": 0.5,
+			"exponent": 0.25
+		},
+		{
+			"name": "Spotlight 1",
+			"parentGuid": "123abc",
+			"goType": "SpotLight",
+			"color": {
+				"x": 0.1,
+				"y": 1,
+				"z": 0.1
+			},
+			"localPosition": {
+				"x": 0,
+				"y": 0,
+				"z": -0.1
+			},
+			"localRotation": {
+				"x": 0,
+				"y": -1,
+				"z": 0,
+				"w": 0
+			},
+			"intensity": 3,
+			"constant": 1,
+			"linear": 0.09,
+			"exponent": 0.032,
+			"cutOff":  0.8660254,
+			"outerCutOff": 0.81915206,
+			"components": [
+				{
+					"class": "RotateOnAxis",
+					"rotationSpeed": 100
+				}
+			]
+		},
+		{
+			"name": "Spotlight 2",
+			"parentGuid": "123abc",
+			"goType": "SpotLight",
+			"color": {
+				"x": 1,
+				"y": 0.1,
+				"z": 0.1
+			},
+			"localPosition": {
+				"x": 0,
+				"y": 0,
+				"z": 0.1
+			},
+			"localRotation": {
+				"x": 0,
+				"y": 0,
+				"z": 1,
+				"w": 0
+			},
+			"intensity": 3,
+			"constant": 1,
+			"linear": 0.09,
+			"exponent": 0.032,
+			"cutOff":  0.8660254,
+			"outerCutOff": 0.81915206,
+			"components": [
+				{
+					"class": "RotateOnAxis"
+				}
+			]
+		},
+		{
+			"name": "TerrainManager",
+			"guid": "terrainManager",
+			"components": [
+				{
+					"class": "TerrainManager",
+					"renderDistance": 4
+				}
+			]
+		}
+	]
+}
