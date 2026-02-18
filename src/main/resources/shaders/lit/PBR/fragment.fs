@@ -63,6 +63,7 @@ uniform int hasMetallicMap = 0;
 uniform int hasAOMap;
 uniform float specularPower = 0;
 uniform float shadowBias;
+uniform float shadowBiasMax;
 uniform int shadowPCFCount = 2;
 uniform int shadowMapSize;
 
@@ -190,15 +191,17 @@ vec3 skybox // Skybox color for the reflected vector
     return lightResult + reflection;
 }
 
-float calculateShadowFactor(){
-    float shadowTotalTexels = (shadowPCFCount * 2.0 + 1.0);
+float calculateShadowFactor(float NdotL){
+    float slopeBias = mix(shadowBiasMax, shadowBias, NdotL);
+    float shadowKernelSize = (shadowPCFCount * 2.0 + 1.0);
+    float shadowTotalTexels = shadowKernelSize * shadowKernelSize;
     float shadowMapTexelSize = 1.0 / shadowMapSize;
     float shadowFactorTotal = 0.0;
 
     for(int x = -shadowPCFCount; x <= shadowPCFCount; x++){
         for(int y = -shadowPCFCount; y <= shadowPCFCount; y++){
             float objectNearestLight = texture(shadowMap, shadowCoords.xy + vec2(x, y) * shadowMapTexelSize).r;
-            if(shadowCoords.z > objectNearestLight + shadowBias){
+            if(shadowCoords.z > objectNearestLight + slopeBias){
                 shadowFactorTotal += 1.0;
             }
         }
@@ -225,7 +228,11 @@ void main()
     vec3 ambient = ambientColor * albedo * irradiance * ao;
 
     //Shadow calculation
-    float shadowFactor = calculateShadowFactor();
+    vec3 shadowN = N;
+    float shadowNdotL = (directionalLight.intensity > 0.0)
+        ? max(dot(shadowN, normalize(-directionalLight.direction)), 0.0)
+        : 1.0;
+    float shadowFactor = calculateShadowFactor(shadowNdotL);
 
     //Skybox
     vec3 reflectionDirection = reflect(-V, N);

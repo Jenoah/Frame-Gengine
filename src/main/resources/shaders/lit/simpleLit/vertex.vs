@@ -27,7 +27,8 @@ void main(){
 
     gl_Position = projectionMatrix * cameraObjectPosition;
 
-    vertexNormal = normal;
+    mat3 normalMatrix = transpose(inverse(mat3(modelMatrix)));
+    vertexNormal = normalize(normalMatrix * normal);
 
     fragPosition = worldPosition.xyz;
     texCoords = textureCoords;

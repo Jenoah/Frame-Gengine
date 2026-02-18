@@ -53,6 +53,13 @@ public class ShadowFrustum {
             if (point.y > maxY) maxY = point.y; else if (point.y < minY) minY = point.y;
             if (point.z > maxZ) maxZ = point.z; else if (point.z < minZ) minZ = point.z;
         }
+        // Extend the Z range backward so shadow casters behind the camera aren't clipped.
+        // Extend XY so large objects near (or scaled beyond) the camera frustum edges still cast shadows.
+        minX -= Constants.SHADOW_FRUSTUM_PADDING;
+        maxX += Constants.SHADOW_FRUSTUM_PADDING;
+        minY -= Constants.SHADOW_FRUSTUM_PADDING;
+        maxY += Constants.SHADOW_FRUSTUM_PADDING;
+        minZ -= Constants.SHADOW_OFFSET;
         maxZ += Constants.SHADOW_OFFSET;
     }
 

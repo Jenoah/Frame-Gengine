@@ -48,6 +48,7 @@ public class SimpleLitShader extends Shader {
         createUniform("shadowSpaceMatrix");
         createUniform("shadowDistance");
         createUniform("shadowBias");
+        createUniform("shadowBiasMax");
         createUniform("shadowTransitionDistance");
         createUniform("shadowPCFCount");
         createUniform("shadowMapSize");
@@ -215,6 +216,7 @@ public class SimpleLitShader extends Shader {
         //Shadows
         this.setUniform("shadowDistance", Constants.SHADOW_DISTANCE);
         this.setUniform("shadowBias", Constants.SHADOW_BIAS);
+        this.setUniform("shadowBiasMax", Constants.SHADOW_BIAS_MAX);
         this.setUniform("shadowTransitionDistance", Constants.SHADOW_TRANSITION_DISTANCE);
         this.setUniform("shadowPCFCount", Constants.SHADOW_PCF_COUNT);
         this.setUniform("shadowMapSize", Constants.SHADOW_MAP_SIZE);

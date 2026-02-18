@@ -54,6 +54,7 @@ uniform vec3 viewPosition;
 uniform vec3 fogColor;
 uniform float specularPower;
 uniform float shadowBias;
+uniform float shadowBiasMax;
 uniform int shadowPCFCount = 2;
 uniform int shadowMapSize;
 
@@ -159,16 +160,26 @@ void main() {
         diffuseMap = material.ambient;
     }
 
-    //Shadow calculation
-    //Shadow calculation
-    float shadowTotalTexels = (shadowPCFCount * 2 + 1);
+    //Correct intensities of textures and lighting
+    ambient = vec3(0.3) * ambientColor;
+    diffuse = vec3(1.0) * diffuseMap.rgb;
+
+    fragNormal = normalize(vertexNormal);
+    viewDirection = normalize(viewPosition - fragPosition);
+
+    //Shadow calculation — slope-scale bias prevents acne at grazing light angles
+    float NdotL = max(dot(fragNormal, normalize(directionalLight.direction)), 0.0);
+    float slopeBias = mix(shadowBiasMax, shadowBias, NdotL);
+
+    float shadowKernelSize = (shadowPCFCount * 2 + 1);
+    float shadowTotalTexels = shadowKernelSize * shadowKernelSize;
     float shadowMapTexelSize = 1.0 / shadowMapSize;
     float shadowFactorTotal = 0.0;
 
     for(int x = -shadowPCFCount; x <= shadowPCFCount; x++){
         for(int y = -shadowPCFCount; y <= shadowPCFCount; y++){
             float objectNearestLight = texture(shadowMap, shadowCoords.xy + vec2(x, y) * shadowMapTexelSize).r;
-            if(shadowCoords.z > objectNearestLight + shadowBias){
+            if(shadowCoords.z > objectNearestLight + slopeBias){
                 shadowFactorTotal++;
             }
         }
@@ -177,13 +188,6 @@ void main() {
     shadowFactorTotal /= shadowTotalTexels;
 
     float shadowFactor = 1.0 - (shadowFactorTotal * shadowCoords.w);
-
-    //Correct intensities of textures and lighting
-    ambient = vec3(0.3) * ambientColor;
-    diffuse = vec3(1.0) * diffuseMap.rgb;
-
-    fragNormal = normalize(vertexNormal);
-    viewDirection = normalize(viewPosition - fragPosition);
 
 
     //Directional Light

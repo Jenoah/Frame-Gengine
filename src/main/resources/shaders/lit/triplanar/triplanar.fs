@@ -55,6 +55,7 @@ uniform vec3 fogColor;
 uniform float specularPower;
 uniform float blendFactor;
 uniform float shadowBias;
+uniform float shadowBiasMax;
 uniform int shadowPCFCount = 2;
 uniform int shadowMapSize;
 
@@ -154,15 +155,17 @@ vec4 calculateDirectionalLight(DirectionalLight light, float shadowInfluence){
     return vec4((ambientOutput + diffuseOutput + specularOutput), 0.0);
 }
 
-float calculateShadowFactor(){
-    float shadowTotalTexels = (shadowPCFCount * 2.0 + 1.0);
+float calculateShadowFactor(float NdotL){
+    float slopeBias = mix(shadowBiasMax, shadowBias, NdotL);
+    float shadowKernelSize = (shadowPCFCount * 2.0 + 1.0);
+    float shadowTotalTexels = shadowKernelSize * shadowKernelSize;
     float shadowMapTexelSize = 1.0 / shadowMapSize;
     float shadowFactorTotal = 0.0;
 
     for(int x = -shadowPCFCount; x <= shadowPCFCount; x++){
         for(int y = -shadowPCFCount; y <= shadowPCFCount; y++){
             float objectNearestLight = texture(shadowMap, shadowCoords.xy + vec2(x, y) * shadowMapTexelSize).r;
-            if(shadowCoords.z > objectNearestLight + shadowBias){
+            if(shadowCoords.z > objectNearestLight + slopeBias){
                 shadowFactorTotal += 1.0;
             }
         }
@@ -174,11 +177,12 @@ float calculateShadowFactor(){
 }
 
 void main() {
-    //Shadow calculation
-    float shadowFactor = calculateShadowFactor();
-
     fragNormal = normalize(vertexNormal);
     viewDirection = normalize(viewPosition - fragPosition);
+
+    //Shadow calculation
+    float NdotL = max(dot(fragNormal, normalize(-directionalLight.direction)), 0.0);
+    float shadowFactor = calculateShadowFactor(NdotL);
     vec4 sideTex = texture(sideTexture, texCoords);
     vec4 topTex = texture(topTexture, texCoords);
 
