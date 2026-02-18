@@ -10,11 +10,14 @@ import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
+import org.lwjgl.BufferUtils;
 
 import static org.lwjgl.stb.STBImage.stbi_set_flip_vertically_on_load;
 
@@ -49,13 +52,35 @@ public class TextureLoader {
             if (file.exists()) {
                 imageBuffer = STBImage.stbi_load(fileName, w, h, comp, 0);
             } else {
-                fileName = Paths.get(EngineSettings.currentProjectDirectory, fileName).toString();
+                if (!fileName.startsWith(EngineSettings.currentProjectDirectory)) {
+                    fileName = Paths.get(EngineSettings.currentProjectDirectory, fileName).toString();
+                }
                 file = new File(fileName);
-                if (!file.exists()) {
+                if (file.exists()) {
+                    imageBuffer = STBImage.stbi_load(fileName, w, h, comp, 0);
+                } else if (EngineSettings.isCompiled) {
+                    String resourcePath = fileName.startsWith("/") ? fileName : ("/" + fileName);
+                    try (InputStream is = TextureLoader.class.getResourceAsStream(resourcePath)) {
+                        if (is == null) {
+                            Debug.logConsoleError("Image resource " + resourcePath + " not found in classpath");
+                            return defaultTextureID;
+                        }
+                        byte[] bytes = is.readAllBytes();
+                        ByteBuffer resourceBuffer = BufferUtils.createByteBuffer(bytes.length);
+                        resourceBuffer.put(bytes).flip();
+                        imageBuffer = STBImage.stbi_load_from_memory(resourceBuffer, w, h, comp, 0);
+                        if (imageBuffer == null) {
+                            Debug.logConsoleError("Failed to decode image resource " + resourcePath + ": " + STBImage.stbi_failure_reason());
+                            return defaultTextureID;
+                        }
+                    } catch (IOException e) {
+                        Debug.logConsoleError("Failed to read image resource: " + e.getMessage());
+                        return defaultTextureID;
+                    }
+                } else {
                     Debug.logConsoleError("Image file " + fileName + " could not be located in filesystem or resource folder: " + STBImage.stbi_failure_reason());
                     return defaultTextureID;
                 }
-                imageBuffer = STBImage.stbi_load(fileName, w, h, comp, 0);
             }
 
             if(imageBuffer == null){

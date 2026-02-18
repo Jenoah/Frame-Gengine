@@ -14,15 +14,20 @@ import org.lwjgl.PointerBuffer;
 import org.lwjgl.assimp.*;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.lwjgl.BufferUtils;
 
 import static org.lwjgl.assimp.Assimp.*;
 
@@ -106,27 +111,34 @@ public class StaticMeshLoader {
     }
 
     private static AIScene pathToAIScene(String resourcePath, int flags){
-        // Handle builtin: prefix — skip project directory, go straight to classpath
         if (resourcePath.startsWith(Mesh.BUILTIN_PREFIX)) {
-            resourcePath = resourcePath.substring(Mesh.BUILTIN_PREFIX.length());
-            try {
-                URL resource = StaticMeshLoader.class.getResource(resourcePath);
-                if (resource != null) resourcePath = Paths.get(resource.toURI()).toAbsolutePath().toString();
-            } catch (URISyntaxException e) {
-                Debug.logError("Error loading built-in model at " + resourcePath + ". " + e.getMessage());
+            String builtinPath = resourcePath.substring(Mesh.BUILTIN_PREFIX.length());
+            URL resource = StaticMeshLoader.class.getResource(builtinPath);
+            if (resource == null) {
+                Debug.logError("Built-in model not found in classpath: " + builtinPath);
                 return null;
             }
+            try {
+                builtinPath = Paths.get(resource.toURI()).toAbsolutePath().toString();
+            } catch (URISyntaxException e) {
+                Debug.logError("Error loading built-in model at " + builtinPath + ". " + e.getMessage());
+                return null;
+            } catch (FileSystemNotFoundException e) {
+                return loadAISceneFromClasspath(resourcePath.substring(Mesh.BUILTIN_PREFIX.length()), flags);
+            }
+            resourcePath = builtinPath;
         } else {
-            // Try resolving as a manifest GUID first
             String guidResolved = ManifestHelper.getPathByGuid(ManifestHelper.manifestFileType.MODEL, resourcePath);
             if (guidResolved != null) {
                 resourcePath = guidResolved;
             }
 
-            // Try project directory, then classpath
             Path filePath = Path.of(EngineSettings.currentProjectDirectory, resourcePath);
             if (filePath.toFile().exists()) {
                 resourcePath = filePath.toString();
+            } else if (EngineSettings.isCompiled) {
+                String classpathPath = EngineSettings.currentProjectDirectory + "/" + resourcePath;
+                return loadAISceneFromClasspath(classpathPath, flags);
             } else {
                 try {
                     URL resource = StaticMeshLoader.class.getResource(resourcePath);
@@ -146,6 +158,27 @@ public class StaticMeshLoader {
         }
 
         return aiScene;
+    }
+
+    private static AIScene loadAISceneFromClasspath(String classpathPath, int flags) {
+        try (InputStream is = StaticMeshLoader.class.getResourceAsStream(classpathPath)) {
+            if (is == null) {
+                Debug.logError("Model resource not found in classpath: " + classpathPath);
+                return null;
+            }
+            byte[] bytes = is.readAllBytes();
+            ByteBuffer buffer = BufferUtils.createByteBuffer(bytes.length);
+            buffer.put(bytes).flip();
+            String hint = FileHelper.getExtension(classpathPath);
+            AIScene aiScene = aiImportFileFromMemory(buffer, flags, hint != null ? hint : "");
+            if (aiScene == null) {
+                Debug.logError("Error loading model from classpath at " + classpathPath + ". " + aiGetErrorString());
+            }
+            return aiScene;
+        } catch (IOException e) {
+            Debug.logError("Error reading model resource: " + e.getMessage());
+            return null;
+        }
     }
 
     private static List<Material> aiSceneToMaterialList(AIScene aiScene, String texturesDir){
