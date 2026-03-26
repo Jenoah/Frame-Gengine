@@ -120,6 +120,13 @@ public class GizmoMovement extends Component {
         disableRotate();
     }
 
+    @Override
+    public void cleanUp() {
+        super.cleanUp();
+        disableMove();
+        disableRotate();
+    }
+
     private void disableMove(){
         if(xAxisLine != null){
             xAxisLine.persistent = false;
