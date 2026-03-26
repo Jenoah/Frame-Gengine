@@ -137,7 +137,7 @@ public class Mesh implements IJsonSerializable {
         }
         if(vertexFloatArray != null && vertexFloatArray.length > 0){
             vertexVBOID = storeDataInAttributeList(0, this.dimension, vertexFloatArray);
-            vertexCount = vertexFloatArray.length;
+            vertexCount = (triangleArray != null) ? triangleArray.length : vertexFloatArray.length / this.dimension;
             this.vertices = vertexFloatArray;
         }
 
@@ -456,7 +456,7 @@ public class Mesh implements IJsonSerializable {
 
     public final int getVertexCount(){
         if(vertexCount == -1){
-            vertexCount = vertices.length;
+            vertexCount = (triangles != null) ? triangles.length : vertices.length / dimension;
         }
 
         return vertexCount;
