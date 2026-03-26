@@ -107,9 +107,18 @@ public class ShadowRenderer implements IRenderer {
     }
 
     public void prepare(Vector3f lightDirection, ShadowFrustum shadowFrustum){
-        updateOrthoProjectionMatrix();
         updateLightViewMatrix(lightDirection, shadowFrustum.getCenter());
         shadowFrustum.update(lightViewMatrix);
+        updateLightViewMatrix(lightDirection, shadowFrustum.getCenter());
+        updateOrthoProjectionMatrix();
+
+        float worldUnitsPerTexelX = shadowFrustum.getWidth()  / Constants.SHADOW_MAP_SIZE;
+        float worldUnitsPerTexelY = shadowFrustum.getHeight() / Constants.SHADOW_MAP_SIZE;
+        float tx = lightViewMatrix.m30();
+        float ty = lightViewMatrix.m31();
+
+        lightViewMatrix.m30((float) Math.floor(tx / worldUnitsPerTexelX) * worldUnitsPerTexelX);
+        lightViewMatrix.m31((float) Math.floor(ty / worldUnitsPerTexelY) * worldUnitsPerTexelY);
 
         projectionMatrix.mulOrthoAffine(lightViewMatrix, projectionViewMatrix);
         shadowFrameBuffer.bindFrameBuffer();
