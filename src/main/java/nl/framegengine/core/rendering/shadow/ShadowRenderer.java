@@ -66,6 +66,10 @@ public class ShadowRenderer implements IRenderer {
 
         shadowSets.forEach((meshMaterialSet) -> {
             if (!meshMaterialSet.getRoot().isEnabled() || !meshMaterialSet.material.castShadow()) return;
+
+            if (meshMaterialSet.getRoot().getAabb() != null
+                    && !shadowFrustum.isInFrustum(meshMaterialSet.getRoot().getAabb().toWorld())) return;
+
             if (recordMetrics) {
                 metrics.recordStateChange();
             }
@@ -79,7 +83,6 @@ public class ShadowRenderer implements IRenderer {
             if(meshMaterialSet.getMesh().isInstanced()){
                 GL33.glDrawElementsInstanced(GL11.GL_TRIANGLES, meshMaterialSet.getMesh().getVertexCount(), GL11.GL_UNSIGNED_INT, 0, meshMaterialSet.getMesh().getInstanceCount());
             }else{
-                if(recordMetrics) metrics.recordVertexCount(meshMaterialSet.getMesh().getVertexCount());
                 GL11.glDrawElements(GL11.GL_TRIANGLES, meshMaterialSet.getMesh().getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
             }
 

@@ -2,6 +2,7 @@ package nl.framegengine.core.rendering.shadow;
 
 import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.engine.WindowManager;
+import nl.framegengine.core.utils.AABB;
 import nl.framegengine.core.utils.Constants;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -139,5 +140,44 @@ public class ShadowFrustum {
 
     public void setCamera(Camera camera) {
         this.cam = camera;
+    }
+
+    protected boolean isInFrustum(AABB worldAABB) {
+        if (cam == null) return true; // No camera, can't cull
+
+        Vector3f aabbMin = worldAABB.min;
+        Vector3f aabbMax = worldAABB.max;
+
+        // Transform all 8 corners of the world AABB into light space and compute light-space AABB
+        float lsMinX = Float.POSITIVE_INFINITY, lsMaxX = Float.NEGATIVE_INFINITY;
+        float lsMinY = Float.POSITIVE_INFINITY, lsMaxY = Float.NEGATIVE_INFINITY;
+        float lsMinZ = Float.POSITIVE_INFINITY, lsMaxZ = Float.NEGATIVE_INFINITY;
+
+        float[] xs = {aabbMin.x, aabbMax.x};
+        float[] ys = {aabbMin.y, aabbMax.y};
+        float[] zs = {aabbMin.z, aabbMax.z};
+
+        for (float x : xs) {
+            for (float y : ys) {
+                for (float z : zs) {
+                    // Transform point by lightViewMatrix (manual multiply to avoid allocation)
+                    float tx = lightViewMatrix.m00() * x + lightViewMatrix.m10() * y + lightViewMatrix.m20() * z + lightViewMatrix.m30();
+                    float ty = lightViewMatrix.m01() * x + lightViewMatrix.m11() * y + lightViewMatrix.m21() * z + lightViewMatrix.m31();
+                    float tz = lightViewMatrix.m02() * x + lightViewMatrix.m12() * y + lightViewMatrix.m22() * z + lightViewMatrix.m32();
+
+                    if (tx < lsMinX) lsMinX = tx;
+                    if (tx > lsMaxX) lsMaxX = tx;
+                    if (ty < lsMinY) lsMinY = ty;
+                    if (ty > lsMaxY) lsMaxY = ty;
+                    if (tz < lsMinZ) lsMinZ = tz;
+                    if (tz > lsMaxZ) lsMaxZ = tz;
+                }
+            }
+        }
+
+        // Standard AABB-vs-AABB overlap test against the shadow frustum bounds
+        return lsMaxX >= minX && lsMinX <= maxX
+            && lsMaxY >= minY && lsMinY <= maxY
+            && lsMaxZ >= minZ && lsMinZ <= maxZ;
     }
 }
