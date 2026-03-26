@@ -81,7 +81,7 @@ public class Scene implements IJsonSerializable {
             gameObject.update();
         }
 
-
+        updateRootGameObjectTransforms();
     }
 
     public void updateRootGameObjectTransforms(){
