@@ -17,13 +17,14 @@ public class RenderMetrics {
     private int vertexCount;
 
     // GPU Timing
-    private int queryID;
-    private boolean queryActive;
-    private long gpuTimeNs;
+    private int queryStartID;
+    private int queryEndID;
+    private long gpuFrameDurationNs;
+    private boolean queryResultPending;
 
     public void init() {
-        // Create GPU timestamp query
-        queryID = GL15.glGenQueries();
+        queryStartID = GL15.glGenQueries();
+        queryEndID = GL15.glGenQueries();
     }
 
     public void frameStart() {
@@ -37,22 +38,22 @@ public class RenderMetrics {
         vaoBinds = 0;
         vertexCount = 0;
 
-        // Begin GPU timing (alternating queries)
-        if(!queryActive) {
-            GL33.glQueryCounter(queryID, GL33.GL_TIMESTAMP);
-            queryActive = true;
+        if(queryResultPending) {
+            long startNs = GL33.glGetQueryObjectui64(queryStartID, GL33.GL_QUERY_RESULT);
+            long endNs = GL33.glGetQueryObjectui64(queryEndID, GL33.GL_QUERY_RESULT);
+            gpuFrameDurationNs = endNs - startNs;
+            queryResultPending = false;
         }
+
+        GL33.glQueryCounter(queryStartID, GL33.GL_TIMESTAMP);
     }
 
     public void frameEnd() {
         // CPU frame duration
         lastFrameDuration = System.nanoTime() - frameStartTime;
 
-        // Retrieve GPU time
-        if(queryActive) {
-            gpuTimeNs = GL33.glGetQueryObjectui64(queryID, GL33.GL_QUERY_RESULT);
-            queryActive = false;
-        }
+        GL33.glQueryCounter(queryEndID, GL33.GL_TIMESTAMP);
+        queryResultPending = true;
     }
 
     // Instrumentation methods
@@ -65,9 +66,9 @@ public class RenderMetrics {
     // Reporting
     public String getMetrics() {
         return String.format(
-                "CPU: %.2fs | GPU: %.2fs | Draws: %d | Shaders: %d | VAOs: %d | Vertex count: %d | DeltaTime: %fs",
+                "CPU: %.2fms | GPU: %.2fms | Draws: %d | Shaders: %d | VAOs: %d | Vertex count: %d | DeltaTime: %.2fms",
                 lastFrameDuration / 1e6,
-                gpuTimeNs / 1e6,
+                gpuFrameDurationNs / 1e6,
                 drawCalls,
                 shaderBinds,
                 vaoBinds,

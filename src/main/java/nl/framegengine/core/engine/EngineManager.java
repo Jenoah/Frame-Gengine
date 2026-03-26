@@ -146,7 +146,7 @@ public class EngineManager {
     }
 
     public static float getDeltaTimeMS() {
-        return (deltaTime * 100000f) / 100f;
+        return deltaTime * 1000f;
     }
 
     public static float getFrameTime(){
