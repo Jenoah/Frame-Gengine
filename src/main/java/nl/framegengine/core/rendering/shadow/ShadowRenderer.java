@@ -107,10 +107,14 @@ public class ShadowRenderer implements IRenderer {
     }
 
     public void prepare(Vector3f lightDirection, ShadowFrustum shadowFrustum){
-        updateLightViewMatrix(lightDirection, shadowFrustum.getCenter());
+        Vector3f frustumCenter = shadowFrustum.computeFrustumCenter();
+        updateLightViewMatrix(lightDirection, frustumCenter);
         shadowFrustum.update(lightViewMatrix);
-        updateLightViewMatrix(lightDirection, shadowFrustum.getCenter());
-        updateOrthoProjectionMatrix();
+        projectionMatrix.setOrtho(
+                shadowFrustum.getMinX(), shadowFrustum.getMaxX(),
+                shadowFrustum.getMinY(), shadowFrustum.getMaxY(),
+                shadowFrustum.getMinZ(), shadowFrustum.getMaxZ()
+        );
 
         float worldUnitsPerTexelX = shadowFrustum.getWidth()  / Constants.SHADOW_MAP_SIZE;
         float worldUnitsPerTexelY = shadowFrustum.getHeight() / Constants.SHADOW_MAP_SIZE;
@@ -157,14 +161,6 @@ public class ShadowRenderer implements IRenderer {
         );
     }
 
-
-    private void updateOrthoProjectionMatrix() {
-        projectionMatrix.identity();
-        projectionMatrix.m00(2f / shadowFrustum.getWidth());
-        projectionMatrix.m11(2f / shadowFrustum.getHeight());
-        projectionMatrix.m22(-2f / shadowFrustum.getLength());
-        projectionMatrix.m33(1f);
-    }
 
     private static Matrix4f createOffset() {
         return new Matrix4f()

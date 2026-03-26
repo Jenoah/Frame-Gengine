@@ -15,31 +15,41 @@ public class ShadowFrustum {
     private float minY, maxY;
     private float minZ, maxZ;
     private Matrix4f lightViewMatrix = new Matrix4f();
-    private Matrix4f rotationMatrix = new Matrix4f();
     private Camera cam;
     private Vector3f cameraPosition = new Vector3f(0);
 
     private float farHeight, farWidth, nearHeight, nearWidth;
     private final Vector3f center = new Vector3f();
-    private final Vector4f tmpVec4 = new Vector4f();
 
     protected ShadowFrustum() {
         this.window = WindowManager.getInstance();
         calculateWidthsAndHeights();
     }
 
+    protected Vector3f computeFrustumCenter() {
+        if (cam == null) return center.set(0);
+        cameraPosition.set(cam.getPosition());
+        Vector3f forward = cam.getForward();
+        // Center is the midpoint between near and far planes along the view direction
+        float halfDist = (Constants.Z_NEAR + Constants.SHADOW_DISTANCE) / 2f;
+        center.set(cameraPosition).fma(halfDist, forward);
+        return center;
+    }
+
+    /**
+     * Transforms the camera frustum corners into light space and computes the AABB.
+     * Must be called after the light view matrix has been built from the frustum center.
+     */
     protected void update(Matrix4f lightViewMatrix) {
         if(cam == null) return;
         this.lightViewMatrix.set(lightViewMatrix);
-        this.cameraPosition.set(cam.getPosition());
 
-        Matrix4f rotation = calculateCameraRotationMatrix();
-        Vector3f forwardVector = new Vector3f(Constants.VECTOR3_FORWARD).mulDirection(rotation);
+        Vector3f forwardVector = cam.getForward();
 
         Vector3f centerNear = new Vector3f(cameraPosition).fma(Constants.Z_NEAR, forwardVector);
         Vector3f centerFar  = new Vector3f(cameraPosition).fma(Constants.SHADOW_DISTANCE, forwardVector);
 
-        Vector3f[] points = calculateFrustumVertices(rotation, forwardVector, centerNear, centerFar);
+        Vector3f[] points = calculateFrustumVertices(forwardVector, centerNear, centerFar);
         boolean first = true;
         for (Vector3f point : points) {
             if (first) {
@@ -53,8 +63,7 @@ public class ShadowFrustum {
             if (point.y > maxY) maxY = point.y; else if (point.y < minY) minY = point.y;
             if (point.z > maxZ) maxZ = point.z; else if (point.z < minZ) minZ = point.z;
         }
-        // Extend the Z range backward so shadow casters behind the camera aren't clipped.
-        // Extend XY so large objects near (or scaled beyond) the camera frustum edges still cast shadows.
+
         minX -= Constants.SHADOW_FRUSTUM_PADDING;
         maxX += Constants.SHADOW_FRUSTUM_PADDING;
         minY -= Constants.SHADOW_FRUSTUM_PADDING;
@@ -63,9 +72,9 @@ public class ShadowFrustum {
         maxZ += Constants.SHADOW_OFFSET;
     }
 
-    private Vector3f[] calculateFrustumVertices(Matrix4f rotation, Vector3f forward, Vector3f centerNear, Vector3f centerFar) {
-        Vector3f up = new Vector3f(Constants.VECTOR3_UP).mulDirection(rotation);
-        Vector3f right = new Vector3f(forward).cross(up);
+    private Vector3f[] calculateFrustumVertices(Vector3f forward, Vector3f centerNear, Vector3f centerFar) {
+        Vector3f right = new Vector3f(forward).cross(Constants.VECTOR3_UP).normalize();
+        Vector3f up = new Vector3f(right).cross(forward).normalize();
         Vector3f down = new Vector3f(up).negate();
         Vector3f left = new Vector3f(right).negate();
 
@@ -96,10 +105,11 @@ public class ShadowFrustum {
 
 
     private void calculateWidthsAndHeights() {
-        farWidth = (float) (Constants.SHADOW_DISTANCE * Math.tan(Constants.FOV));
-        nearWidth = (float) (Constants.Z_NEAR * Math.tan(Constants.FOV));
-        farHeight = farWidth / getAspectRatio();
-        nearHeight = nearWidth / getAspectRatio();
+        float tanHalfFov = (float) Math.tan(Constants.FOV / 2.0);
+        farHeight = Constants.SHADOW_DISTANCE * tanHalfFov;
+        nearHeight = Constants.Z_NEAR * tanHalfFov;
+        farWidth = farHeight * getAspectRatio();
+        nearWidth = nearHeight * getAspectRatio();
     }
 
     protected float getWidth() {
@@ -114,16 +124,14 @@ public class ShadowFrustum {
         return maxZ - minZ;
     }
 
-    protected Vector3f getCenter() {
-        tmpVec4.set((minX + maxX) / 2f, (minY + maxY) / 2f, (minZ + maxZ) / 2f, 1.0f);
-        Matrix4f invertedLight = new Matrix4f(lightViewMatrix).invert();
-        invertedLight.transform(tmpVec4).xyz(center);
-        return center;
-    }
+    protected float getMinX() { return minX; }
+    protected float getMaxX() { return maxX; }
+    protected float getMinY() { return minY; }
+    protected float getMaxY() { return maxY; }
+    protected float getMinZ() { return minZ; }
+    protected float getMaxZ() { return maxZ; }
 
-    private Matrix4f calculateCameraRotationMatrix() {
-        return rotationMatrix.identity().lookAt(cameraPosition, new Vector3f(cameraPosition).add(cam.getForward()), Constants.VECTOR3_UP);
-    }
+    protected Vector3f getCenter() { return center; }
 
     private float getAspectRatio() {
         return (float) window.getWidth() / (float) window.getHeight();
