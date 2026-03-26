@@ -59,7 +59,9 @@ public class ShadowRenderer implements IRenderer {
         GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
         GL11.glDisable(GL11.GL_BLEND);
         GL11.glEnable(GL11.GL_CULL_FACE);
-        GL11.glCullFace(GL11.GL_FRONT);
+        GL11.glCullFace(GL11.GL_BACK);
+        GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
+        GL11.glPolygonOffset(Constants.SHADOW_POLYGON_OFFSET_FACTOR, Constants.SHADOW_POLYGON_OFFSET_UNITS);
 
 
         shadowSets.forEach((meshMaterialSet) -> {
@@ -85,7 +87,7 @@ public class ShadowRenderer implements IRenderer {
         });
 
         shadowFrameBuffer.unbindFrameBuffer();
-        GL11.glCullFace(GL11.GL_BACK);
+        GL11.glDisable(GL11.GL_POLYGON_OFFSET_FILL);
         shadowShader.unbind();
     }
 
