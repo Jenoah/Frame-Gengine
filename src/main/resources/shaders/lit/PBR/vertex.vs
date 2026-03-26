@@ -19,8 +19,6 @@ uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 shadowSpaceMatrix;
-uniform float shadowDistance;
-uniform float shadowTransitionDistance;
 uniform bool useInstancing;
 
 void main(){
@@ -42,10 +40,5 @@ void main(){
     fragPosition = worldPosition.xyz;
     UV = textureCoords;
 
-    float cameraDistance = length(cameraObjectPosition.xyz);
     //fogFactor = clamp(exp(-pow((cameraDistance*fogDensity), fogGradient)), 0.0, 1.0);
-
-    cameraDistance -= (shadowDistance - shadowTransitionDistance);
-    cameraDistance /= shadowTransitionDistance;
-    shadowCoords.w = clamp(1-cameraDistance, 0, 1);
 }

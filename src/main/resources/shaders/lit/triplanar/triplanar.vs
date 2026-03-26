@@ -16,8 +16,6 @@ uniform mat4 projectionMatrix;
 uniform mat4 shadowSpaceMatrix;
 uniform float fogDensity;
 uniform float fogGradient;
-uniform float shadowDistance;
-uniform float shadowTransitionDistance;
 
 const vec3 textureScale = vec3(1);
 
@@ -36,8 +34,4 @@ void main(){
 
     float cameraDistance = length(cameraObjectPosition.xyz);
     fogFactor = clamp(exp(-pow((cameraDistance*fogDensity), fogGradient)), 0.0, 1.0);
-
-    cameraDistance -= (shadowDistance - shadowTransitionDistance);
-    cameraDistance /= shadowTransitionDistance;
-    shadowCoords.w = clamp(1.0 - cameraDistance, 0.0, 1.0);
 }

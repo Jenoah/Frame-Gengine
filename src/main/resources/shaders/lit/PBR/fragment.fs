@@ -66,6 +66,8 @@ uniform float shadowBias;
 uniform float shadowBiasMax;
 uniform int shadowPCFCount = 2;
 uniform int shadowMapSize;
+uniform float shadowDistance;
+uniform float shadowTransitionDistance;
 
 uniform float fogDensity;
 uniform float fogGradient;
@@ -209,7 +211,9 @@ float calculateShadowFactor(float NdotL){
 
     shadowFactorTotal /= shadowTotalTexels;
 
-    return clamp(1.0 - (shadowFactorTotal * shadowCoords.w), 0.0, 1.0);
+    float fragCameraDistance = length(viewPosition - fragPosition);
+    float shadowFade = clamp(1.0 - (fragCameraDistance - (shadowDistance - shadowTransitionDistance)) / shadowTransitionDistance, 0.0, 1.0);
+    return clamp(1.0 - (shadowFactorTotal * shadowFade), 0.0, 1.0);
 }
 
 // MAIN

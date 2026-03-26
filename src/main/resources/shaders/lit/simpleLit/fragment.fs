@@ -57,6 +57,8 @@ uniform float shadowBias;
 uniform float shadowBiasMax;
 uniform int shadowPCFCount = 2;
 uniform int shadowMapSize;
+uniform float shadowDistance;
+uniform float shadowTransitionDistance;
 
 uniform int pointLightCount = 0;
 uniform int spotLightCount = 0;
@@ -168,7 +170,7 @@ void main() {
     viewDirection = normalize(viewPosition - fragPosition);
 
     //Shadow calculation — slope-scale bias prevents acne at grazing light angles
-    float NdotL = max(dot(fragNormal, normalize(directionalLight.direction)), 0.0);
+    float NdotL = max(dot(fragNormal, normalize(-directionalLight.direction)), 0.0);
     float slopeBias = mix(shadowBiasMax, shadowBias, NdotL);
 
     float shadowKernelSize = (shadowPCFCount * 2 + 1);
@@ -187,7 +189,9 @@ void main() {
 
     shadowFactorTotal /= shadowTotalTexels;
 
-    float shadowFactor = 1.0 - (shadowFactorTotal * shadowCoords.w);
+    float fragCameraDistance = length(viewPosition - fragPosition);
+    float shadowFade = clamp(1.0 - (fragCameraDistance - (shadowDistance - shadowTransitionDistance)) / shadowTransitionDistance, 0.0, 1.0);
+    float shadowFactor = 1.0 - (shadowFactorTotal * shadowFade);
 
 
     //Directional Light
