@@ -29,6 +29,8 @@ public class PostProcessing {
     private static final int bloomSize = 8;
     private static final float bloomThreshold = .95f;
     private static final float bloomIntensity = 1.75f;
+    private static boolean forceFillDrawMode = false;
+    private static int previousDrawMode = 0;
 
     public static void init(){
         quad = getQuad();
@@ -127,12 +129,20 @@ public class PostProcessing {
 
     private static void bind(){
         GL30.glBindVertexArray(quad.getId());
+        if(forceFillDrawMode){
+            previousDrawMode = GL11.glGetInteger(GL11.GL_POLYGON_MODE);
+            GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
+        }
+
         GL20.glEnableVertexAttribArray(0);
         GL11.glDisable(GL11.GL_DEPTH_TEST);
     }
 
     private static void unbind(){
         GL11.glEnable(GL11.GL_DEPTH_TEST);
+        if(forceFillDrawMode){
+            GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, previousDrawMode);
+        }
         GL20.glDisableVertexAttribArray(0);
         GL30.glBindVertexArray(0);
     }
@@ -140,5 +150,9 @@ public class PostProcessing {
     public static void updateResolution(){
         cleanUp();
         init();
+    }
+
+    public static void ForceFillDrawMode(boolean forceFillDrawModeStatus){
+        forceFillDrawMode = forceFillDrawModeStatus;
     }
 }
