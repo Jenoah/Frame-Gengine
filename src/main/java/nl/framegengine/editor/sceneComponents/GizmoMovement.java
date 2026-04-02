@@ -222,6 +222,7 @@ public class GizmoMovement extends Component {
 
         Raycast.Ray mouseRay = fromCameraByMouse(camera);
 
+        //Todo: X has priority over Y- and Z axis as it is being checked first. Change to check actual mouse by hitpoint and distance
         if(MouseInput.isLbClicked()) {
             if (Raycast.intersectRay(mouseRay, xAxis)) {
                 isDragging = true;

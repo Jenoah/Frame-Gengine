@@ -48,6 +48,7 @@ public class HierarchyPanel extends EditorPanel {
     }
 
     public void setCurrentlySelectedGameObject(GameObject currentlySelectedGameObject) {
+        //Todo: Fix shadows getting gaps on select object (both by mouse and in hierarchy)
         this.currentlySelectedGameObject = currentlySelectedGameObject;
         infoPanel.setCurrentlySelectedObject(currentlySelectedGameObject);
         if (gizmo != null && currentlySelectedGameObject != null
@@ -153,6 +154,7 @@ public class HierarchyPanel extends EditorPanel {
         if (ImGui.beginPopupContextItem(contextObjectMenuStrID)) {
             ImGui.separatorText("Object settings");
             if (ImGui.menuItem("Remove")) {
+                //TODO: Add confirmation box
                 if(SceneManager.currentScene != null){
                     currentlySelectedGameObject.remove();
                     currentlySelectedGameObject = null;
