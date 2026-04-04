@@ -517,9 +517,9 @@ public class GameObject implements IJsonSerializable {
     }
 
     public GameObject setGuid(String guid) {
+        if (this.guid != null) instancedObjects.remove(this.guid);
         this.guid = guid;
-        instancedObjects.remove(getGuid());
-        instancedObjects.put(getGuid(), this);
+        instancedObjects.put(this.guid, this);
         return this;
     }
 
