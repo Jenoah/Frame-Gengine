@@ -4,6 +4,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import javax.json.JsonArray;
+import javax.json.JsonObject;
 import java.lang.reflect.Field;
 import java.util.Hashtable;
 import java.util.List;
@@ -182,5 +184,47 @@ class SceneTest {
         scene.removeVaoId(7);
 
         assertFalse(scene.hasVaoId(7));
+    }
+
+    // ======================================================================
+    // serializeToJson (§4.6)
+    // ======================================================================
+
+    @Test
+    void serializeToJson_containsRequiredTopLevelFields() {
+        scene.setLevelName("TestLevel");
+
+        JsonObject json = scene.serializeToJson();
+
+        assertTrue(json.containsKey("levelName"),   "must contain 'levelName'");
+        assertTrue(json.containsKey("fogGradient"), "must contain 'fogGradient'");
+        assertTrue(json.containsKey("fogDensity"),  "must contain 'fogDensity'");
+        assertTrue(json.containsKey("fogColor"),    "must contain 'fogColor'");
+        assertTrue(json.containsKey("gameObjects"), "must contain 'gameObjects'");
+        assertEquals("TestLevel", json.getString("levelName"));
+    }
+
+    @Test
+    void serializeToJson_excludesGameObjectsWhereCanBeSavedIsFalse() {
+        GameObject saveable   = new GameObject("Saveable");
+        GameObject unsaveable = new GameObject("Unsaveable");
+        unsaveable.canBeSaved(false);
+        scene.addGameObject(saveable);
+        scene.addGameObject(unsaveable);
+
+        JsonArray gameObjects = scene.serializeToJson().getJsonArray("gameObjects");
+
+        // Collect names from the serialised array
+        long saveableCount   = gameObjects.stream()
+                .filter(v -> v.asJsonObject().containsKey("name") &&
+                             v.asJsonObject().getString("name").equals("Saveable"))
+                .count();
+        long unsaveableCount = gameObjects.stream()
+                .filter(v -> v.asJsonObject().containsKey("name") &&
+                             v.asJsonObject().getString("name").equals("Unsaveable"))
+                .count();
+
+        assertEquals(1, saveableCount,   "saveable object must appear in gameObjects array");
+        assertEquals(0, unsaveableCount, "unsaveable object must be excluded from gameObjects array");
     }
 }
