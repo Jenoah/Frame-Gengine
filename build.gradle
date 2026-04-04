@@ -67,6 +67,7 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    systemProperty "test.silent", "true"
 }
 
 tasks.register('buildEditorJar', Jar) {

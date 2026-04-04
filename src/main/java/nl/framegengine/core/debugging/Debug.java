@@ -6,9 +6,13 @@ import java.util.List;
 
 public class Debug {
 
+    private static final boolean SILENT = "true".equalsIgnoreCase(System.getProperty("test.silent"))
+            || "compiled".equalsIgnoreCase(System.getProperty("app.mode"));
+
     private static final List<LogEntry> logHistory = new ArrayList<>();
 
     public static void log(String message){
+        if (SILENT) return;
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 
         // Find the caller's class and line number (index 2 is the caller of Log())
@@ -25,6 +29,7 @@ public class Debug {
     }
 
     public static void logConsole(String message){
+        if (SILENT) return;
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 
         // Find the caller's class and line number (index 2 is the caller of Log())
@@ -39,6 +44,7 @@ public class Debug {
     }
 
     public static void logError(String message){
+        if (SILENT) return;
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 
         StackTraceElement caller = stackTrace[2];
@@ -53,6 +59,7 @@ public class Debug {
     }
 
     public static void logConsoleError(String message){
+        if (SILENT) return;
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
 
         StackTraceElement caller = stackTrace[2];
