@@ -58,6 +58,11 @@ dependencies {
 
     //Apache IO
     implementation "commons-io:commons-io:2.20.0"
+
+    //Testing
+    testImplementation platform('org.junit:junit-bom:5.11.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 test {
@@ -118,11 +123,14 @@ tasks.register('buildStandaloneJar', Jar) {
     description = 'Build a standalone runnable JAR for the game.'
 
     def customProjectPath = project.findProperty("customProjectPath")
-    if (!customProjectPath) {
-        throw new GradleException("Please set -PcustomProjectPath=/path/to/resources")
+    def projectFiles = customProjectPath ? file(customProjectPath) : null
+
+    doFirst {
+        if (!customProjectPath) {
+            throw new GradleException("Please set -PcustomProjectPath=/path/to/resources")
+        }
+        logger.lifecycle("Using project files path: ${projectFiles.absolutePath}")
     }
-    def projectFiles = file(customProjectPath)
-    logger.lifecycle("Using project files path: ${projectFiles.absolutePath}")
 
 
     manifest {
@@ -140,11 +148,11 @@ tasks.register('buildStandaloneJar', Jar) {
     archiveExtension.set('jar')
 
     // Include extra resources from a custom directory (e.g., export/resources)
-    if (projectFiles.exists()) {
+    if (projectFiles != null && projectFiles.exists()) {
         from(projectFiles) {
             into 'userresource'
         }
-    } else {
+    } else if (projectFiles != null) {
         logger.info("Project path ${projectFiles.absolutePath} does not exist.")
     }
     logger.lifecycle("Game jar built")
