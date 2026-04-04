@@ -63,6 +63,16 @@ public class Scene implements IJsonSerializable {
         init();
     }
 
+    Scene(WindowManager windowManager) {
+        this.gameObjects = new ArrayList<>();
+        this.sortedGameObjects = new ArrayList<>();
+        this.rootGameObjects = new ArrayList<>();
+        this.guiObjects = new ArrayList<>();
+        this.windowManager = windowManager;
+        this.textObjects = new HashMap<>();
+        init();
+    }
+
     public void init() { }
 
     public void postStart() {
