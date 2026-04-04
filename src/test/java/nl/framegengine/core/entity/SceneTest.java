@@ -1,5 +1,6 @@
 package nl.framegengine.core.entity;
 
+import org.joml.Vector3f;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -226,5 +227,83 @@ class SceneTest {
 
         assertEquals(1, saveableCount,   "saveable object must appear in gameObjects array");
         assertEquals(0, unsaveableCount, "unsaveable object must be excluded from gameObjects array");
+    }
+
+    // ======================================================================
+    // syncSortedGameObjects (§11)
+    // ======================================================================
+
+    @Test
+    void syncSortedGameObjects_threeObjects_orderedNearestFirst() {
+        GameObject near = new GameObject("Near");
+        GameObject mid  = new GameObject("Mid");
+        GameObject far  = new GameObject("Far");
+
+        near.setRenderCameraSquaredDistance(1.0f);
+        mid.setRenderCameraSquaredDistance(4.0f);
+        far.setRenderCameraSquaredDistance(9.0f);
+
+        // Add in reverse order to verify sort is actually applied
+        scene.addGameObject(far);
+        scene.addGameObject(near);
+        scene.addGameObject(mid);
+
+        scene.syncSortedGameObjects();
+
+        List<GameObject> sorted = scene.getSortedGameObjects();
+        assertSame(near, sorted.get(0));
+        assertSame(mid,  sorted.get(1));
+        assertSame(far,  sorted.get(2));
+    }
+
+    @Test
+    void syncSortedGameObjects_twoObjectsEqualDistance_bothPresent() {
+        GameObject a = new GameObject("A");
+        GameObject b = new GameObject("B");
+
+        a.setRenderCameraSquaredDistance(5.0f);
+        b.setRenderCameraSquaredDistance(5.0f);
+
+        scene.addGameObject(a);
+        scene.addGameObject(b);
+
+        scene.syncSortedGameObjects();
+
+        List<GameObject> sorted = scene.getSortedGameObjects();
+        assertEquals(2, sorted.size());
+        assertTrue(sorted.contains(a));
+        assertTrue(sorted.contains(b));
+    }
+
+    @Test
+    void addGameObject_afterSync_newObjectAppearsInSortedList() {
+        GameObject first = new GameObject("First");
+        first.setRenderCameraSquaredDistance(10.0f);
+        scene.addGameObject(first);
+        scene.syncSortedGameObjects();
+
+        GameObject lateAdd = new GameObject("LateAdd");
+        lateAdd.setRenderCameraSquaredDistance(2.0f);
+        scene.addGameObject(lateAdd);
+
+        assertTrue(scene.getSortedGameObjects().contains(lateAdd));
+    }
+
+    @Test
+    void addGameObject_afterSync_reSyncReordersCorrectly() {
+        GameObject first = new GameObject("First");
+        first.setRenderCameraSquaredDistance(10.0f);
+        scene.addGameObject(first);
+        scene.syncSortedGameObjects();
+
+        GameObject lateAdd = new GameObject("LateAdd");
+        lateAdd.setRenderCameraSquaredDistance(2.0f);
+        scene.addGameObject(lateAdd);
+
+        scene.syncSortedGameObjects();
+
+        List<GameObject> sorted = scene.getSortedGameObjects();
+        assertSame(lateAdd, sorted.get(0));
+        assertSame(first,   sorted.get(1));
     }
 }

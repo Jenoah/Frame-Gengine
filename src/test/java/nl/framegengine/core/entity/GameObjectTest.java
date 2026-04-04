@@ -590,4 +590,48 @@ class GameObjectTest {
 
         assertEquals(parent, restoredChild.getParent());
     }
+
+    // ======================================================================
+    // renderCameraSquaredDistance (§11)
+    // ======================================================================
+
+    @Test
+    void setRenderCameraSquaredDistance_float_getterReturnsSetValue() {
+        GameObject go = new GameObject();
+
+        go.setRenderCameraSquaredDistance(25.0f);
+
+        assertEquals(25.0f, go.getRenderCameraSquaredDistance(), EPSILON);
+    }
+
+    @Test
+    void setRenderCameraSquaredDistance_float_overwritesPreviousValue() {
+        GameObject go = new GameObject();
+        go.setRenderCameraSquaredDistance(100.0f);
+
+        go.setRenderCameraSquaredDistance(0.0f);
+
+        assertEquals(0.0f, go.getRenderCameraSquaredDistance(), EPSILON);
+    }
+
+    @Test
+    void setRenderCameraSquaredDistance_vector_storesCorrectSquaredDistance() {
+        // Object at (3, 4, 0), camera at origin — squared distance = 3²+4²+0² = 25
+        GameObject go = new GameObject();
+        go.setPosition(3.0f, 4.0f, 0.0f);
+
+        go.setRenderCameraSquaredDistance(new Vector3f(0, 0, 0));
+
+        assertEquals(25.0f, go.getRenderCameraSquaredDistance(), 1e-4f);
+    }
+
+    @Test
+    void setRenderCameraSquaredDistance_vector_cameraAtSamePosition_storesZero() {
+        GameObject go = new GameObject();
+        go.setPosition(5.0f, 5.0f, 5.0f);
+
+        go.setRenderCameraSquaredDistance(new Vector3f(5.0f, 5.0f, 5.0f));
+
+        assertEquals(0.0f, go.getRenderCameraSquaredDistance(), EPSILON);
+    }
 }
