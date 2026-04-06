@@ -48,7 +48,7 @@ public class HierarchyPanel extends EditorPanel {
     }
 
     public void setCurrentlySelectedGameObject(GameObject currentlySelectedGameObject) {
-        //Todo: Fix shadows getting gaps on select object (both by mouse and in hierarchy)
+        //Todo: Fix (spot)lights not always emitting light on all objects until initial selection of an object
         this.currentlySelectedGameObject = currentlySelectedGameObject;
         infoPanel.setCurrentlySelectedObject(currentlySelectedGameObject);
         if (gizmo != null && currentlySelectedGameObject != null
