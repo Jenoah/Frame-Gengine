@@ -105,8 +105,7 @@ public class Raycast {
     public static Float intersectRay(Ray ray, AABB aabb) {
         if (aabb == null) return null;
 
-        AABB worldAABB = new AABB(aabb);
-        worldAABB.offset(aabb.getWorldOffset());
+        AABB worldAABB = aabb.toWorld();
 
         float tMin = Float.NEGATIVE_INFINITY;
         float tMax = Float.POSITIVE_INFINITY;
