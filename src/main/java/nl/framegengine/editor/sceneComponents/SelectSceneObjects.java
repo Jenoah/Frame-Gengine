@@ -45,7 +45,6 @@ public class SelectSceneObjects extends Component {
 
         Raycast.Ray mouseRay = Raycast.fromCameraByMouse(camera);
 
-        //TODO: Prioritize gizmo over other objects
         GameObject clickedGameObject = Raycast.getGameObject(mouseRay).gameObject;
         if(clickedGameObject != null){
             hierarchyPanel.setCurrentlySelectedGameObject(clickedGameObject);
