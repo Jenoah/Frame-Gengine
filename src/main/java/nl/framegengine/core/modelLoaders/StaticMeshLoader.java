@@ -318,17 +318,15 @@ public class StaticMeshLoader {
         if (result == 0) material.setMetallic(value[0]);
 
         result = aiGetMaterialFloatArray(aiMaterial, AI_MATKEY_OPACITY, aiTextureType_NONE, 0, value, null);
-        if (result == 0){
-            material.getDiffuseColor().w = value[0];
-            //TODO: Fix importing of transparency
-            //material.setTransparent(true);
-        }
+        if (result == 0) material.getDiffuseColor().w = value[0];
 
         result = aiGetMaterialFloatArray(aiMaterial, AI_MATKEY_TWOSIDED, aiTextureType_NONE, 0, value, null);
-        if (result == 0) material.setDoubleSided(value[0] == 0);
+        if (result == 0) material.setDoubleSided(value[0] != 0);
 
         result = aiGetMaterialFloatArray(aiMaterial, AI_MATKEY_COLOR_TRANSPARENT, aiTextureType_NONE, 0, value, null);
         if (result == 0) material.getDiffuseColor().w = 1f - value[0];
+
+        if (material.getDiffuseColor().w < 1f) material.setTransparent(true);
 
         return material;
     }

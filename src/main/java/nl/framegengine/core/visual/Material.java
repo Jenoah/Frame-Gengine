@@ -290,7 +290,7 @@ public class Material implements IJsonSerializable {
         }
 
         if(JsonHelper.hasJsonKey(jsonInfo, "shader")){
-            ShaderManager.getShaderByQualifiedClassName(jsonInfo.get("shader").toString());
+            this.shader = ShaderManager.getShaderByQualifiedClassName(jsonInfo.get("shader").toString());
         }
 
         if(guid == null || guid.isBlank()) setGuid();

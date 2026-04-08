@@ -205,9 +205,9 @@ public class InfoPanel extends EditorPanel {
                     }
                 }
             }
-            case null, default -> {
+            default -> {
                 ImGui.text(field.getName());
-                if(objectValue != null) ImGui.text(objectValue.toString());
+                ImGui.text(objectValue.toString());
             }
         }
         ImGui.setWindowFontScale(0.4f);
@@ -272,24 +272,15 @@ public class InfoPanel extends EditorPanel {
                     }
                 } else {
                     String textureGUID = ImGuiHelper.guidFromName(selectedName);
-                    int selectedTextureID = TextureLoader.getTextureByGUID(textureGUID);
-
-                    // Todo: Fix unimported textures loading
-                    if(selectedTextureID == -1){
-                        String texturePath = ManifestHelper.getPathByGuid(ManifestHelper.manifestFileType.TEXTURE, textureGUID);
-                        if(texturePath != null && !texturePath.isEmpty()) {
-                            selectedTextureID = TextureLoader.loadTexture(texturePath);
-                        } else {
-                            Debug.logError("Could not find path for texture GUID: " + textureGUID);
-                            return;
-                        }
+                    String texturePath = ManifestHelper.getPathByGuid(ManifestHelper.manifestFileType.TEXTURE, textureGUID);
+                    if(texturePath == null || texturePath.isEmpty()) {
+                        Debug.logError("Could not find path for texture GUID: " + textureGUID);
+                        return;
                     }
 
-                    if(selectedTextureID != -1 && selectedTextureID != TextureLoader.getDefaultTextureId()){
-                        Texture selectedTexture = new Texture(selectedTextureID);
-                        Debug.log("Selected " + selectedName + " with ID: " + selectedTextureID + " and GUID: " + selectedTexture.getGuid());
-
-                        // Update the field with the new texture
+                    Texture selectedTexture = buildTextureForField(field.getName(), texturePath);
+                    if(selectedTexture.getId() != -1 && selectedTexture.getId() != TextureLoader.getDefaultTextureId()){
+                        Debug.log("Selected " + selectedName + " with ID: " + selectedTexture.getId() + " and GUID: " + selectedTexture.getGuid());
                         try {
                             field.setAccessible(true);
                             field.set(drawingObject, selectedTexture);
@@ -297,7 +288,7 @@ public class InfoPanel extends EditorPanel {
                         } catch (IllegalAccessException e) {
                             Debug.logError("Failed to update texture field: " + e.getMessage());
                         }
-                    }else{
+                    } else {
                         Debug.logError("Failed to load texture for GUID: " + textureGUID);
                     }
                 }
@@ -310,6 +301,16 @@ public class InfoPanel extends EditorPanel {
     private String getRawFieldName(String fieldNameRaw){
         if(!fieldNameRaw.isEmpty()) return fieldNameRaw.split("##")[0];
         return fieldNameRaw;
+    }
+
+    private Texture buildTextureForField(String fieldName, String texturePath) {
+        return switch (fieldName) {
+            case "normalMap"    -> new Texture(texturePath, false, false, true, true,  false);
+            case "roughnessMap",
+                 "metallicMap",
+                 "aoMap"        -> new Texture(texturePath, false, false, true, false, true);
+            default             -> new Texture(texturePath);
+        };
     }
 
     private void updateTextureList(){
