@@ -4,7 +4,7 @@ import nl.framegengine.core.components.Component;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.entity.SceneManager;
-import nl.framegengine.core.modelLoaders.OBJLoader.OBJLoader;
+import nl.framegengine.core.modelLoaders.StaticMeshLoader;
 import nl.framegengine.core.rendering.RenderManager;
 import nl.framegengine.core.shaders.ShaderManager;
 import nl.framegengine.core.utils.AABB;
@@ -12,8 +12,10 @@ import nl.framegengine.core.utils.Constants;
 import nl.framegengine.core.utils.IJsonSerializable;
 import nl.framegengine.core.utils.JsonHelper;
 import nl.framegengine.core.visual.Material;
+import nl.framegengine.core.visual.MaterialManager;
 import nl.framegengine.core.visual.Mesh;
 import nl.framegengine.core.visual.MeshMaterialSet;
+import nl.framegengine.editor.ManifestHelper;
 import org.joml.Vector3f;
 
 import javax.json.Json;
@@ -152,9 +154,6 @@ public class RenderComponent extends Component {
 
         getRoot().setCenter(new Vector3f(min).lerp(max, 0.5f));
 
-        min.mul(root.getScale());
-        max.mul(root.getScale());
-
         root.setAabb(new AABB(min, max));
     }
 
@@ -193,9 +192,51 @@ public class RenderComponent extends Component {
         if(!hasMeshPaths){
             ignoredKeys.add("meshPaths");
             ignoredKeys.add("meshMaterialSets");
+        } else {
+            // Convert meshPaths to stable references before serialization:
+            // - builtin: paths stay as-is
+            // - project model paths get converted to manifest GUIDs
+            List<String> originalPaths = new ArrayList<>(meshPaths);
+            meshPaths.clear();
+            for (String path : originalPaths) {
+                meshPaths.add(toStableReference(path));
+            }
+
+            // Also update the meshPath on each MeshMaterialSet's Mesh
+            for (MeshMaterialSet mms : meshMaterialSets) {
+                String mp = mms.getMesh().getMeshPath();
+                if (mp != null && !mp.isBlank()) {
+                    mms.getMesh().setMeshPath(toStableReference(mp));
+                }
+            }
         }
 
-        return JsonHelper.objectToJson(this, ignoredKeys.toArray(new String[0]));
+        JsonObject result = JsonHelper.objectToJson(this, ignoredKeys.toArray(new String[0]));
+
+        return result;
+    }
+
+    /**
+     * Converts a mesh path to a stable serializable reference.
+     * - Paths starting with "builtin:" are returned as-is.
+     * - Paths that can be resolved to a manifest GUID are returned as the GUID.
+     * - All other paths (legacy / unresolvable) are returned as-is for backward compatibility.
+     */
+    private String toStableReference(String path) {
+        if (path == null || path.isBlank()) return path;
+        if (path.startsWith(Mesh.BUILTIN_PREFIX)) return path;
+
+        // Already a GUID? Check if the manifest knows it
+        if (ManifestHelper.hasGuid(ManifestHelper.manifestFileType.MODEL, path)) {
+            return path;
+        }
+
+        // Try to look up the GUID by path
+        String guid = ManifestHelper.getGuidByPath(ManifestHelper.manifestFileType.MODEL, path);
+        if (guid != null) return guid;
+
+        // Fallback: return path as-is (legacy compatibility)
+        return path;
     }
 
     @Override
@@ -210,22 +251,26 @@ public class RenderComponent extends Component {
         }
 
         if(!meshMaterialSets.isEmpty()){
-            Mesh mesh = meshMaterialSets.stream().findFirst().get().getMesh();
-            float uvScale = mesh.getUvScale();
-            String meshPath = mesh.getMeshPath();
-            Material mat = meshMaterialSets.stream().findFirst().get().material;
+            Set<MeshMaterialSet> tempMms = new HashSet<>(meshMaterialSets);
             meshMaterialSets.clear();
-            if(meshPath.isEmpty() || meshPath.isBlank()){
-                return this;
-            }
 
-            Set<MeshMaterialSet> mms = OBJLoader.loadOBJModel(meshPath);
-            mms.forEach(meshMaterialSet -> {
-                if(uvScale != 1f) meshMaterialSet.getMesh().setUVScale(uvScale);
-                meshMaterialSet.setRoot(getRoot());
-                meshMaterialSet.material = mat;
+            tempMms.forEach(meshMaterialSetA -> {
+                Mesh mesh = meshMaterialSetA.getMesh();
+                float uvScale = mesh.getUvScale();
+                String meshPath = mesh.getMeshPath();
+                Material mat = meshMaterialSetA.material;
+
+                if(meshPath.isBlank()) return;
+
+                Set<MeshMaterialSet> mms = StaticMeshLoader.load(meshPath, mesh.getMeshId(), "");
+                if(mms == null || mms.isEmpty()) return;
+                mms.forEach(meshMaterialSetB -> {
+                    if(uvScale != 1f) meshMaterialSetB.getMesh().setUVScale(uvScale);
+                    meshMaterialSetB.setRoot(getRoot());
+                    if(mat != MaterialManager.defaultMaterial) meshMaterialSetB.material = mat;
+                });
+                meshMaterialSets.addAll(mms);
             });
-            meshMaterialSets.addAll(mms);
         }
 
 

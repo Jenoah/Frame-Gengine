@@ -1,8 +1,11 @@
 package nl.framegengine.core.utils;
 
+import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
+import org.lwjgl.assimp.AIMatrix4x4;
+import org.lwjgl.assimp.AIVector3D;
 
 import java.util.List;
 
@@ -122,5 +125,17 @@ public class Conversion {
         return new Vector3f(a.x, a.y, a.z);
     }
 
+    public static Vector3f toVector3F(AIVector3D a){
+        return new Vector3f(a.x(), a.y(), a.z());
+    }
 
+    public static Matrix4f toMatrix4F(AIMatrix4x4 matrix4x4){
+        float[] matrixArr = new float[] {
+                matrix4x4.a1(), matrix4x4.b1(), matrix4x4.c1(), matrix4x4.d1(),
+                matrix4x4.a2(), matrix4x4.b2(), matrix4x4.c2(), matrix4x4.d2(),
+                matrix4x4.a3(), matrix4x4.b3(), matrix4x4.c3(), matrix4x4.d3(),
+                matrix4x4.a4(), matrix4x4.b4(), matrix4x4.c4(), matrix4x4.d4()
+        };
+        return new Matrix4f().set(matrixArr);
+    }
 }

@@ -10,7 +10,7 @@ import imgui.type.ImString;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.utils.ClassHelper;
-import nl.framegengine.core.utils.FileHelper;
+import nl.framegengine.core.utils.IJsonSerializable;
 import nl.framegengine.core.visual.Material;
 import nl.framegengine.core.visual.Texture;
 import nl.framegengine.core.visual.TextureLoader;
@@ -23,28 +23,35 @@ import org.joml.Vector4f;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
 public class InfoPanel extends EditorPanel {
 
-    private GameObject currentlySelectedObject = null;
-    private List<Field> hierarchyObjects = new ArrayList<>();
+    private IJsonSerializable currentlySelectedObject = null;
+    private final List<Field> hierarchyObjects = new ArrayList<>();
 
     private String[] textureNames = new String[0];
 
     public InfoPanel(int posX, int posY, int sizeX, int sizeY) {
         super(posX, posY, sizeX, sizeY);
-        ManifestHelper.addEventCallback(() -> updateTextureList());
+        ManifestHelper.addEventCallback(this::updateTextureList);
+        updateTextureList();
     }
 
     @Override
     public void renderFrame() {
         if(currentlySelectedObject == null) return;
 
+        String objectName;
+        if(currentlySelectedObject instanceof GameObject go){
+            objectName = go.getName();
+        }else{
+            objectName = currentlySelectedObject.getClass().getSimpleName();
+        }
+
         ImGui.setWindowFontScale(2f);
-        ImGui.text(currentlySelectedObject.getName());
+        ImGui.text(objectName);
         ImGui.setWindowFontScale(1f);
         ImGui.text(currentlySelectedObject.getClass().getSimpleName());
         ImGui.newLine();
@@ -66,28 +73,55 @@ public class InfoPanel extends EditorPanel {
         ImGui.popStyleColor(4);
     }
 
-    public void setCurrentlySelectedObject(GameObject gameObject){
-        currentlySelectedObject = gameObject;
+    public void setCurrentlySelectedObject(IJsonSerializable selectedObject){
+        currentlySelectedObject = selectedObject;
         hierarchyObjects.clear();
 
         if(currentlySelectedObject == null) return;
         try {
-            hierarchyObjects.add(ClassHelper.getFieldFromObject("isEnabled", currentlySelectedObject.getClass()));
-            hierarchyObjects.add(ClassHelper.getFieldFromObject("localPosition", currentlySelectedObject.getClass()));
-            hierarchyObjects.add(ClassHelper.getFieldFromObject("localRotation", currentlySelectedObject.getClass()));
-            hierarchyObjects.add(ClassHelper.getFieldFromObject("scale", currentlySelectedObject.getClass()));
+            if(currentlySelectedObject instanceof GameObject) {
+                hierarchyObjects.add(ClassHelper.getFieldFromObject("isEnabled", currentlySelectedObject.getClass()));
+                hierarchyObjects.add(ClassHelper.getFieldFromObject("localPosition", currentlySelectedObject.getClass()));
+                hierarchyObjects.add(ClassHelper.getFieldFromObject("localRotation", currentlySelectedObject.getClass()));
+                hierarchyObjects.add(ClassHelper.getFieldFromObject("scale", currentlySelectedObject.getClass()));
+            }
         } catch (NoSuchFieldException ignored) {}
         ClassHelper.getAllPublicAndProtectedProperties(hierarchyObjects, currentlySelectedObject.getClass());
     }
 
     private void drawOption(Field field, Object drawingObject) throws IllegalAccessException {
         Object objectValue = field.get(drawingObject);
+        String fieldName = field.getName() + "##" + field.hashCode();
+
+        // Special handling for Texture fields (even if null)
+        if (field.getType() == Texture.class) {
+            ImGui.setWindowFontScale(1.1f);
+            ImGui.text(field.getName());
+            if (objectValue != null) {
+                drawObject(objectValue);
+            }
+            drawManifestType(ManifestHelper.manifestFileType.TEXTURE, objectValue, field, drawingObject);
+            ImGui.setWindowFontScale(0.4f);
+            ImGui.newLine();
+            ImGui.setWindowFontScale(1f);
+            return;
+        }
+
+        if(objectValue == null) {
+            ImGui.setWindowFontScale(1.1f);
+            ImGui.text(field.getName());
+            ImGui.text("null");
+            ImGui.setWindowFontScale(0.4f);
+            ImGui.newLine();
+            ImGui.setWindowFontScale(1f);
+            return;
+        }
 
         ImGui.setWindowFontScale(1.1f);
         switch (objectValue) {
             case Float f -> {
                 ImFloat ImFl = new ImFloat(f);
-                if (ImGui.inputFloat(field.getName() + "##" + field.hashCode(), ImFl)) {
+                if (ImGui.inputFloat(fieldName, ImFl)) {
                     field.setAccessible(true);
                     field.set(drawingObject, ImFl.floatValue());
                     if(drawingObject instanceof GameObject go) go.callUpdate();
@@ -95,7 +129,7 @@ public class InfoPanel extends EditorPanel {
             }
             case String str -> {
                 ImString imStr = new ImString(str);
-                if (ImGui.inputText(field.getName() + "##" + field.hashCode(), imStr)) {
+                if (ImGui.inputText(fieldName, imStr)) {
                     field.setAccessible(true);
                     field.set(drawingObject, imStr.get());
                     if(drawingObject instanceof GameObject go) go.callUpdate();
@@ -103,7 +137,7 @@ public class InfoPanel extends EditorPanel {
             }
             case Integer integer -> {
                 ImInt imInteger = new ImInt(integer);
-                if (ImGui.inputInt(field.getName() + "##" + field.hashCode(), imInteger)) {
+                if (ImGui.inputInt(fieldName, imInteger)) {
                     field.setAccessible(true);
                     field.set(drawingObject, imInteger.get());
                     if(drawingObject instanceof GameObject go) go.callUpdate();
@@ -111,7 +145,7 @@ public class InfoPanel extends EditorPanel {
             }
             case Boolean bool -> {
                 ImBoolean imBool = new ImBoolean(bool);
-                if (ImGui.checkbox(field.getName() + "##" + field.hashCode(), imBool)) {
+                if (ImGui.checkbox(fieldName, imBool)) {
                     field.setAccessible(true);
                     field.set(drawingObject, imBool.get());
                     if(drawingObject instanceof GameObject go) go.callUpdate();
@@ -119,16 +153,28 @@ public class InfoPanel extends EditorPanel {
             }
             case Vector3f vector -> {
                 float[] vec3Array = new float[]{vector.x, vector.y, vector.z};
-                if (ImGui.inputFloat3(field.getName() + "##" + field.hashCode(), vec3Array)) {
+                if (ImGui.inputFloat3(fieldName, vec3Array)) {
                     vector.set(vec3Array[0], vec3Array[1], vec3Array[2]);
-                    field.setAccessible(true);
-                    field.set(drawingObject, vector);
-                    if(drawingObject instanceof GameObject go) go.callUpdate();
+                    if(drawingObject instanceof GameObject go){
+                        String rawFieldName = getRawFieldName(fieldName);
+                        if(rawFieldName.equals("scale")) {
+                            go.setScale(vector);
+                        }else if(rawFieldName.equals("localPosition")) {
+                            go.setPosition(vector);
+                        }else{
+                            field.setAccessible(true);
+                            field.set(drawingObject, vector);
+                        }
+                        go.callUpdate();
+                    }else{
+                        field.setAccessible(true);
+                        field.set(drawingObject, vector);
+                    }
                 }
             }
             case Vector4f vector -> {
                 float[] vec4Array = new float[]{vector.x, vector.y, vector.z, vector.w};
-                if (ImGui.inputFloat4(field.getName() + "##" + field.hashCode(), vec4Array)) {
+                if (ImGui.inputFloat4(fieldName, vec4Array)) {
                     vector.set(vec4Array[0], vec4Array[1], vec4Array[2], vec4Array[3]);
                     field.setAccessible(true);
                     field.set(drawingObject, vector);
@@ -137,17 +183,12 @@ public class InfoPanel extends EditorPanel {
             }
             case Quaternionf quaternion -> {
                 float[] quaternionArray = new float[]{quaternion.x, quaternion.y, quaternion.z, quaternion.w};
-                if (ImGui.inputFloat4(field.getName() + "##" + field.hashCode(), quaternionArray)) {
+                if (ImGui.inputFloat4(fieldName, quaternionArray)) {
                     quaternion.set(quaternionArray[0], quaternionArray[1], quaternionArray[2], quaternionArray[3]);
                     field.setAccessible(true);
                     field.set(drawingObject, quaternion);
                     if(drawingObject instanceof GameObject go) go.callUpdate();
                 }
-            }
-            case Texture texture -> {
-                ImGui.text(field.getName());
-                drawObject(texture);
-                drawManifestType(ManifestHelper.manifestFileType.TEXTURE, texture);
             }
             case Material material -> {
                 ImGui.text(field.getName());
@@ -164,9 +205,9 @@ public class InfoPanel extends EditorPanel {
                     }
                 }
             }
-            case null, default -> {
+            default -> {
                 ImGui.text(field.getName());
-                if(objectValue != null) ImGui.text(objectValue.toString());
+                ImGui.text(objectValue.toString());
             }
         }
         ImGui.setWindowFontScale(0.4f);
@@ -190,23 +231,66 @@ public class InfoPanel extends EditorPanel {
         ImGui.unindent(10);
     }
 
-    private void drawManifestType(ManifestHelper.manifestFileType fileType, Object object){
+    private void drawManifestType(ManifestHelper.manifestFileType fileType, Object object, Field field, Object drawingObject){
         if(fileType == ManifestHelper.manifestFileType.TEXTURE){
             Texture texture = (Texture)object;
-            ImGui.image(texture.getId(), new ImVec2(32, 32));
+            final String NO_TEXTURE_LABEL = "<No Texture>";
 
-            String currentSelectedName = FileHelper.getFileName(texture.getTexturePath()) + "##" + texture.getGuid();
-            ImInt currentSelectedItem = new ImInt(Arrays.stream(textureNames).toList().indexOf(currentSelectedName));
-            if(ImGui.combo(fileType.name().toLowerCase() + "##" + object.hashCode(), currentSelectedItem, textureNames)){
-                String textureGUID = ImGuiHelper.guidFromName(textureNames[currentSelectedItem.get()]);
-                int selectedTextureID = TextureLoader.getTextureByGUID(textureGUID);
-                if(selectedTextureID != -1){
-                    Texture selectedTexture = new Texture(selectedTextureID);
-                    Debug.log("Selected " + textureNames[currentSelectedItem.get()] + " at " + textureGUID);
+            // Show preview if texture exists
+            if(texture != null) {
+                ImGui.image(texture.getId(), new ImVec2(32, 32));
+            }
 
-                    //TODO: ASSIGN selectedTexture TO CORRESPONDING MATERIAL
-                }else{
-                    Debug.logError("Selected texture not loaded in");
+            int selectedIndex = 0; // Default to no texture
+            if(texture != null && texture.getGuid() != null) {
+                String textureGuid = texture.getGuid();
+                for(int i = 0; i < textureNames.length; i++) {
+                    String itemName = textureNames[i];
+                    if(!itemName.equals(NO_TEXTURE_LABEL)) {
+                        String itemGuid = ImGuiHelper.guidFromName(itemName);
+                        if(textureGuid.equals(itemGuid)) {
+                            selectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            ImInt currentSelectedItem = new ImInt(selectedIndex);
+
+            if(ImGui.combo(fileType.name().toLowerCase() + "##" + field.hashCode(), currentSelectedItem, textureNames)){
+                String selectedName = textureNames[currentSelectedItem.get()];
+
+                if(selectedName.equals(NO_TEXTURE_LABEL)) {
+                    try {
+                        field.setAccessible(true);
+                        field.set(drawingObject, null);
+                        if(drawingObject instanceof GameObject go) go.callUpdate();
+                        Debug.log("Texture set to null");
+                    } catch (IllegalAccessException e) {
+                        Debug.logError("Failed to set texture to null: " + e.getMessage());
+                    }
+                } else {
+                    String textureGUID = ImGuiHelper.guidFromName(selectedName);
+                    String texturePath = ManifestHelper.getPathByGuid(ManifestHelper.manifestFileType.TEXTURE, textureGUID);
+                    if(texturePath == null || texturePath.isEmpty()) {
+                        Debug.logError("Could not find path for texture GUID: " + textureGUID);
+                        return;
+                    }
+
+                    Texture selectedTexture = buildTextureForField(field.getName(), texturePath);
+                    if(selectedTexture.getId() != -1 && selectedTexture.getId() != TextureLoader.getDefaultTextureId()){
+                        Debug.log("Selected " + selectedName + " with ID: " + selectedTexture.getId() + " and GUID: " + selectedTexture.getGuid());
+                        try {
+                            field.setAccessible(true);
+                            field.set(drawingObject, selectedTexture);
+                            if(drawingObject instanceof GameObject go) go.callUpdate();
+                        } catch (IllegalAccessException e) {
+                            Debug.logError("Failed to update texture field: " + e.getMessage());
+                        }
+                    } else {
+                        Debug.logError("Failed to load texture for GUID: " + textureGUID);
+                    }
                 }
             }
         }else{
@@ -214,11 +298,25 @@ public class InfoPanel extends EditorPanel {
         }
     }
 
+    private String getRawFieldName(String fieldNameRaw){
+        if(!fieldNameRaw.isEmpty()) return fieldNameRaw.split("##")[0];
+        return fieldNameRaw;
+    }
+
+    private Texture buildTextureForField(String fieldName, String texturePath) {
+        return switch (fieldName) {
+            case "normalMap"    -> new Texture(texturePath, false, false, true, true,  false);
+            case "roughnessMap",
+                 "metallicMap",
+                 "aoMap"        -> new Texture(texturePath, false, false, true, false, true);
+            default             -> new Texture(texturePath);
+        };
+    }
+
     private void updateTextureList(){
         List<String> manifestItems = new ArrayList<>();
-        ManifestHelper.getTextures().forEach(manifestItem -> {
-            manifestItems.add(manifestItem.get("filename")+"##"+manifestItem.get("guid"));
-        });
+        manifestItems.add("<No Texture>"); // Add empty option for null texture - using angle brackets to avoid conflicts
+        ManifestHelper.getTextures().forEach(manifestItem -> manifestItems.add(manifestItem.get("filename")+"##"+manifestItem.get("guid")));
         textureNames = manifestItems.toArray(new String[0]);
     }
 }

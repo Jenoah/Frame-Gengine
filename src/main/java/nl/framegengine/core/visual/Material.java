@@ -20,6 +20,7 @@ public class Material implements IJsonSerializable {
 
     protected float reflectance = 0.04f;
     protected float roughness = 0.1f;
+    protected float metallic = 0.1f;
     protected float tilingScale = 1;
     protected Texture albedoTexture = null;
     protected Texture normalMap = null;
@@ -36,7 +37,11 @@ public class Material implements IJsonSerializable {
     protected Shader shader;
     protected String guid;
 
-    public Material(){}
+    public Material(){
+        this.shader = ShaderManager.pbrShader;
+        setGuid();
+        MaterialManager.addMaterial(this);
+    }
 
     public Material(Shader shader){
         this.shader = shader;
@@ -46,9 +51,9 @@ public class Material implements IJsonSerializable {
 
     public Material(Material material){
         this.shader = material.getShader();
-        this.ambientColor = material.getAmbientColor();
-        this.diffuseColor = material.getDiffuseColor();
-        this.specularColor = material.getSpecularColor();
+        this.ambientColor = new Vector4f(material.getAmbientColor());
+        this.diffuseColor = new Vector4f(material.getDiffuseColor());
+        this.specularColor = new Vector4f(material.getSpecularColor());
         this.reflectance = material.getReflectance();
         this.albedoTexture = material.getAlbedoTexture();
         this.normalMap = material.getNormalMap();
@@ -57,6 +62,7 @@ public class Material implements IJsonSerializable {
         this.metallicMap = material.getMetallicMap();
         this.aoMap = material.getAoMap();
         this.roughness = material.getRoughness();
+        this.metallic = material.getMetallic();
         this.tilingScale = material.getTilingScale();
         this.isOnTop = material.isOnTop();
         this.castShadow = material.castShadow();
@@ -98,6 +104,11 @@ public class Material implements IJsonSerializable {
 
     public Material setRoughness(float roughness){
         this.roughness = Math.clamp(0.01f, 1f, roughness);
+        return this;
+    }
+
+    public Material setMetallic(float metallic){
+        this.metallic = Math.clamp(0.01f, 1f, metallic);
         return this;
     }
 
@@ -193,6 +204,8 @@ public class Material implements IJsonSerializable {
         return roughness;
     }
 
+    public final float getMetallic(){ return metallic; }
+
     public final float getTilingScale() { return tilingScale; }
 
     public final Texture getAlbedoTexture() {
@@ -231,6 +244,7 @@ public class Material implements IJsonSerializable {
 
     public final boolean isOnTop() { return isOnTop; }
 
+    @Override
     public final String getGuid(){ return guid; }
 
 //  Has Getters
@@ -276,7 +290,7 @@ public class Material implements IJsonSerializable {
         }
 
         if(JsonHelper.hasJsonKey(jsonInfo, "shader")){
-            ShaderManager.getShaderByQualifiedClassName(jsonInfo.get("shader").toString());
+            this.shader = ShaderManager.getShaderByQualifiedClassName(jsonInfo.get("shader").toString());
         }
 
         if(guid == null || guid.isBlank()) setGuid();

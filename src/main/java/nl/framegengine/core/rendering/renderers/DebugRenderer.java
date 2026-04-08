@@ -20,7 +20,7 @@ import java.util.Set;
 
 public class DebugRenderer implements IRenderer {
 
-    public class DebugMesh {
+    public static class DebugMesh {
         public Mesh mesh;
         public Vector3f worldPosition = new Vector3f(0);
         public Quaternionf worldRotation = new Quaternionf().identity();
@@ -150,22 +150,21 @@ public class DebugRenderer implements IRenderer {
     }
 
     private void renderDebugShape(){
-        if(debugEntities.isEmpty()) {
+        if(debugEntities.isEmpty()) return;
 
-            GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
+        GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
 
-            debugEntities.forEach(debugEntity -> {
-                bind(cubeMesh);
-                debugShader.prepare(debugEntity.getPosition(), debugEntity.getRotation(), debugEntity.getScale(), mainCamera);
+        debugEntities.forEach(debugEntity -> {
+            bind(cubeMesh);
+            debugShader.prepare(debugEntity.getPosition(), debugEntity.getRotation(), debugEntity.getScale(), mainCamera);
 
-                if (debugEntity.getShape() == DebugEntity.DebugShape.CUBE) {
-                    GL11.glDrawElements(GL11.GL_TRIANGLES, cubeMesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
-                }
-                unbind();
-            });
-            GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
-            debugEntities.clear();
-        }
+            if (debugEntity.getShape() == DebugEntity.DebugShape.CUBE) {
+                GL11.glDrawElements(GL11.GL_TRIANGLES, cubeMesh.getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
+            }
+            unbind();
+        });
+        GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
+        debugEntities.clear();
     }
 
     @Override

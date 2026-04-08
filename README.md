@@ -2,42 +2,93 @@
 <img width='50%' src="git-files/images/FrameGengine.png" alt="Logo of Java Game Engine called Frame Gengine" />
 </p>
 
+<div align="center">
+
 # Frame Gengine
-A simple Java Game engine using LWJGL3 / OpenGL.
 
-## Included features
-- 3D rendering
-- Simple editor
-- Instanced rendering
-- Game Object Components
-- PBR lighting
-- Directional shadows
-- Custom shaders
-- Fog
-- Simple UI
-- Text rendering (Credits to [Thin Matrix's font rendering tutorial](https://www.youtube.com/watch?v=mnIQEQoHHCU))
-- Post-processing
-- Debug boxes
+A simple Java Game engine using LWJGL 3 and OpenGL
 
-## Planned features
-- Point- and spotlight shadows
-- Collisions
-- Ambient Occlusion
-- Reflections
-- Expanding UI to buttons
-- Audio
-- Occlusion culling
+[![Language](https://img.shields.io/badge/Language-Java-blue.svg)](https://www.java.com)
+[![Library](https://img.shields.io/badge/Library-LWJGL%203-orange.svg)](https://www.lwjgl.org/)
+[![Graphics API](https://img.shields.io/badge/Graphics-OpenGL-green.svg)](https://www.opengl.org/)
 
-## How to run
-- Run the 'Editor/EditorLauncher.java'
-- If on Mac, use the file mentioned above with the '-XstartOnFirstThread' VM parameter
+</div>
 
-## Examples
-All the above-mentioned included features are shown in the demo scene. The previews below might be outdated.
-This demo scene includes a procedurally generated world. This is done with chunks of [Marching Cubes](https://en.wikipedia.org/wiki/Marching_cubes) that runs on a separate thread to prevent stuttering on generation.
+---
+
+## 📖 About The Project
+
+Frame Gengine is a personal project built from the ground up to explore the concepts of 3D game engine development. It includes a variety of modern rendering techniques and a simple editor for scene manipulation.
+
+The demo below showcases a procedurally generated world using the **[Marching Cubes](https://en.wikipedia.org/wiki/Marching_cubes)** algorithm. This process runs on a separate thread to ensure smooth performance during chunk generation. Of course, all using Frame Gengine!
+
+## 🖼️ Gallery
+
+The previews below might be outdated compared to the latest features.
 
 <p align="center">
 <img width='100%' src="git-files/images/preview_proc_gen_lighting_shadow_pbr.gif" alt="preview of procedural generation in the Java game engine" />
+<em>Procedural world generation with PBR lighting and shadows.</em>
 </p>
 
-![preview image of editor](git-files/images/editor_preview2.jpeg)
+<br>
+
+<p align="center">
+<img width='100%' src="git-files/images/editor_preview2.jpeg" alt="preview image of editor" />
+<em>The simple built-in editor.</em>
+</p>
+
+---
+
+### ⚠️ Disclaimer
+This project is in the early stages of development and is not battle-tested. It does not have a stable version and likely contains bugs. It is primarily a learning project and can contain breaking changes over its lifetime.
+
+---
+
+## ✨ Features
+
+| Rendering Features    | Engine & Editor |
+|:----------------------| :-- |
+| ✅ 3D Rendering        | ✅ Simple Editor |
+| ✅ Instanced Rendering | ✅ Game Object / Component System |
+| ✅ PBR Lighting        | ✅ Debug Wireframe Rendering |
+| ✅ Directional Shadows | ✅ Simple UI System |
+| ✅ Custom Shaders      | |
+| ✅ Fog                 | |
+| ✅ Post-processing     | |
+| ✅ Text / UI rendering | |
+
+### 🚧 Planned Features
+-   Point & Spotlight Shadows
+-   Collision Detection
+-   Screen-Space Ambient Occlusion (SSAO)
+-   Screen-Space Reflections (SSR)
+-   Expanded UI (Buttons, etc.)
+-   Audio System
+-   Occlusion Culling
+
+---
+
+## 🚀 Getting Started
+
+### How to Run
+1.  Clone the repository.
+2.  Open the project in your favorite Java IDE.
+3.  Run the `Editor/EditorLauncher.java` file.
+4.  **If on macOS**, add the `-XstartOnFirstThread` VM parameter to your run configuration.
+
+---
+
+## 🤝 Contributing
+Contributions are welcome! If you'd like to contribute, please feel free to make a fork and submit a pull request.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/MyNewFeature`)
+3. Commit your Changes (`git commit -m 'Added MyNewFeature'`)
+4. Push to the Branch (`git push origin feature/MyNewFeature`)
+5. Open a Pull Request
+
+---
+
+## 🙏 Honorable mentions
+*   Font rendering approach inspired by [Thin Matrix's font rendering tutorial](https://www.youtube.com/watch?v=mnIQEQoHHCU).

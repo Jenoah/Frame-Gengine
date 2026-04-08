@@ -23,6 +23,9 @@ import java.nio.IntBuffer;
 import java.util.*;
 
 public class Mesh implements IJsonSerializable {
+
+    public static final String BUILTIN_PREFIX = "builtin:";
+
     private float[] vertices;
     private float[] normals;
     private float[] tangents;
@@ -31,6 +34,7 @@ public class Mesh implements IJsonSerializable {
     private int[] triangles;
     private int dimension = 3;
     private String meshPath = "";
+    private int meshId = -1;
 
     private final Set<Integer> vbos = new HashSet<>();
 
@@ -121,6 +125,7 @@ public class Mesh implements IJsonSerializable {
     }
 
     private void load(float[] vertexFloatArray, float[] uvFloatArray, int[] triangleArray, float[] normals){
+        GL11.glGetError(); //Resets OPEN GLs error flag
         vaoID = GL30.glGenVertexArrays();
         GL30.glBindVertexArray(vaoID);
 
@@ -130,18 +135,18 @@ public class Mesh implements IJsonSerializable {
                 this.triangles = triangleArray;
             }
         }
-        if(vertexFloatArray != null){
+        if(vertexFloatArray != null && vertexFloatArray.length > 0){
             vertexVBOID = storeDataInAttributeList(0, this.dimension, vertexFloatArray);
-            vertexCount = vertexFloatArray.length;
+            vertexCount = (triangleArray != null) ? triangleArray.length : vertexFloatArray.length / this.dimension;
             this.vertices = vertexFloatArray;
         }
 
-        if(uvFloatArray != null){
+        if(uvFloatArray != null && uvFloatArray.length > 0){
             uvVBOID = storeDataInAttributeList(1, 2, uvFloatArray);
             this.uvs = uvFloatArray;
         }
 
-        if(normals != null) {
+        if(normals != null && normals.length > 0) {
             normalVBOID = storeDataInAttributeList(2, 3, normals);
             this.normals = normals;
         }
@@ -155,30 +160,46 @@ public class Mesh implements IJsonSerializable {
     }
 
     private int storeIndicesBuffer(int[] triangles){
+        if (triangles == null || triangles.length == 0) {
+            throw new IllegalArgumentException("Index array is empty or null!");
+        }
+
         int vbo = GL15.glGenBuffers();
         vbos.add(vbo);
         GL30.glBindBuffer(GL30.GL_ELEMENT_ARRAY_BUFFER, vbo);
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            IntBuffer buffer = stack.mallocInt(triangles.length);
-            buffer.put(triangles);
-            buffer.flip();
-            GL30.glBufferData(GL30.GL_ELEMENT_ARRAY_BUFFER, buffer, GL30.GL_STATIC_DRAW);
+        IntBuffer buffer = MemoryUtil.memAllocInt(triangles.length);
+        buffer.put(triangles);
+        buffer.flip();
+        GL30.glBufferData(GL30.GL_ELEMENT_ARRAY_BUFFER, buffer, GL30.GL_STATIC_DRAW);
+
+        int error = GL11.glGetError();
+        if (error != GL11.GL_NO_ERROR) {
+            Debug.logConsoleError("OpenGL error (storeIndicesBuffer) (data length: " + triangles.length + "): " + error);
         }
+
+        MemoryUtil.memFree(buffer);
+
         return vbo;
     }
 
     private int storeDataInAttributeList(int attributeNumber, int vertexCount, float[] data){
         int vbo = GL15.glGenBuffers();
+
         vbos.add(vbo);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo);
-        try (MemoryStack stack = MemoryStack.stackPush()) {
-            FloatBuffer buffer = stack.mallocFloat(data.length);
-            buffer.put(data);
-            buffer.flip();
-            GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
-            GL20.glVertexAttribPointer(attributeNumber, vertexCount, GL11.GL_FLOAT, false, 0, 0);
-        }
+        FloatBuffer buffer = MemoryUtil.memAllocFloat(data.length);
+        buffer.put(data);
+        buffer.flip();
+        GL15.glBufferData(GL15.GL_ARRAY_BUFFER, buffer, GL15.GL_STATIC_DRAW);
+        GL20.glVertexAttribPointer(attributeNumber, vertexCount, GL11.GL_FLOAT, false, 0, 0);
         GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+
+        int error = GL11.glGetError();
+        if (error != GL11.GL_NO_ERROR) {
+            Debug.logConsoleError("OpenGL error (storeDataInAttributeList) (data length: " + attributeNumber + "/" + data.length + "): " + error);
+        }
+
+        MemoryUtil.memFree(buffer);
         return vbo;
     }
 
@@ -435,7 +456,7 @@ public class Mesh implements IJsonSerializable {
 
     public final int getVertexCount(){
         if(vertexCount == -1){
-            vertexCount = vertices.length;
+            vertexCount = (triangles != null) ? triangles.length : vertices.length / dimension;
         }
 
         return vertexCount;
@@ -493,6 +514,21 @@ public class Mesh implements IJsonSerializable {
     }
 
     public String getMeshPath() {
+        return meshPath;
+    }
+
+    public boolean isBuiltin() {
+        return meshPath != null && meshPath.startsWith(BUILTIN_PREFIX);
+    }
+
+    /**
+     * Returns the resource path without the builtin: prefix.
+     * If the path is not builtin, returns the meshPath as-is.
+     */
+    public String getResourcePath() {
+        if (isBuiltin()) {
+            return meshPath.substring(BUILTIN_PREFIX.length());
+        }
         return meshPath;
     }
 
@@ -690,6 +726,24 @@ public class Mesh implements IJsonSerializable {
 
     public boolean isStatic(){
         return isStatic;
+    }
+
+    public final int getMeshId() {
+        return meshId;
+    }
+
+    public void setMeshId(int meshId) {
+        this.meshId = meshId;
+    }
+
+    @Override
+    public String getGuid() {
+        return "NoGuid";
+    }
+
+    @Override
+    public IJsonSerializable setGuid(String guid) {
+        return null;
     }
 
     @Override

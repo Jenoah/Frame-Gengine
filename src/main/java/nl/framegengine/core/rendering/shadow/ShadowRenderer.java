@@ -59,11 +59,17 @@ public class ShadowRenderer implements IRenderer {
         GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
         GL11.glDisable(GL11.GL_BLEND);
         GL11.glEnable(GL11.GL_CULL_FACE);
-        GL11.glCullFace(GL11.GL_FRONT);
+        GL11.glCullFace(GL11.GL_BACK);
+        GL11.glEnable(GL11.GL_POLYGON_OFFSET_FILL);
+        GL11.glPolygonOffset(Constants.SHADOW_POLYGON_OFFSET_FACTOR, Constants.SHADOW_POLYGON_OFFSET_UNITS);
 
 
         shadowSets.forEach((meshMaterialSet) -> {
             if (!meshMaterialSet.getRoot().isEnabled() || !meshMaterialSet.material.castShadow()) return;
+
+            if (meshMaterialSet.getRoot().getAabb() != null
+                    && !shadowFrustum.isInFrustum(meshMaterialSet.getRoot().getAabb().toWorld())) return;
+
             if (recordMetrics) {
                 metrics.recordStateChange();
             }
@@ -77,7 +83,6 @@ public class ShadowRenderer implements IRenderer {
             if(meshMaterialSet.getMesh().isInstanced()){
                 GL33.glDrawElementsInstanced(GL11.GL_TRIANGLES, meshMaterialSet.getMesh().getVertexCount(), GL11.GL_UNSIGNED_INT, 0, meshMaterialSet.getMesh().getInstanceCount());
             }else{
-                if(recordMetrics) metrics.recordVertexCount(meshMaterialSet.getMesh().getVertexCount());
                 GL11.glDrawElements(GL11.GL_TRIANGLES, meshMaterialSet.getMesh().getVertexCount(), GL11.GL_UNSIGNED_INT, 0);
             }
 
@@ -85,7 +90,7 @@ public class ShadowRenderer implements IRenderer {
         });
 
         shadowFrameBuffer.unbindFrameBuffer();
-        GL11.glCullFace(GL11.GL_BACK);
+        GL11.glDisable(GL11.GL_POLYGON_OFFSET_FILL);
         shadowShader.unbind();
     }
 
@@ -107,9 +112,22 @@ public class ShadowRenderer implements IRenderer {
     }
 
     public void prepare(Vector3f lightDirection, ShadowFrustum shadowFrustum){
-        updateOrthoProjectionMatrix();
-        updateLightViewMatrix(lightDirection, shadowFrustum.getCenter());
+        Vector3f frustumCenter = shadowFrustum.computeFrustumCenter();
+        updateLightViewMatrix(lightDirection, frustumCenter);
         shadowFrustum.update(lightViewMatrix);
+        projectionMatrix.setOrtho(
+                shadowFrustum.getMinX(), shadowFrustum.getMaxX(),
+                shadowFrustum.getMinY(), shadowFrustum.getMaxY(),
+                shadowFrustum.getMinZ(), shadowFrustum.getMaxZ()
+        );
+
+        float worldUnitsPerTexelX = shadowFrustum.getWidth()  / Constants.SHADOW_MAP_SIZE;
+        float worldUnitsPerTexelY = shadowFrustum.getHeight() / Constants.SHADOW_MAP_SIZE;
+        float tx = lightViewMatrix.m30();
+        float ty = lightViewMatrix.m31();
+
+        lightViewMatrix.m30((float) Math.floor(tx / worldUnitsPerTexelX) * worldUnitsPerTexelX);
+        lightViewMatrix.m31((float) Math.floor(ty / worldUnitsPerTexelY) * worldUnitsPerTexelY);
 
         projectionMatrix.mulOrthoAffine(lightViewMatrix, projectionViewMatrix);
         shadowFrameBuffer.bindFrameBuffer();
@@ -148,14 +166,6 @@ public class ShadowRenderer implements IRenderer {
         );
     }
 
-
-    private void updateOrthoProjectionMatrix() {
-        projectionMatrix.identity();
-        projectionMatrix.m00(2f / shadowFrustum.getWidth());
-        projectionMatrix.m11(2f / shadowFrustum.getHeight());
-        projectionMatrix.m22(-2f / shadowFrustum.getLength());
-        projectionMatrix.m33(1f);
-    }
 
     private static Matrix4f createOffset() {
         return new Matrix4f()

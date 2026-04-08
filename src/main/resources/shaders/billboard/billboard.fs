@@ -10,6 +10,7 @@ struct Material {
     int hasTexture;
     float reflectance;
     float roughness;
+    float metallic;
 };
 
 uniform sampler2D textureSampler;

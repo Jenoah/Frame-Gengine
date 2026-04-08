@@ -238,6 +238,7 @@ public class RenderManager {
 
     public static void setWireframeMode(boolean wireframeMode){
         showWireframe = wireframeMode;
+        PostProcessing.ForceFillDrawMode(showWireframe);
         if(componentRenderer != null) componentRenderer.setWireframeMode(showWireframe);
     }
 

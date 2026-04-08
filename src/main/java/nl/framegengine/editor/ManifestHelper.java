@@ -29,6 +29,7 @@ public class ManifestHelper {
     private static final List<HashMap<String, String>> scripts = new ArrayList<>();
     private static final List<HashMap<String, String>> levels = new ArrayList<>();
     private static final List<HashMap<String, String>> materials = new ArrayList<>();
+    private static final List<HashMap<String, String>> models = new ArrayList<>();
     private static final List<HashMap<String, String>> others = new ArrayList<>();
 
     private static final List<EventCallback> eventCallbacks = new ArrayList<>();
@@ -107,6 +108,7 @@ public class ManifestHelper {
         scripts.clear();
         levels.clear();
         materials.clear();
+        models.clear();
         others.clear();
 
         String manifestFileContent = FileHelper.readFile(manifestFile.getAbsolutePath());
@@ -135,6 +137,11 @@ public class ManifestHelper {
                                 materials.add(manifestJsonToHashmapItem(jsonArrayValue.asJsonObject()));
                             }
                         });
+                        case "models" -> jsonValue.asJsonArray().forEach(jsonArrayValue -> {
+                            if (jsonArrayValue.getValueType() == JsonValue.ValueType.OBJECT) {
+                                models.add(manifestJsonToHashmapItem(jsonArrayValue.asJsonObject()));
+                            }
+                        });
                         case null, default -> jsonValue.asJsonArray().forEach(jsonArrayValue -> {
                             if (jsonArrayValue.getValueType() == JsonValue.ValueType.OBJECT) {
                                 others.add(manifestJsonToHashmapItem(jsonArrayValue.asJsonObject()));
@@ -143,7 +150,7 @@ public class ManifestHelper {
                     }
                 }
             });
-            Debug.logConsole("Loaded in " + (textures.size() + scripts.size() + levels.size() + materials.size() + others.size()) + " data entries");
+            Debug.logConsole("Loaded in " + (textures.size() + scripts.size() + levels.size() + materials.size() + models.size() + others.size()) + " data entries");
         }else{
             Debug.logConsoleError("Manifest file empty");
         }
@@ -157,12 +164,14 @@ public class ManifestHelper {
         JsonArrayBuilder scriptArray = Json.createArrayBuilder();
         JsonArrayBuilder levelArray = Json.createArrayBuilder();
         JsonArrayBuilder materialArray = Json.createArrayBuilder();
+        JsonArrayBuilder modelsArray = Json.createArrayBuilder();
         JsonArrayBuilder otherArray = Json.createArrayBuilder();
 
         List<HashMap<String, String>> manifestTextures = new ArrayList<>();
         List<HashMap<String, String>> manifestScripts = new ArrayList<>();
         List<HashMap<String, String>> manifestLevels = new ArrayList<>();
         List<HashMap<String, String>> manifestMaterials = new ArrayList<>();
+        List<HashMap<String, String>> manifestModels= new ArrayList<>();
         List<HashMap<String, String>> manifestOthers = new ArrayList<>();
 
         Path[] filesInProject = FileHelper.findFilesInDirectory(Paths.get(EngineSettings.currentProjectDirectory), new HashSet<>(Arrays.asList(".app", ".tmp", ".bak"))).toArray(Path[]::new);
@@ -179,6 +188,7 @@ public class ManifestHelper {
                     case SCRIPT -> addManifestRecord(scripts, fileGUID, relativePath, manifestScripts, filePath);
                     case LEVEL -> addManifestRecord(levels, fileGUID, relativePath, manifestLevels, filePath);
                     case MATERIAL -> addManifestRecord(materials, fileGUID, relativePath, manifestMaterials, filePath);
+                    case MODEL -> addManifestRecord(models, fileGUID, relativePath, manifestModels, filePath);
                     case null, default -> addManifestRecord(others, fileGUID, relativePath, manifestOthers, filePath);
                 }
             }
@@ -190,12 +200,14 @@ public class ManifestHelper {
         manifestScripts.forEach(manifestValue -> addToManifestArray(manifestValue, scriptArray));
         manifestLevels.forEach(manifestValue -> addToManifestArray(manifestValue, levelArray));
         manifestMaterials.forEach(manifestValue -> addToManifestArray(manifestValue, materialArray));
+        manifestModels.forEach(manifestValue -> addToManifestArray(manifestValue, modelsArray));
         manifestOthers.forEach(manifestValue -> addToManifestArray(manifestValue, otherArray));
 
         jsonManifestContent.add("textures", textureArray.build());
         jsonManifestContent.add("scripts", scriptArray.build());
         jsonManifestContent.add("levels", levelArray.build());
         jsonManifestContent.add("materials", materialArray.build());
+        jsonManifestContent.add("models", modelsArray.build());
         jsonManifestContent.add("others", otherArray.build());
 
         Map<String, Boolean> config = new HashMap<>();
@@ -276,6 +288,7 @@ public class ManifestHelper {
         SCRIPT,
         LEVEL,
         MATERIAL,
+        MODEL,
         NULL
     }
 
@@ -283,7 +296,7 @@ public class ManifestHelper {
         return pathToManifestFileType(file.toPath());
     }
 
-    private static manifestFileType pathToManifestFileType(Path path){
+    public static manifestFileType pathToManifestFileType(Path path){
         String extension = FileHelper.getExtension(path.toString());
 
         return switch (extension) {
@@ -291,6 +304,7 @@ public class ManifestHelper {
             case "lvl" -> manifestFileType.LEVEL;
             case "java" -> manifestFileType.SCRIPT;
             case "mtrl" -> manifestFileType.MATERIAL;
+            case "fbx", "obj" -> manifestFileType.MODEL;
             case null, default -> manifestFileType.NULL;
         };
     }
@@ -299,6 +313,7 @@ public class ManifestHelper {
     public static List<HashMap<String, String>> getScripts(){ return scripts; }
     public static List<HashMap<String, String>> getLevels(){ return levels; }
     public static List<HashMap<String, String>> getMaterials(){ return materials; }
+    public static List<HashMap<String, String>> getModels(){ return models; }
     public static List<HashMap<String, String>> getOthers(){ return others; }
 
     public static List<HashMap<String, String>> getOfType(manifestFileType fileType){
@@ -307,6 +322,7 @@ public class ManifestHelper {
             case SCRIPT -> { return getScripts(); }
             case LEVEL -> { return getLevels(); }
             case MATERIAL -> { return getMaterials(); }
+            case MODEL -> { return getModels(); }
             case null, default -> { return getOthers(); }
         }
     }

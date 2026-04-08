@@ -58,17 +58,18 @@ public class MaterialManager {
     }
 
     public static void saveMaterials(){
-        materials.forEach((guid, material) -> {
-            if(material == MaterialManager.defaultMaterial) return;
+        for (String guid : materials.keySet().toArray(new String[0])) {
+            Material material = materials.get(guid);
+            if(material == MaterialManager.defaultMaterial) continue;
             String materialPath = ManifestHelper.getPathByGuid(ManifestHelper.manifestFileType.MATERIAL, guid);
             if(materialPath == null || materialPath.isBlank()){
                 Debug.logError("Material path not found by Guid " + guid);
-                return;
+                continue;
             }
             File materialFile = new File(EngineSettings.currentProjectDirectory + File.separator + materialPath);
             if(!materialFile.exists()){
                 Debug.logError("Material file not found at " + materialPath);
-                return;
+                continue;
             }
 
             Map<String, Boolean> config = new HashMap<>();
@@ -80,7 +81,7 @@ public class MaterialManager {
             jsonWriter.write(material.serializeToJson());
 
             FileHelper.writeToFile(stringWriter.toString(), materialFile.getAbsolutePath());
-        });
+        }
     }
 
     public static void addMaterial(Material material){

@@ -1,14 +1,10 @@
 package nl.framegengine.core.entity;
 
-import nl.framegengine.core.utils.IJsonSerializable;
+import nl.framegengine.core.utils.*;
 import nl.framegengine.core.components.Component;
 import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.rendering.RenderManager;
-import nl.framegengine.core.utils.AABB;
-import nl.framegengine.core.utils.Constants;
-import nl.framegengine.core.utils.JsonHelper;
-import nl.framegengine.core.utils.ObjectPool;
 import nl.framegengine.editor.EngineSettings;
 import org.joml.*;
 import org.joml.Math;
@@ -17,6 +13,7 @@ import javax.json.*;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+
 
 public class GameObject implements IJsonSerializable {
     private String name = "GameObject";
@@ -35,7 +32,8 @@ public class GameObject implements IJsonSerializable {
     private float renderCameraSquaredDistance = 0;
     protected boolean canBeSaved = true;
 
-    private static final Dictionary<String, GameObject> instancedObjects = new Hashtable<>();
+    private static final Hashtable<String, GameObject> instancedObjects = new Hashtable<>();
+    private static final Hashtable<String, List<GameObject>> parentWhenPresent = new Hashtable<>();
 
     private final List<GameObject> children;
     private GameObject parent;
@@ -69,9 +67,14 @@ public class GameObject implements IJsonSerializable {
         if (parent == null) {
             return new Vector3f(localPosition);
         } else {
+            Vector3f scaledPosition = ObjectPool.VECTOR3F_POOL.obtain().set(localPosition).mul(parent.getScale());
             Quaternionf parentRotation = parent.getRotation();
-            Vector3f rotatedPosition = new Vector3f(localPosition).rotate(parentRotation);
-            return new Vector3f(parent.getPosition()).add(rotatedPosition);
+            Vector3f rotatedLocal = scaledPosition.rotate(parentRotation);
+
+            Vector3f targetVector = new Vector3f(parent.getPosition()).add(rotatedLocal);
+            ObjectPool.VECTOR3F_POOL.free(scaledPosition);
+
+            return targetVector;
         }
     }
 
@@ -103,9 +106,11 @@ public class GameObject implements IJsonSerializable {
         } else {
             Vector3f parentWorldPos = parent.getPosition();
             Quaternionf parentWorldRot = parent.getRotation();
+            Vector3f parentWorldScale = parent.getScale(); // Assume this returns a Vector3f
 
             Vector3f relativePos = ObjectPool.VECTOR3F_POOL.obtain().set(worldPosition).sub(parentWorldPos);
-            relativePos.rotate(parentWorldRot.conjugate()); // inverse rotate to get local position
+            relativePos.div(parentWorldScale);
+            parentWorldRot.conjugate(new Quaternionf()).transform(relativePos);
 
             setPosition(relativePos);
             ObjectPool.VECTOR3F_POOL.free(relativePos);
@@ -131,14 +136,14 @@ public class GameObject implements IJsonSerializable {
     public Vector3f getEulerAngles(){
         Vector3f eulerAngles = new Vector3f();
         getRotation().getEulerAnglesXYZ(eulerAngles);
-        eulerAngles.mul((float) Math.toDegrees(1));
+        eulerAngles.mul(Math.toDegrees(1));
         return eulerAngles;
     }
 
     public Vector3f getLocalEulerAngles(){
         Vector3f eulerAngles = new Vector3f();
         localRotation.getEulerAnglesXYZ(eulerAngles);
-        eulerAngles.mul((float) Math.toDegrees(1));
+        eulerAngles.mul(Math.toDegrees(1));
         return eulerAngles;
     }
 
@@ -180,7 +185,7 @@ public class GameObject implements IJsonSerializable {
     }
 
     public GameObject setRotation(Vector3f rotation) {
-        Vector3f radians = ObjectPool.VECTOR3F_POOL.obtain().set(rotation).mul((float) Math.toRadians(1));
+        Vector3f radians = ObjectPool.VECTOR3F_POOL.obtain().set(rotation).mul(Math.toRadians(1));
         localRotation.identity().rotateXYZ(radians.x, radians.y, radians.z).normalize();
         ObjectPool.VECTOR3F_POOL.free(radians);
         callUpdate();
@@ -189,7 +194,7 @@ public class GameObject implements IJsonSerializable {
 
     public GameObject addRotation(Vector3f rotation){
         if(rotation.equals(Constants.VECTOR3_ZERO)) return this;
-        Vector3f radians = new Vector3f(rotation).mul((float) Math.toRadians(1));
+        Vector3f radians = new Vector3f(rotation).mul(Math.toRadians(1));
 
         localRotation.mul(
                 new Quaternionf().identity().rotateXYZ(
@@ -240,39 +245,45 @@ public class GameObject implements IJsonSerializable {
     }
 
     public Vector3f getScale() {
+        if(parent == null) return scale;
+        return Calculus.multiplyVector(scale, parent.getScale());
+    }
+
+    public Vector3f getLocalScale() {
         return scale;
     }
 
     public GameObject setScale(float scale) {
-        this.scale.set(scale);
-        if(aabb != null && getComponent(RenderComponent.class) != null) getComponent(RenderComponent.class).calculateAABB();
-        if(!children.isEmpty()) children.forEach(child -> child.setScale(child.getScale().mul(scale)));
-
-        callUpdate();
-        return this;
+        return setScale(scale, scale, scale);
     }
 
     public GameObject setScale(Vector3f scale) {
-        this.scale.set(scale);
-        if(aabb != null && getComponent(RenderComponent.class) != null) getComponent(RenderComponent.class).calculateAABB();
-        if(!children.isEmpty()) children.forEach(child -> child.setScale(child.getScale().mul(scale)));
-
-        callUpdate();
-        return this;
+        return setScale(scale.x, scale.y, scale.z);
     }
 
     public GameObject setScale(float x, float y, float z) {
         this.scale.set(x, y, z);
-        if(aabb != null && getComponent(RenderComponent.class) != null) getComponent(RenderComponent.class).calculateAABB();
+        if(!children.isEmpty()) children.forEach(child -> child.setScale(child.getLocalScale()));
 
         callUpdate();
         return this;
     }
 
     public GameObject setScale(float x, float y) {
-        this.scale.set(x, y, 0);
-        if(aabb != null && getComponent(RenderComponent.class) != null) getComponent(RenderComponent.class).calculateAABB();
+        return setScale(x, y, 0);
+    }
+
+    public Matrix4f getMatrix(){
+        return new Matrix4f().translationRotateScale(localPosition, localRotation, scale);
+    }
+
+    public GameObject setMatrix(Matrix4f newMatrix){
+        newMatrix.getTranslation(localPosition);
+        setScale(newMatrix.getScale(scale));
+        newMatrix.getUnnormalizedRotation(localRotation);
+
         callUpdate();
+
         return this;
     }
 
@@ -308,14 +319,33 @@ public class GameObject implements IJsonSerializable {
         return this;
     }
 
+    public GameObject setParentByGUID(String parentGUID){
+        GameObject parentObject = GameObject.getByGUID(parentGUID);
+        if(parentObject != null) return setParent(parentObject);
+
+        if(parentWhenPresent.containsKey(parentGUID)){
+            parentWhenPresent.get(parentGUID).add(this);
+        }else{
+            ArrayList<GameObject> parentObjects = new ArrayList<>();
+            parentObjects.add(this);
+            parentWhenPresent.put(parentGUID, parentObjects);
+        }
+
+        return this;
+    }
+
+    private void addWaitingChildren(){
+        if(parentWhenPresent.containsKey(guid)) parentWhenPresent.get(guid).forEach(go -> go.setParent(this));
+    }
+
     public GameObject getParent(){
         return this.parent;
     }
 
     public void update(){
         if(drawDebugWireframe && aabb != null){
-            worldAABB.set(getAabb()).offset(getPosition());
-            RenderManager.debugCube(worldAABB.getCenter(), getRotation(), worldAABB.getSize());
+            worldAABB.set(aabb.toWorld());
+            RenderManager.debugCube(worldAABB.getCenter(), Constants.QUATERNION_IDENTITY, worldAABB.getSize());
         }
 
         if(!isEnabled || components.isEmpty()) return;
@@ -481,14 +511,16 @@ public class GameObject implements IJsonSerializable {
         return guid;
     }
 
-    public void setGuid(){
+    public GameObject setGuid(){
         setGuid(String.valueOf(java.util.UUID.randomUUID()));
+        return this;
     }
 
-    public void setGuid(String guid) {
+    public GameObject setGuid(String guid) {
+        if (this.guid != null) instancedObjects.remove(this.guid);
         this.guid = guid;
-        instancedObjects.remove(getGuid());
-        instancedObjects.put(getGuid(), this);
+        instancedObjects.put(this.guid, this);
+        return this;
     }
 
     public static GameObject getByGUID(String guid){
@@ -556,7 +588,7 @@ public class GameObject implements IJsonSerializable {
     @Override
     public JsonObject serializeToJson() {
         JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
-        JsonObject jsonObject = JsonHelper.objectToJson(this, new String[]{"children", "parent", "instancedObjects"});
+        JsonObject jsonObject = JsonHelper.objectToJson(this, new String[]{"children", "parent", "instancedObjects", "renderCameraSquaredDistance"});
         jsonObject.forEach(jsonObjectBuilder::add);
         if(parent != null) jsonObjectBuilder.add("parentGuid", Json.createValue(parent.guid));
         return jsonObjectBuilder.build();
@@ -573,7 +605,9 @@ public class GameObject implements IJsonSerializable {
                  IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-        if(JsonHelper.hasJsonKey(jsonInfo, "parentGuid")) setParent(GameObject.getByGUID(jsonInfo.getString("parentGuid")));
+
+        if(JsonHelper.hasJsonKey(jsonInfo, "parentGuid")) setParentByGUID(jsonInfo.getString("parentGuid"));
+        addWaitingChildren();
         return this;
     }
 }

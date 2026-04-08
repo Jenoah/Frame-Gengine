@@ -27,7 +27,7 @@ public class GameInstance implements ILogic{
         window.setClearColor(0, 0, 0, 0);
         window.setWindowIcon("textures/FrameGengine_icon.png");
 
-        TextureLoader.setDefaultTextureId(TextureLoader.loadTexture("textures/texture_not_found.png"));
+        TextureLoader.setDefaultTextureId(TextureLoader.loadTexture("textures/texture_not_found.png", true));
 
         Scene level = SceneManager.loadScene(EngineSettings.currentProjectDirectory + File.separator + EngineSettings.currentLevelPath);
 

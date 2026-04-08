@@ -19,9 +19,8 @@ uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 shadowSpaceMatrix;
-uniform float shadowDistance;
-uniform float shadowTransitionDistance;
 uniform bool useInstancing;
+uniform float tilingScale;
 
 void main(){
     mat4 finalModelMatrix = useInstancing ? instanceModelMatrix : modelMatrix;
@@ -40,12 +39,7 @@ void main(){
     gl_Position = projectionMatrix * cameraObjectPosition;
 
     fragPosition = worldPosition.xyz;
-    UV = textureCoords;
+    UV = textureCoords * tilingScale;
 
-    float cameraDistance = length(cameraObjectPosition.xyz);
     //fogFactor = clamp(exp(-pow((cameraDistance*fogDensity), fogGradient)), 0.0, 1.0);
-
-    cameraDistance -= (shadowDistance - shadowTransitionDistance);
-    cameraDistance /= shadowTransitionDistance;
-    shadowCoords.w = clamp(1-cameraDistance, 0, 1);
 }

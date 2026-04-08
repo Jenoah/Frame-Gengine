@@ -1,5 +1,6 @@
 package nl.framegengine.core.physics;
 
+import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.engine.WindowManager;
 import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.entity.GameObject;
@@ -105,8 +106,7 @@ public class Raycast {
     public static Float intersectRay(Ray ray, AABB aabb) {
         if (aabb == null) return null;
 
-        AABB worldAABB = new AABB(aabb);
-        worldAABB.offset(aabb.getWorldOffset());
+        AABB worldAABB = aabb.toWorld();
 
         float tMin = Float.NEGATIVE_INFINITY;
         float tMax = Float.POSITIVE_INFINITY;
@@ -156,6 +156,22 @@ public class Raycast {
 
         for (GameObject gameObject : SceneManager.currentScene.getSortedGameObjects()) {
             if((excludedObjects != null && excludedObjects.contains(gameObject)) || !gameObject.isShowInEditor() || !gameObject.isEnabled()) continue;
+            Float t = intersectRay(ray, gameObject.getAabb());
+            if (t != null && t < closestDistance) {
+                closestDistance = t;
+                closestObject = gameObject;
+            }
+        }
+
+        return new RayHit(Calculus.addVectors(ray.origin, Calculus.multiplyVector(ray.direction, closestDistance)), closestObject);
+    }
+
+    public static RayHit getClosestIntersectionFromList(Ray ray, List<GameObject> includedObjects){
+        GameObject closestObject = null;
+        float closestDistance = Float.POSITIVE_INFINITY;
+
+        for (GameObject gameObject : includedObjects) {
+            if(!gameObject.isEnabled()) continue;
             Float t = intersectRay(ray, gameObject.getAabb());
             if (t != null && t < closestDistance) {
                 closestDistance = t;

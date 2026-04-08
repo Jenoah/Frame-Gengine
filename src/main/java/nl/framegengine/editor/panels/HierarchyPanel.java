@@ -14,7 +14,8 @@ import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.lighting.DirectionalLight;
 import nl.framegengine.core.lighting.PointLight;
 import nl.framegengine.core.lighting.SpotLight;
-import nl.framegengine.core.modelLoaders.OBJLoader.OBJLoader;
+import nl.framegengine.core.modelLoaders.StaticMeshLoader;
+import nl.framegengine.core.visual.Mesh;
 import nl.framegengine.core.visual.MeshMaterialSet;
 import nl.framegengine.editor.EditorPanel;
 import nl.framegengine.editor.ImGuiHelper;
@@ -47,6 +48,7 @@ public class HierarchyPanel extends EditorPanel {
     }
 
     public void setCurrentlySelectedGameObject(GameObject currentlySelectedGameObject) {
+        //Todo: Fix (spot)lights not always emitting light on all objects until initial selection of an object
         this.currentlySelectedGameObject = currentlySelectedGameObject;
         infoPanel.setCurrentlySelectedObject(currentlySelectedGameObject);
         if (gizmo != null && currentlySelectedGameObject != null
@@ -75,8 +77,9 @@ public class HierarchyPanel extends EditorPanel {
         ImGui.pushStyleColor(ImGuiCol.Button, standardButtonBackgroundColor);
         ImGui.pushStyleColor(ImGuiCol.ButtonHovered, hoverButtonBackgroundColor);
         ImGui.pushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0f, 0.5f);
+
         for (GameObject go : hierarchyObjects) {
-            if(!go.isShowInEditor()) break;
+            if(!go.isShowInEditor()) continue;
             String goLabel = go.getName() + "##" + go.getGuid();
             if(go.getParent() == null) {
                 if(currentlySelectedGameObject == go){
@@ -151,6 +154,7 @@ public class HierarchyPanel extends EditorPanel {
         if (ImGui.beginPopupContextItem(contextObjectMenuStrID)) {
             ImGui.separatorText("Object settings");
             if (ImGui.menuItem("Remove")) {
+                //TODO: Add confirmation box
                 if(SceneManager.currentScene != null){
                     currentlySelectedGameObject.remove();
                     currentlySelectedGameObject = null;
@@ -173,28 +177,34 @@ public class HierarchyPanel extends EditorPanel {
             if (ImGui.beginMenu("Shape")) {
                 if (ImGui.menuItem("Cube")) {
                     if(SceneManager.currentScene != null){
-                        GameObject cubeObject = new GameObject("Cube");
-                        Set<MeshMaterialSet> meshMaterialSets = OBJLoader.loadOBJModel("/models/cube.obj");
-                        cubeObject.addComponent(new RenderComponent(meshMaterialSets));
-                        SceneManager.currentScene.addEntity(cubeObject);
+                        Set<MeshMaterialSet> meshMaterialSets = StaticMeshLoader.load(Mesh.BUILTIN_PREFIX + "/models/cube.obj");
+                        if(meshMaterialSets != null) {
+                            GameObject cubeObject = new GameObject("Cube");
+                            cubeObject.addComponent(new RenderComponent(meshMaterialSets));
+                            SceneManager.currentScene.addEntity(cubeObject);
+                        }
                     }
                     ImGui.closeCurrentPopup();
                 }
                 if (ImGui.menuItem("Quad")) {
                     if(SceneManager.currentScene != null){
-                        GameObject cubeObject = new GameObject("Quad");
-                        Set<MeshMaterialSet> meshMaterialSets = OBJLoader.loadOBJModel("/models/quad.obj");
-                        cubeObject.addComponent(new RenderComponent(meshMaterialSets));
-                        SceneManager.currentScene.addEntity(cubeObject);
+                        Set<MeshMaterialSet> meshMaterialSets = StaticMeshLoader.load(Mesh.BUILTIN_PREFIX + "/models/quad.obj");
+                        if(meshMaterialSets != null) {
+                            GameObject cubeObject = new GameObject("Quad");
+                            cubeObject.addComponent(new RenderComponent(meshMaterialSets));
+                            SceneManager.currentScene.addEntity(cubeObject);
+                        }
                     }
                     ImGui.closeCurrentPopup();
                 }
                 if (ImGui.menuItem("Sphere")) {
                     if(SceneManager.currentScene != null){
-                        GameObject sphereObject = new GameObject("Sphere");
-                        Set<MeshMaterialSet> meshMaterialSets = OBJLoader.loadOBJModel("/models/sphere.obj");
-                        sphereObject.addComponent(new RenderComponent(meshMaterialSets));
-                        SceneManager.currentScene.addEntity(sphereObject);
+                        Set<MeshMaterialSet> meshMaterialSets = StaticMeshLoader.load(Mesh.BUILTIN_PREFIX + "/models/sphere.obj");
+                        if(meshMaterialSets != null) {
+                            GameObject sphereObject = new GameObject("Sphere");
+                            sphereObject.addComponent(new RenderComponent(meshMaterialSets));
+                            SceneManager.currentScene.addEntity(sphereObject);
+                        }
                     }
                     ImGui.closeCurrentPopup();
                 }

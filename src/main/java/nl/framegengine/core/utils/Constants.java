@@ -57,7 +57,11 @@ public class Constants {
     //Shadows
     public static final float SHADOW_DISTANCE = 40;
     public static final float SHADOW_OFFSET = 10;
-    public static final float SHADOW_BIAS = 0.0015f;
+    public static final float SHADOW_FRUSTUM_PADDING = 15; // XY expansion so large/offset casters aren't clipped
+    public static final float SHADOW_BIAS = 0.0001f;     // minimum (flat-surface) bias
+    public static final float SHADOW_BIAS_MAX = 0.001f;  // maximum bias for steep light angles (slope-scale)
+    public static final float SHADOW_POLYGON_OFFSET_FACTOR = 2.0f;  // slope-scaled polygon offset during shadow depth pass
+    public static final float SHADOW_POLYGON_OFFSET_UNITS = 8.0f;   // constant polygon offset during shadow depth pass
     public static final int SHADOW_MAP_SIZE = 2048;
     public static final int SHADOW_TRANSITION_DISTANCE = 10;
     public static final int SHADOW_PCF_COUNT = 2;

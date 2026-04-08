@@ -20,6 +20,7 @@ public class Texture implements IJsonSerializable {
     private boolean flipped = false;
     private boolean repeat = true;
     private boolean isNormalMap = false;
+    private boolean isDataTexture = false;
     private String texturePath = "";
 
     public int getId() {
@@ -31,6 +32,7 @@ public class Texture implements IJsonSerializable {
     public Texture(int id) {
         this.id = id;
         this.guid = TextureLoader.getGuidById(this.id);
+        this.texturePath = ManifestHelper.getPathByGuid(ManifestHelper.manifestFileType.TEXTURE, this.guid);
     }
 
     public Texture(String texturePath){
@@ -64,8 +66,19 @@ public class Texture implements IJsonSerializable {
         this.guid = TextureLoader.getGuidById(this.id);
     }
 
+    public Texture(String texturePath, boolean pointFilter, boolean flipped, boolean repeat, boolean isNormalMap, boolean isDataTexture){
+        this.id = TextureLoader.loadTexture(texturePath, pointFilter, flipped, repeat, isNormalMap, isDataTexture);
+        this.pointFilter = pointFilter;
+        this.flipped = flipped;
+        this.repeat = repeat;
+        this.isNormalMap = isNormalMap;
+        this.isDataTexture = isDataTexture;
+        this.texturePath = texturePath;
+        this.guid = TextureLoader.getGuidById(this.id);
+    }
+
     public String getTexturePath(){
-        return texturePath.isBlank() ? texturePath : ManifestHelper.getPathByGuid(ManifestHelper.manifestFileType.TEXTURE, guid);
+        return !texturePath.isBlank() ? texturePath : ManifestHelper.getPathByGuid(ManifestHelper.manifestFileType.TEXTURE, guid);
     }
 
     @Override
@@ -98,7 +111,8 @@ public class Texture implements IJsonSerializable {
                     pointFilter,
                     flipped,
                     repeat,
-                    isNormalMap);
+                    isNormalMap,
+                    isDataTexture);
         }
         this.guid = TextureLoader.getGuidById(this.id);
         return this;
@@ -106,5 +120,11 @@ public class Texture implements IJsonSerializable {
 
     public final String getGuid(){
         return guid;
+    }
+
+    @Override
+    public IJsonSerializable setGuid(String guid) {
+        this.guid = guid;
+        return this;
     }
 }

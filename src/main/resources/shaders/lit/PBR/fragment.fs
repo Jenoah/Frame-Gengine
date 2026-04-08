@@ -17,6 +17,7 @@ struct Material {
     int hasTexture;
     float reflectance;
     float roughness;
+    float metallic;
 };
 
 struct DirectionalLight {
@@ -60,11 +61,13 @@ uniform int hasNormalMap = 0;
 uniform int hasRoughnessMap = 0;
 uniform int hasMetallicMap = 0;
 uniform int hasAOMap;
-uniform float metallic = .1;
 uniform float specularPower = 0;
 uniform float shadowBias;
+uniform float shadowBiasMax;
 uniform int shadowPCFCount = 2;
 uniform int shadowMapSize;
+uniform float shadowDistance;
+uniform float shadowTransitionDistance;
 
 uniform float fogDensity;
 uniform float fogGradient;
@@ -136,9 +139,9 @@ vec3 getNormal()
     }
 }
 
-float getRoughness() { return (hasRoughnessMap == 1) ? texture(roughnessMap, UV).r * material.roughness : material.roughness; }
-float getMetallic()  { return (hasMetallicMap == 1)  ? texture(metallicMap, UV).r  : metallic; }
-float getAO()        { return (hasAOMap == 1)        ? texture(aoMap, UV).r        : 1.0; }
+float getRoughness() { return (hasRoughnessMap == 1) ? texture(roughnessMap, UV).a * material.roughness : material.roughness; }
+float getMetallic()  { return (hasMetallicMap == 1)  ? texture(metallicMap, UV).r * material.metallic  : material.metallic; }
+float getAO()        { return (hasAOMap == 1)        ? texture(aoMap, UV).g        : 1.0; }
 
 // UNIFIED PBR LIGHT FUNCTION
 vec3 calculatePBRLight(
@@ -190,15 +193,17 @@ vec3 skybox // Skybox color for the reflected vector
     return lightResult + reflection;
 }
 
-float calculateShadowFactor(){
-    float shadowTotalTexels = (shadowPCFCount * 2.0 + 1.0);
+float calculateShadowFactor(float NdotL){
+    float slopeBias = mix(shadowBiasMax, shadowBias, NdotL);
+    float shadowKernelSize = (shadowPCFCount * 2.0 + 1.0);
+    float shadowTotalTexels = shadowKernelSize * shadowKernelSize;
     float shadowMapTexelSize = 1.0 / shadowMapSize;
     float shadowFactorTotal = 0.0;
 
     for(int x = -shadowPCFCount; x <= shadowPCFCount; x++){
         for(int y = -shadowPCFCount; y <= shadowPCFCount; y++){
             float objectNearestLight = texture(shadowMap, shadowCoords.xy + vec2(x, y) * shadowMapTexelSize).r;
-            if(shadowCoords.z > objectNearestLight + shadowBias){
+            if(shadowCoords.z > objectNearestLight + slopeBias){
                 shadowFactorTotal += 1.0;
             }
         }
@@ -206,7 +211,9 @@ float calculateShadowFactor(){
 
     shadowFactorTotal /= shadowTotalTexels;
 
-    return clamp(1.0 - (shadowFactorTotal * shadowCoords.w), 0.0, 1.0);
+    float fragCameraDistance = length(viewPosition - fragPosition);
+    float shadowFade = clamp(1.0 - (fragCameraDistance - (shadowDistance - shadowTransitionDistance)) / shadowTransitionDistance, 0.0, 1.0);
+    return clamp(1.0 - (shadowFactorTotal * shadowFade), 0.0, 1.0);
 }
 
 // MAIN
@@ -225,7 +232,11 @@ void main()
     vec3 ambient = ambientColor * albedo * irradiance * ao;
 
     //Shadow calculation
-    float shadowFactor = calculateShadowFactor();
+    vec3 shadowN = N;
+    float shadowNdotL = (directionalLight.intensity > 0.0)
+        ? max(dot(shadowN, normalize(-directionalLight.direction)), 0.0)
+        : 1.0;
+    float shadowFactor = calculateShadowFactor(shadowNdotL);
 
     //Skybox
     vec3 reflectionDirection = reflect(-V, N);

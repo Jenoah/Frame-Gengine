@@ -63,6 +63,16 @@ public class Scene implements IJsonSerializable {
         init();
     }
 
+    public Scene(WindowManager windowManager) {
+        this.gameObjects = new ArrayList<>();
+        this.sortedGameObjects = new ArrayList<>();
+        this.rootGameObjects = new ArrayList<>();
+        this.guiObjects = new ArrayList<>();
+        this.windowManager = windowManager;
+        this.textObjects = new HashMap<>();
+        init();
+    }
+
     public void init() { }
 
     public void postStart() {
@@ -81,7 +91,7 @@ public class Scene implements IJsonSerializable {
             gameObject.update();
         }
 
-
+        updateRootGameObjectTransforms();
     }
 
     public void updateRootGameObjectTransforms(){
@@ -335,14 +345,14 @@ public class Scene implements IJsonSerializable {
     }
 
     public List<GameObject> getRootGameObjects() {
-        return gameObjects;
+        return rootGameObjects;
     }
 
     public void setLevelName(String levelName) {
         this.levelName = levelName;
     }
 
-    private void processGameObjects(){
+    public void processGameObjects(){
         rootGameObjects.clear();
 
         gameObjects.forEach(go -> {
@@ -391,6 +401,16 @@ public class Scene implements IJsonSerializable {
 
     public void setEditorCameraRotation(Quaternionf editorCameraRotation) {
         this.editorCameraRotation = editorCameraRotation;
+    }
+
+    @Override
+    public String getGuid() {
+        return "NoGuid";
+    }
+
+    @Override
+    public IJsonSerializable setGuid(String guid) {
+        return null;
     }
 
     @Override

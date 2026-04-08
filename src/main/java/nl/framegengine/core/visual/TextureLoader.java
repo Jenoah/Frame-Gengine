@@ -2,19 +2,22 @@ package nl.framegengine.core.visual;
 
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.utils.Constants;
+import nl.framegengine.editor.EngineSettings;
 import nl.framegengine.editor.ManifestHelper;
 import org.joml.Math;
-import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.*;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
+import org.lwjgl.BufferUtils;
 
 import static org.lwjgl.stb.STBImage.stbi_set_flip_vertically_on_load;
 
@@ -25,38 +28,59 @@ public class TextureLoader {
     private static boolean pointFilter = false;
     private static boolean repeatTexture = true;
     private static boolean isNormalMap = false;
+    private static boolean isDataTexture = false;
     private static int defaultTextureID = 0;
 
     public static int loadTexture(String fileName){
         String textureGUID = ManifestHelper.getGuidByPath(ManifestHelper.manifestFileType.TEXTURE, fileName);
         if(textures.containsKey(textureGUID)){
+            //Debug.log("Loading existing texture for " + fileName);
             return textures.get(textureGUID);
         }
 
         ByteBuffer imageBuffer;
-        int width = 0, height = 0, alphaFormat;
-        IntBuffer comp;
+        int width = 0, height = 0, alphaFormat, components = 0;
+
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
             IntBuffer w = stack.mallocInt(1);
             IntBuffer h = stack.mallocInt(1);
-            comp = stack.mallocInt(1);
+            IntBuffer comp = stack.mallocInt(1);
 
             stbi_set_flip_vertically_on_load(flipTexture);
             File file = new File(fileName);
             if (file.exists()) {
                 imageBuffer = STBImage.stbi_load(fileName, w, h, comp, 0);
             } else {
-                InputStream is = TextureLoader.class.getResourceAsStream(fileName);
-                if (is == null) {
+                if (!fileName.startsWith(EngineSettings.currentProjectDirectory)) {
+                    fileName = Paths.get(EngineSettings.currentProjectDirectory, fileName).toString();
+                }
+                file = new File(fileName);
+                if (file.exists()) {
+                    imageBuffer = STBImage.stbi_load(fileName, w, h, comp, 0);
+                } else if (EngineSettings.isCompiled) {
+                    String resourcePath = fileName.startsWith("/") ? fileName : ("/" + fileName);
+                    try (InputStream is = TextureLoader.class.getResourceAsStream(resourcePath)) {
+                        if (is == null) {
+                            Debug.logConsoleError("Image resource " + resourcePath + " not found in classpath");
+                            return defaultTextureID;
+                        }
+                        byte[] bytes = is.readAllBytes();
+                        ByteBuffer resourceBuffer = BufferUtils.createByteBuffer(bytes.length);
+                        resourceBuffer.put(bytes).flip();
+                        imageBuffer = STBImage.stbi_load_from_memory(resourceBuffer, w, h, comp, 0);
+                        if (imageBuffer == null) {
+                            Debug.logConsoleError("Failed to decode image resource " + resourcePath + ": " + STBImage.stbi_failure_reason());
+                            return defaultTextureID;
+                        }
+                    } catch (IOException e) {
+                        Debug.logConsoleError("Failed to read image resource: " + e.getMessage());
+                        return defaultTextureID;
+                    }
+                } else {
                     Debug.logConsoleError("Image file " + fileName + " could not be located in filesystem or resource folder: " + STBImage.stbi_failure_reason());
                     return defaultTextureID;
                 }
-                byte[] bytes = is.readAllBytes();
-                ByteBuffer buffer = BufferUtils.createByteBuffer(bytes.length).put(bytes);
-                buffer.flip();
-                imageBuffer = STBImage.stbi_load_from_memory(buffer, w, h, comp, 0);
-                is.close();
             }
 
             if(imageBuffer == null){
@@ -66,6 +90,7 @@ public class TextureLoader {
 
             width = w.get();
             height = h.get();
+            components = comp.get(); // Store component count before stack closes
         } catch (Exception e) {
             Debug.logConsoleError(e.getMessage());
             return defaultTextureID;
@@ -76,16 +101,30 @@ public class TextureLoader {
         GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
 
         int format;
-        if (comp.get() == 3) {
+        if (components == 1) {
+            // Single-channel grayscale texture (e.g., roughness, AO, metallic maps)
+            // Use linear color space (GL_R8) for data textures, not sRGB
+            format = GL30.GL_R8;
+            alphaFormat = GL11.GL_RED;
+            
+            // Use texture swizzling to make single-channel textures appear as grayscale
+            // This maps R -> RGB so previews show as black-and-white instead of red
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL33.GL_TEXTURE_SWIZZLE_R, GL11.GL_RED);
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL33.GL_TEXTURE_SWIZZLE_G, GL11.GL_RED);
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL33.GL_TEXTURE_SWIZZLE_B, GL11.GL_RED);
+            GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL33.GL_TEXTURE_SWIZZLE_A, GL11.GL_RED);
+        } else if (components == 3) {
             if ((width & 3) != 0) {
                 GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 2 - (width & 1));
             }
-            format = isNormalMap ? GL11.GL_RGB8 : GL21.GL_SRGB8;
+            // Use linear color space for normal maps and data textures (roughness, metallic, AO)
+            // Use sRGB for color textures (albedo)
+            format = (isNormalMap || isDataTexture) ? GL11.GL_RGB8 : GL21.GL_SRGB8;
             alphaFormat = GL11.GL_RGB;
         } else {
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_ONE_MINUS_SRC_ALPHA);
-            format = isNormalMap ? GL11.GL_RGBA8 : GL21.GL_SRGB8_ALPHA8;
+            format = (isNormalMap || isDataTexture) ? GL11.GL_RGBA8 : GL21.GL_SRGB8_ALPHA8;
             alphaFormat = GL11.GL_RGBA;
         }
 
@@ -118,8 +157,14 @@ public class TextureLoader {
         TextureLoader.pointFilter = false;
         TextureLoader.repeatTexture = true;
         TextureLoader.isNormalMap = false;
+        TextureLoader.isDataTexture = false;
 
-        if(textureGUID != null) textures.put(textureGUID, id);
+        if(textureGUID != null){
+            textures.put(textureGUID, id);
+        }else{
+            textureGUID = ManifestHelper.getGuidByPath(ManifestHelper.manifestFileType.TEXTURE, fileName);
+            if(textureGUID != null) textures.put(textureGUID, id);
+        }
 
         return id;
     }
@@ -149,6 +194,15 @@ public class TextureLoader {
         TextureLoader.repeatTexture = repeatTexture;
         TextureLoader.flipTexture = flipTexture;
         TextureLoader.isNormalMap = isNormalMap;
+        return loadTexture(fileName);
+    }
+
+    public static int loadTexture(String fileName, boolean pointFilter, boolean flipTexture, boolean repeatTexture, boolean isNormalMap, boolean isDataTexture){
+        TextureLoader.pointFilter = pointFilter;
+        TextureLoader.repeatTexture = repeatTexture;
+        TextureLoader.flipTexture = flipTexture;
+        TextureLoader.isNormalMap = isNormalMap;
+        TextureLoader.isDataTexture = isDataTexture;
         return loadTexture(fileName);
     }
 
@@ -241,4 +295,6 @@ public class TextureLoader {
     public static void setDefaultTextureId(int id){
         defaultTextureID = id;
     }
+
+    public static int getDefaultTextureId(){ return defaultTextureID; }
 }

@@ -4,6 +4,7 @@ import nl.framegengine.core.components.Component;
 import nl.framegengine.core.components.constraint.MoveOnAxisConstraint;
 import nl.framegengine.core.components.constraint.RotateOnAxisConstraint;
 import nl.framegengine.core.components.visual.RenderComponent;
+import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.input.MouseInput;
@@ -22,6 +23,7 @@ import org.joml.Vector3f;
 import org.joml.Vector2f;
 import org.joml.Vector4f;
 import org.joml.Math;
+import java.util.ArrayList;
 
 import static nl.framegengine.core.physics.Raycast.fromCameraByMouse;
 
@@ -37,6 +39,7 @@ public class GizmoMovement extends Component {
     private boolean isDragging = false;
     private TransformMode transformMode = TransformMode.Move;
     private final Vector2f mouseDownPosition = new Vector2f(0);
+    private ArrayList<GameObject> axisArray = new ArrayList<>(3);
 
     public GizmoMovement(MoveOnAxisConstraint moveOnAxisConstraint, RotateOnAxisConstraint rotateOnAxisConstraint){
         this.moveOnAxisConstraint = moveOnAxisConstraint;
@@ -65,6 +68,10 @@ public class GizmoMovement extends Component {
         xAxis.initiate();
         yAxis.initiate();
         zAxis.initiate();
+
+        axisArray.add(xAxis);
+        axisArray.add(yAxis);
+        axisArray.add(zAxis);
     }
 
     @Override
@@ -116,6 +123,13 @@ public class GizmoMovement extends Component {
     @Override
     public void disable() {
         super.disable();
+        disableMove();
+        disableRotate();
+    }
+
+    @Override
+    public void cleanUp() {
+        super.cleanUp();
         disableMove();
         disableRotate();
     }
@@ -216,7 +230,10 @@ public class GizmoMovement extends Component {
         Raycast.Ray mouseRay = fromCameraByMouse(camera);
 
         if(MouseInput.isLbClicked()) {
-            if (Raycast.intersectRay(mouseRay, xAxis)) {
+            Raycast.RayHit hitAxis = Raycast.getClosestIntersectionFromList(mouseRay, axisArray);
+            if(hitAxis.gameObject == null) return;
+
+            if (hitAxis.gameObject == xAxis) {
                 isDragging = true;
                 mouseDownPosition.set(MouseInput.getMousePositionInPixels());
                 moveOnAxisConstraint.setConstraintAxis(Constants.VECTOR3_RIGHT);
@@ -224,7 +241,7 @@ public class GizmoMovement extends Component {
                 rotateOnAxisConstraint.setOffset(root.getRotation());
                 moveOnAxisConstraint.setOffset(Calculus.subtractVectors(root.getPosition(), Raycast.closestPointOnLine(root.getPosition(), Constants.VECTOR3_RIGHT, mouseRay)));
                 updateAxisLines();
-            } else if (Raycast.intersectRay(mouseRay, yAxis)) {
+            } else if (hitAxis.gameObject == yAxis) {
                 isDragging = true;
                 mouseDownPosition.set(MouseInput.getMousePositionInPixels());
                 moveOnAxisConstraint.setConstraintAxis(Constants.VECTOR3_UP);
@@ -232,7 +249,7 @@ public class GizmoMovement extends Component {
                 rotateOnAxisConstraint.setOffset(root.getRotation());
                 moveOnAxisConstraint.setOffset(Calculus.subtractVectors(root.getPosition(), Raycast.closestPointOnLine(root.getPosition(), Constants.VECTOR3_UP, mouseRay)));
                 updateAxisLines();
-            } else if (Raycast.intersectRay(mouseRay, zAxis)) {
+            } else if (hitAxis.gameObject == zAxis) {
                 isDragging = true;
                 mouseDownPosition.set(MouseInput.getMousePositionInPixels());
                 moveOnAxisConstraint.setConstraintAxis(Constants.VECTOR3_FORWARD);
