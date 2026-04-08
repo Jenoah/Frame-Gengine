@@ -62,6 +62,8 @@ public class EditorWindow {
         GLFWErrorCallback.createPrint(System.err).set();
         if(!glfwInit()) throw new IllegalStateException("Unable to initialize GLFW");
 
+        //TODO: Convert ImGUI to NanoVG by creating an abstraction layer (and interfaces) making something easier to test and more expandable and interchangeable later if needed
+
         glslVersion = "#version 140";
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
