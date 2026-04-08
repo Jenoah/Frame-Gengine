@@ -16,13 +16,13 @@ A simple Java Game engine using LWJGL 3 and OpenGL
 
 ---
 
-## 📖 About The Project
+## About The Project
 
-Frame Gengine is a personal project built from the ground up to explore the concepts of 3D game engine development. It includes a variety of modern rendering techniques and a simple editor for scene manipulation.
+Frame Gengine is a personal project built from the ground up as a passion project to learn 3D game engine development. It includes several rendering techniques and a simple editor for scene editing.
 
 The demo below showcases a procedurally generated world using the **[Marching Cubes](https://en.wikipedia.org/wiki/Marching_cubes)** algorithm. This process runs on a separate thread to ensure smooth performance during chunk generation. Of course, all using Frame Gengine!
 
-## 🖼️ Gallery
+## Gallery
 
 The previews below might be outdated compared to the latest features.
 
@@ -40,12 +40,12 @@ The previews below might be outdated compared to the latest features.
 
 ---
 
-### ⚠️ Disclaimer
+### Disclaimer
 This project is in the early stages of development and is not battle-tested. It does not have a stable version and likely contains bugs. It is primarily a learning project and can contain breaking changes over its lifetime.
 
 ---
 
-## ✨ Features
+## Features
 
 | Rendering Features    | Engine & Editor |
 |:----------------------| :-- |
@@ -58,7 +58,7 @@ This project is in the early stages of development and is not battle-tested. It 
 | ✅ Post-processing     | |
 | ✅ Text / UI rendering | |
 
-### 🚧 Planned Features
+### Planned Features
 -   Point & Spotlight Shadows
 -   Collision Detection
 -   Screen-Space Ambient Occlusion (SSAO)
@@ -69,7 +69,7 @@ This project is in the early stages of development and is not battle-tested. It 
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### How to Run
 1.  Clone the repository.
@@ -79,16 +79,15 @@ This project is in the early stages of development and is not battle-tested. It 
 
 ---
 
-## 🤝 Contributing
+## Contributing
 Contributions are welcome! If you'd like to contribute, please feel free to make a fork and submit a pull request.
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/MyNewFeature`)
-3. Commit your Changes (`git commit -m 'Added MyNewFeature'`)
-4. Push to the Branch (`git push origin feature/MyNewFeature`)
-5. Open a Pull Request
+1. Fork the project
+2. Create feature Branch (`git checkout -b feature/MyNewFeature`)
+3. Commit and push changes (`git commit -m 'Added MyNewFeature'`)
+4. Open pull request
 
 ---
 
-## 🙏 Honorable mentions
+## Credits
 *   Font rendering approach inspired by [Thin Matrix's font rendering tutorial](https://www.youtube.com/watch?v=mnIQEQoHHCU).
