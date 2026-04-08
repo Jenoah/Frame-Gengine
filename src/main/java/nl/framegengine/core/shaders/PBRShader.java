@@ -29,6 +29,7 @@ public class PBRShader extends SimpleLitShader{
         createUniform("hasAOMap");
         createUniform("useInstancing");
         createUniform("skyboxTexture");
+        createUniform("tilingScale");
     }
 
     @Override
@@ -36,6 +37,7 @@ public class PBRShader extends SimpleLitShader{
         super.prepare(meshMaterialSet, camera);
 
         this.setUniform("useInstancing", meshMaterialSet.getMesh().isInstanced());
+        this.setUniform("tilingScale", meshMaterialSet.material.getTilingScale());
 
         if(meshMaterialSet.material.hasAlbedoTexture()) {
             GL13.glActiveTexture(GL13.GL_TEXTURE0);

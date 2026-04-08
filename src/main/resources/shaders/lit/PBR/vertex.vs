@@ -20,6 +20,7 @@ uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 shadowSpaceMatrix;
 uniform bool useInstancing;
+uniform float tilingScale;
 
 void main(){
     mat4 finalModelMatrix = useInstancing ? instanceModelMatrix : modelMatrix;
@@ -38,7 +39,7 @@ void main(){
     gl_Position = projectionMatrix * cameraObjectPosition;
 
     fragPosition = worldPosition.xyz;
-    UV = textureCoords;
+    UV = textureCoords * tilingScale;
 
     //fogFactor = clamp(exp(-pow((cameraDistance*fogDensity), fogGradient)), 0.0, 1.0);
 }
