@@ -34,7 +34,7 @@ public class TextureLoader {
     public static int loadTexture(String fileName){
         String textureGUID = ManifestHelper.getGuidByPath(ManifestHelper.manifestFileType.TEXTURE, fileName);
         if(textures.containsKey(textureGUID)){
-            Debug.log("Loading existing texture for " + fileName);
+            //Debug.log("Loading existing texture for " + fileName);
             return textures.get(textureGUID);
         }
 
