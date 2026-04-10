@@ -16,7 +16,8 @@ public class AudioListener extends Component {
     public void initiate() {
         super.initiate();
         if (Instance != this && Instance != null){
-            Debug.logError("An audio listener has already registered.");
+            Debug.logError("An audio listener has already registered on " + Instance.root);
+            root.removeComponent(this);
             return;
         }
 
@@ -44,5 +45,11 @@ public class AudioListener extends Component {
         data[4] = up.y;
         data[5] = up.z;
         alListenerfv(AL_ORIENTATION, data);
+    }
+
+    @Override
+    public void cleanUp() {
+        super.cleanUp();
+        Instance = null;
     }
 }

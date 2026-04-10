@@ -1,7 +1,10 @@
 package nl.framegengine.core.components.audio;
 
+import nl.framegengine.core.audio.AudioManager;
+import nl.framegengine.core.audio.SoundBuffer;
 import nl.framegengine.core.components.Component;
 import nl.framegengine.core.entity.Camera;
+import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.utils.Calculus;
 import nl.framegengine.core.utils.ObjectPool;
 import org.joml.Math;
@@ -12,9 +15,14 @@ import static org.lwjgl.openal.AL10.*;
 public class AudioSource extends Component {
     private int sourceId;
     private Camera mainCamera = null;
+    private AudioManager audioManager;
     private boolean is3d = true;
 
-    public AudioSource(){}
+    public AudioSource(){
+        if(SceneManager.currentScene != null && SceneManager.currentScene.getAudioManager() != null) {
+            this.audioManager = SceneManager.currentScene.getAudioManager();
+        }
+    }
 
     @Override
     public void initiate() {
@@ -23,6 +31,9 @@ public class AudioSource extends Component {
         this.sourceId = alGenSources();
         if(Camera.getMainCamera() != null) mainCamera = Camera.getMainCamera();
         set3d(true);
+        if(SceneManager.currentScene != null && SceneManager.currentScene.getAudioManager() != null){
+            audioManager.addAudioSource(getGuid(), this);
+        }
     }
 
     public final boolean isPlaying() {
@@ -41,9 +52,10 @@ public class AudioSource extends Component {
         alSourcePause(sourceId);
     }
 
-    public void setBuffer(int bufferId) {
+    public void setBuffer(SoundBuffer soundBuffer) {
         stop();
-        alSourcei(sourceId, AL_BUFFER, bufferId);
+        alSourcei(sourceId, AL_BUFFER, soundBuffer.getBufferId());
+        audioManager.addSoundBuffer(soundBuffer);
     }
 
     public void setVolume(float gain) {

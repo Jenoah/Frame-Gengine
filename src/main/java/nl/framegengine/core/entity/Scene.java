@@ -1,5 +1,7 @@
 package nl.framegengine.core.entity;
 
+import nl.framegengine.core.audio.AudioManager;
+import nl.framegengine.core.components.audio.AudioListener;
 import nl.framegengine.core.engine.WindowManager;
 import nl.framegengine.core.fonts.fontMeshCreator.FontType;
 import nl.framegengine.core.fonts.fontMeshCreator.GUIText;
@@ -38,6 +40,7 @@ public class Scene implements IJsonSerializable {
     protected float fogDensity = 0.01f;
     protected float fogGradient = 15f;
     protected Camera mainCamera = null;
+    protected AudioManager audioManager;
 
     //Editor camera
     protected Vector3f editorCameraPosition = new Vector3f(0, 1, 0);
@@ -60,6 +63,7 @@ public class Scene implements IJsonSerializable {
         this.guiObjects = new ArrayList<>();
         this.windowManager = WindowManager.getInstance();
         this.textObjects = new HashMap<>();
+        this.audioManager = new AudioManager();
         init();
     }
 
@@ -70,6 +74,7 @@ public class Scene implements IJsonSerializable {
         this.guiObjects = new ArrayList<>();
         this.windowManager = windowManager;
         this.textObjects = new HashMap<>();
+        this.audioManager = new AudioManager();
         init();
     }
 
@@ -111,6 +116,7 @@ public class Scene implements IJsonSerializable {
         sortedGameObjects.clear();
         rootGameObjects.clear();
         guiObjects.clear();
+        audioManager.cleanUp();
     }
 
     public void addEntity(GameObject entity, boolean intitiateComponents){
@@ -193,7 +199,20 @@ public class Scene implements IJsonSerializable {
         }
     }
 
-    public void setMainCamera(Camera camera){ mainCamera = camera; }
+    public void setMainCamera(Camera camera){
+        AudioListener mainCameraAudioListener = null;
+        if(mainCamera != null){
+            mainCameraAudioListener = mainCamera.getComponent(AudioListener.class);
+            AudioListener.Instance = null;
+        }
+        mainCamera = camera;
+
+        AudioListener audioListener = new AudioListener();
+        mainCamera.addComponent(audioListener);
+        audioManager.setAudioListener(audioListener);
+
+        if(mainCameraAudioListener != null) mainCamera.removeComponent(mainCameraAudioListener);
+    }
 
     public Camera getMainCamera(){ return mainCamera; }
 
@@ -401,6 +420,10 @@ public class Scene implements IJsonSerializable {
 
     public void setEditorCameraRotation(Quaternionf editorCameraRotation) {
         this.editorCameraRotation = editorCameraRotation;
+    }
+
+    public AudioManager getAudioManager() {
+        return audioManager;
     }
 
     @Override
