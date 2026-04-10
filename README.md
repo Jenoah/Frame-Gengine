@@ -90,4 +90,5 @@ Contributions are welcome! If you'd like to contribute, please feel free to make
 ---
 
 ## Credits
-*   Font rendering approach inspired by [Thin Matrix's font rendering tutorial](https://www.youtube.com/watch?v=mnIQEQoHHCU).
+* Font rendering approach inspired by [Thin Matrix's font rendering tutorial](https://www.youtube.com/watch?v=mnIQEQoHHCU).
+* Audio implementation inspired by [AHBejarano](https://ahbejarano.gitbook.io/lwjglgamedev/chapter-16)
