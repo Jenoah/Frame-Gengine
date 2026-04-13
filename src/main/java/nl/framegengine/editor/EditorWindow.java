@@ -4,6 +4,9 @@ import imgui.ImGui;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
+import nl.framegengine.editor.ui.IEditorUI;
+import nl.framegengine.editor.ui.NanoVGContext;
+import nl.framegengine.editor.ui.NanoVGEditorUI;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
@@ -19,6 +22,15 @@ public class EditorWindow {
 
     private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
     private final ImGuiImplGl3 imGuiImplGl3 = new ImGuiImplGl3();
+
+    /** NanoVG context — created after the OpenGL context is ready. */
+    private final NanoVGContext nanoVGContext = new NanoVGContext();
+
+    /**
+     * Toolkit-agnostic UI layer backed by NanoVG.
+     * Constructed after {@link NanoVGContext#init()} to ensure the handle is valid.
+     */
+    private IEditorUI nanoVGEditorUI;
 
     private String glslVersion = null;
     private long windowPtr;
@@ -47,9 +59,12 @@ public class EditorWindow {
         initImGui();
         imGuiGlfw.init(windowPtr, true);
         imGuiImplGl3.init(glslVersion);
+        nanoVGContext.init();
+        nanoVGEditorUI = new NanoVGEditorUI(nanoVGContext);
     }
 
     public void cleanUp(){
+        nanoVGContext.destroy();
         imGuiImplGl3.shutdown();
         imGuiGlfw.shutdown();
         ImGui.destroyContext();
@@ -165,5 +180,30 @@ public class EditorWindow {
 
     public static EditorLayout getEditorLayout() {
         return editorLayout;
+    }
+
+    /**
+     * Returns the raw GLFW window pointer.
+     * Widgets that need to poll cursor position or button state directly
+     * (via {@code glfwGetCursorPos} / {@code glfwGetMouseButton}) should use this.
+     */
+    public long getWindowPtr() {
+        return windowPtr;
+    }
+
+    /**
+     * Returns the {@link NanoVGContext} owned by this window.
+     * Panels and widgets that need the raw NanoVG handle should obtain it via this accessor.
+     */
+    public NanoVGContext getNanoVGContext() {
+        return nanoVGContext;
+    }
+
+    /**
+     * Returns the {@link IEditorUI} instance backed by NanoVG.
+     * Use this to drive {@code beginFrame}/{@code endFrame} for the NanoVG render pass.
+     */
+    public IEditorUI getNanoVGEditorUI() {
+        return nanoVGEditorUI;
     }
 }

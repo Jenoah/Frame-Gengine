@@ -2,8 +2,9 @@ package nl.framegengine.editor;
 
 import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
+import nl.framegengine.editor.ui.IPanel;
 
-public abstract class EditorPanel {
+public abstract class EditorPanel implements IPanel {
 
     protected int posX;
     protected int posY;
@@ -46,5 +47,17 @@ public abstract class EditorPanel {
         this.posY = posY;
         this.sizeX = sizeX;
         this.sizeY = sizeY;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Delegates to {@link #setSizeAndPosition(int, int, int, int)} by
+     * truncating the float values to int.  This preserves compatibility with
+     * the existing ImGui-backed panels during the migration period.
+     */
+    @Override
+    public void setPosition(float x, float y, float width, float height) {
+        setSizeAndPosition((int) x, (int) y, (int) width, (int) height);
     }
 }

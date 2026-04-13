@@ -2,9 +2,10 @@ package nl.framegengine.editor;
 
 import imgui.ImGui;
 import nl.framegengine.editor.panels.*;
+import nl.framegengine.editor.ui.IPanel;
 
 public class EditorLayout {
-    private final EditorPanel[] editorPanels = new EditorPanel[7];
+    private final IPanel[] editorPanels = new IPanel[7];
     private GameSettingsPopupPanel gameSettingsPopupPanel;
 
     public EditorLayout(){
@@ -27,13 +28,13 @@ public class EditorLayout {
     }
 
     public void recalculatePanels(){
-        editorPanels[0].setSizeAndPosition(0, 18, fromPercentageX(20), fromPercentageY(70) - 18);
-        editorPanels[1].setSizeAndPosition(fromPercentageX(20), 18, fromPercentageX(60), fromPercentageY(60) - 18);
-        editorPanels[2].setSizeAndPosition(fromPercentageX(20), fromPercentageY(70), fromPercentageX(85), fromPercentageY(30));
-        editorPanels[3].setSizeAndPosition(fromPercentageX(80), 18, fromPercentageX(20), fromPercentageY(70) - 18);
-        editorPanels[4].setSizeAndPosition(0, fromPercentageY(70), fromPercentageX(20), fromPercentageY(30));
-        editorPanels[5].setSizeAndPosition(fromPercentageX(20), fromPercentageY(60), fromPercentageX(60), fromPercentageY(10));
-        editorPanels[6].setSizeAndPosition(0, 0, fromPercentageX(50), fromPercentageY(80));
+        editorPanels[0].setPosition(0, 18, fromPercentageX(20), fromPercentageY(70) - 18);
+        editorPanels[1].setPosition(fromPercentageX(20), 18, fromPercentageX(60), fromPercentageY(60) - 18);
+        editorPanels[2].setPosition(fromPercentageX(20), fromPercentageY(70), fromPercentageX(85), fromPercentageY(30));
+        editorPanels[3].setPosition(fromPercentageX(80), 18, fromPercentageX(20), fromPercentageY(70) - 18);
+        editorPanels[4].setPosition(0, fromPercentageY(70), fromPercentageX(20), fromPercentageY(30));
+        editorPanels[5].setPosition(fromPercentageX(20), fromPercentageY(60), fromPercentageX(60), fromPercentageY(10));
+        editorPanels[6].setPosition(0, 0, fromPercentageX(50), fromPercentageY(80));
 
         ((GamePanel)editorPanels[1]).recalculateResolution();
     }
@@ -47,7 +48,7 @@ public class EditorLayout {
     }
 
     public void renderLayout(){
-        for (EditorPanel editorPanel : editorPanels) {
+        for (IPanel editorPanel : editorPanels) {
             editorPanel.prepareFrame();
             editorPanel.renderFrame();
             editorPanel.endFrame();
@@ -74,8 +75,8 @@ public class EditorLayout {
     }
 
     @SuppressWarnings("unchecked")
-    public <C extends EditorPanel> C getEditorPanelOfType(Class<C> editorPanelClass) {
-        for (EditorPanel c : editorPanels) {
+    public <C extends IPanel> C getEditorPanelOfType(Class<C> editorPanelClass) {
+        for (IPanel c : editorPanels) {
             if (editorPanelClass.isInstance(c)) {
                 return (C) c;
             }
