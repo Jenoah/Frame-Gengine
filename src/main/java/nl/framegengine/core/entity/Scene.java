@@ -63,8 +63,6 @@ public class Scene implements IJsonSerializable {
         this.guiObjects = new ArrayList<>();
         this.windowManager = WindowManager.getInstance();
         this.textObjects = new HashMap<>();
-        this.audioManager = new AudioManager();
-        init();
     }
 
     public Scene(WindowManager windowManager) {
@@ -74,11 +72,11 @@ public class Scene implements IJsonSerializable {
         this.guiObjects = new ArrayList<>();
         this.windowManager = windowManager;
         this.textObjects = new HashMap<>();
-        this.audioManager = new AudioManager();
-        init();
     }
 
-    public void init() { }
+    public void init() {
+        this.audioManager = new AudioManager();
+    }
 
     public void postStart() {
         RenderManager.setRenderCamera(mainCamera);
@@ -465,7 +463,6 @@ public class Scene implements IJsonSerializable {
                  IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-        processGameObjects();
         return this;
     }
 }

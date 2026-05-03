@@ -53,6 +53,8 @@ public class SceneManager {
 
     private static void initScene(Scene scene){
         Debug.logConsole("Loading in scene game objects");
+        scene.init();
+        scene.processGameObjects();
         scene.getGameObjects().forEach(go -> {
             if(go instanceof Light light) tryAddLight(light, scene);
             if(go instanceof Camera camera) camera.showProxy();

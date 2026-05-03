@@ -3,18 +3,15 @@ package nl.framegengine.core.components.audio;
 import nl.framegengine.core.audio.AudioManager;
 import nl.framegengine.core.audio.SoundBuffer;
 import nl.framegengine.core.components.Component;
-import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.entity.SceneManager;
-import nl.framegengine.core.utils.Calculus;
-import nl.framegengine.core.utils.ObjectPool;
 import org.joml.Math;
 import org.joml.Vector3f;
 
+import static nl.framegengine.core.audio.AudioManager.checkALError;
 import static org.lwjgl.openal.AL10.*;
 
 public class AudioSource extends Component {
     private int sourceId;
-    private Camera mainCamera = null;
     private AudioManager audioManager;
     private boolean is3d = true;
 
@@ -26,10 +23,10 @@ public class AudioSource extends Component {
 
     @Override
     public void initiate() {
-        super.initiate();
         if (hasInitiated) return;
+        super.initiate();
         this.sourceId = alGenSources();
-        if(Camera.getMainCamera() != null) mainCamera = Camera.getMainCamera();
+        checkALError();
         set3d(true);
         if(SceneManager.currentScene != null && SceneManager.currentScene.getAudioManager() != null){
             audioManager.addAudioSource(getGuid(), this);
@@ -41,15 +38,16 @@ public class AudioSource extends Component {
     }
 
     public void play() {
+        int currentBuffer = alGetSourcei(sourceId, AL_BUFFER);
         alSourcePlay(sourceId);
     }
 
     public void stop() {
-        alSourceStop(sourceId);
+        if(isPlaying()) alSourceStop(sourceId);
     }
 
     public void pause() {
-        alSourcePause(sourceId);
+        if(isPlaying()) alSourcePause(sourceId);
     }
 
     public void setBuffer(SoundBuffer soundBuffer) {
@@ -85,8 +83,10 @@ public class AudioSource extends Component {
 
     @Override
     public void cleanUp() {
+        if(hasCleanedUp) return;
         super.cleanUp();
-        stop();
+        alSourceStop(sourceId);
+        alSourcei(sourceId, AL_BUFFER, 0);
         alDeleteSources(sourceId);
     }
 }

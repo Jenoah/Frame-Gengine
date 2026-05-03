@@ -1,18 +1,13 @@
 package nl.framegengine.core.audio;
 
 import nl.framegengine.core.debugging.Debug;
-import nl.framegengine.core.modelLoaders.StaticMeshLoader;
-import nl.framegengine.core.utils.FileHelper;
-import nl.framegengine.core.visual.TextureLoader;
 import nl.framegengine.editor.EngineSettings;
-import org.lwjgl.stb.STBImage;
 import org.lwjgl.stb.STBVorbis;
 import org.lwjgl.stb.STBVorbisInfo;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
 import java.io.File;
-import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.IntBuffer;
@@ -20,12 +15,14 @@ import java.nio.ShortBuffer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static nl.framegengine.core.audio.AudioManager.checkALError;
 import static org.lwjgl.openal.AL10.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class SoundBuffer {
     private int bufferId;
     private ShortBuffer pcm;
+    private boolean hasCleanedUp = false;
 
     public SoundBuffer(String fileName){
         Path filePath = Path.of(EngineSettings.currentProjectDirectory, fileName);
@@ -38,15 +35,14 @@ public class SoundBuffer {
                 URL resource = SoundBuffer.class.getResource(fileName);
                 if (resource != null) fileName = Paths.get(resource.toURI()).toAbsolutePath().toString();
             } catch (URISyntaxException e) {
-                Debug.logError("Error loading model at " + fileName + ". " + e.getMessage());
-                bufferId = -1;
+                Debug.logError("Error loading sound buffer from " + fileName + ". " + e.getMessage());
+                this.bufferId = -1;
                 return;
             }
         }
 
         try {
-            bufferId = loadBuffer(fileName);
-            return;
+            this.bufferId = loadBuffer(fileName);
         } catch (Exception e) {
             Debug.logError("Error loading sound buffer: " + e.getMessage());
         }
@@ -54,10 +50,12 @@ public class SoundBuffer {
 
     private int loadBuffer(String filePath){
         int bufferId = alGenBuffers();
+        checkALError();
+
         try (STBVorbisInfo info = STBVorbisInfo.malloc()) {
             pcm = readVorbis(filePath, info);
             alBufferData(bufferId, info.channels() == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16, pcm, info.sample_rate());
-            Debug.log("Loaded sound buffer from " + filePath);
+            checkALError();
         }
 
         return bufferId;
@@ -89,6 +87,8 @@ public class SoundBuffer {
     }
 
     public void cleanUp(){
+        if(hasCleanedUp) return;
+        hasCleanedUp = true;
         alDeleteBuffers(this.bufferId);
         if(pcm != null){
             MemoryUtil.memFree(pcm);
