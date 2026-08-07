@@ -3,6 +3,7 @@ package nl.framegengine.core.components.audio;
 import nl.framegengine.core.components.Component;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.utils.Constants;
+import nl.framegengine.editor.EngineSettings;
 import org.joml.Vector3f;
 
 import static org.lwjgl.openal.AL10.*;
@@ -15,6 +16,7 @@ public class AudioListener extends Component {
     @Override
     public void initiate() {
         super.initiate();
+        if(!EngineSettings.isInGame) return;
         if (Instance != this && Instance != null){
             Debug.logError("An audio listener has already registered on " + Instance.root);
             root.removeComponent(this);
