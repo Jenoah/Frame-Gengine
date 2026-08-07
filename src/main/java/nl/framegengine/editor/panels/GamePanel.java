@@ -107,15 +107,15 @@ public class GamePanel extends EditorPanel {
         if(!EngineSettings.isInGame){
             ImGui.setCursorPos(sizeX / 2f - 48f, 24);
             if(ImGui.button("M", 32f, 32f) && gizmoMovement != null){
-                gizmoMovement.setTransformMode(GizmoMovement.TransformMode.Move);
+                gizmoMovement.SetTransformMode(GizmoMovement.TransformMode.TRANSLATE);
             }
             ImGui.setCursorPos(sizeX / 2f, 24);
             if(ImGui.button("R", 32f, 32f) && gizmoMovement != null){
-                gizmoMovement.setTransformMode(GizmoMovement.TransformMode.Rotate);
+                gizmoMovement.SetTransformMode(GizmoMovement.TransformMode.ROTATE);
             }
             ImGui.setCursorPos(sizeX / 2f + 48f, 24);
             if(ImGui.button("S", 32f, 32f) && gizmoMovement != null){
-                gizmoMovement.setTransformMode(GizmoMovement.TransformMode.Scale);
+                gizmoMovement.SetTransformMode(GizmoMovement.TransformMode.SCALE);
             }
         }
     }
@@ -195,15 +195,15 @@ public class GamePanel extends EditorPanel {
         gizmo.translateLocal(Constants.VECTOR3_UP);
 
         DirectConstraint directConstraint = new DirectConstraint();
-        MoveOnAxisConstraint moveGizmoOnAxis = new MoveOnAxisConstraint();
-        RotateOnAxisConstraint rotateGizmoOnAxis = new RotateOnAxisConstraint();
-        gizmoMovement = new GizmoMovement(moveGizmoOnAxis, rotateGizmoOnAxis);
+        //MoveOnAxisConstraint moveGizmoOnAxis = new MoveOnAxisConstraint();
+        //RotateOnAxisConstraint rotateGizmoOnAxis = new RotateOnAxisConstraint();
+        gizmoMovement = new GizmoMovement();
         directConstraint.runInEditor = true;
         if(hierarchyPanel != null) hierarchyPanel.setGizmo(gizmo);
 
         gizmo.addComponent(directConstraint);
-        gizmo.addComponent(moveGizmoOnAxis);
-        gizmo.addComponent(rotateGizmoOnAxis);
+        //gizmo.addComponent(moveGizmoOnAxis);
+        //gizmo.addComponent(rotateGizmoOnAxis);
         gizmo.addComponent(gizmoMovement);
         gizmo.setShowInEditor(false);
         gizmo.canBeSaved(false);

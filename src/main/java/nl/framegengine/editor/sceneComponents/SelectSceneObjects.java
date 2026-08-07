@@ -41,7 +41,8 @@ public class SelectSceneObjects extends Component {
         super.update();
         if(camera == null) RenderManager.getRenderCamera();
 
-        if(!(MouseInput.isLbClicked() && SceneManager.currentScene != null) || gizmoMovement.isCurrentlyMoving()) return;
+        if(true) return;
+        //if(!(MouseInput.isLbClicked() && SceneManager.currentScene != null) || gizmoMovement.isCurrentlyMoving()) return;
 
         Raycast.Ray mouseRay = Raycast.fromCameraByMouse(camera);
 
