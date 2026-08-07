@@ -383,8 +383,10 @@ public class GameObject implements IJsonSerializable {
     }
 
     public void cleanUp(){
-        components.forEach(Component::cleanUp);
-        children.forEach(child -> child.components.forEach(Component::cleanUp));
+        for(Component component : new HashSet<>(components)){ component.cleanUp(); }
+        children.forEach(child -> {
+            for(Component component : new HashSet<>(child.components)){ component.cleanUp(); }
+        });
     }
 
     public Set<Component> getComponents(){

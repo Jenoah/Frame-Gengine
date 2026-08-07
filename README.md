@@ -47,16 +47,16 @@ This project is in the early stages of development and is not battle-tested. It 
 
 ## Features
 
-| Rendering Features    | Engine & Editor |
-|:----------------------| :-- |
-| ✅ 3D Rendering        | ✅ Simple Editor |
+| Rendering Features    | Engine & Editor                  |
+|:----------------------|:---------------------------------|
+| ✅ 3D Rendering        | ✅ Simple Editor                  |
 | ✅ Instanced Rendering | ✅ Game Object / Component System |
-| ✅ PBR Lighting        | ✅ Debug Wireframe Rendering |
-| ✅ Directional Shadows | ✅ Simple UI System |
-| ✅ Custom Shaders      | |
-| ✅ Fog                 | |
-| ✅ Post-processing     | |
-| ✅ Text / UI rendering | |
+| ✅ PBR Lighting        | ✅ Debug Wireframe Rendering      |
+| ✅ Directional Shadows | ✅ Simple UI System               |
+| ✅ Custom Shaders      | ✅ Simple Audio playback          |
+| ✅ Fog                 |                                  |
+| ✅ Post-processing     |                                  |
+| ✅ Text / UI rendering |                                  |
 
 ### Planned Features
 -   Point & Spotlight Shadows
@@ -64,7 +64,7 @@ This project is in the early stages of development and is not battle-tested. It 
 -   Screen-Space Ambient Occlusion (SSAO)
 -   Screen-Space Reflections (SSR)
 -   Expanded UI (Buttons, etc.)
--   Audio System
+-   Audio Effects
 -   Occlusion Culling
 
 ---
@@ -90,4 +90,5 @@ Contributions are welcome! If you'd like to contribute, please feel free to make
 ---
 
 ## Credits
-*   Font rendering approach inspired by [Thin Matrix's font rendering tutorial](https://www.youtube.com/watch?v=mnIQEQoHHCU).
+* Font rendering approach inspired by [Thin Matrix's font rendering tutorial](https://www.youtube.com/watch?v=mnIQEQoHHCU).
+* Audio implementation inspired by [AHBejarano](https://ahbejarano.gitbook.io/lwjglgamedev/chapter-16)

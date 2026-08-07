@@ -3,6 +3,7 @@ package nl.framegengine.core.components;
 import nl.framegengine.core.utils.IJsonSerializable;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.utils.JsonHelper;
+import nl.framegengine.editor.EngineSettings;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -14,12 +15,15 @@ public class Component implements IJsonSerializable {
     protected GameObject root = null;
     protected boolean hasInitiated = false;
     public boolean runInEditor = false;
+    protected boolean hasCleanedUp = false;
+    protected boolean addedDuringPlaymode = false;
 
     private boolean isEnabled = true;
 
     public void initiate(){
         if(hasInitiated) return;
         hasInitiated = true;
+        if(EngineSettings.isInGame) addedDuringPlaymode = true;
     }
 
     public void update(){}
@@ -43,7 +47,13 @@ public class Component implements IJsonSerializable {
 
     public final boolean getEnabled(){ return root.isEnabled() && isEnabled; }
 
-    public void cleanUp(){ }
+    public final boolean isAddedDuringPlaymode(){ return addedDuringPlaymode; }
+
+    public void cleanUp(){
+        if(hasCleanedUp) return;
+        hasCleanedUp =  true;
+        if(addedDuringPlaymode) root.removeComponent(this);
+    }
 
     @Override
     public String getGuid() {
