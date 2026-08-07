@@ -2,6 +2,8 @@ package nl.framegengine.editor.panels;
 
 import imgui.ImGui;
 import imgui.ImVec2;
+import imgui.extension.imguizmo.ImGuizmo;
+import imgui.extension.imguizmo.flag.Operation;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import nl.framegengine.core.components.constraint.DirectConstraint;
@@ -21,8 +23,12 @@ import nl.framegengine.editor.*;
 import nl.framegengine.editor.sceneComponents.GizmoMovement;
 import nl.framegengine.editor.sceneComponents.ScenePreviewCameraControls;
 import nl.framegengine.editor.sceneComponents.SelectSceneObjects;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.Arrays;
+
+import static imgui.extension.imguizmo.flag.Mode.LOCAL;
+import static imgui.extension.imguizmo.flag.Mode.WORLD;
 
 public class GamePanel extends EditorPanel {
 
@@ -48,6 +54,8 @@ public class GamePanel extends EditorPanel {
 
     float offsetX = 36f;
     float offsetY = 0f;
+
+    //Gizmo
 
     private boolean updateMouseOffset = false;
 
@@ -83,6 +91,8 @@ public class GamePanel extends EditorPanel {
 
             ImGui.image(EditorWindow.getInstance().getGameFBOID(), aspectWidth, aspectHeight, 0, 1, 1, 0);
             inFocus = ImGui.isItemHovered();
+
+            gizmoMovement.drawGizmo();
         }
 
         if(updateMouseOffset){
@@ -106,15 +116,15 @@ public class GamePanel extends EditorPanel {
 
         if(!EngineSettings.isInGame){
             ImGui.setCursorPos(sizeX / 2f - 48f, 24);
-            if(ImGui.button("M", 32f, 32f) && gizmoMovement != null){
+            if((ImGui.button("M", 32f, 32f) || WindowManager.getInstance().isKeyPressed(GLFW.GLFW_KEY_Q)) && gizmoMovement != null){
                 gizmoMovement.SetTransformMode(GizmoMovement.TransformMode.TRANSLATE);
             }
             ImGui.setCursorPos(sizeX / 2f, 24);
-            if(ImGui.button("R", 32f, 32f) && gizmoMovement != null){
+            if((ImGui.button("R", 32f, 32f) || WindowManager.getInstance().isKeyPressed(GLFW.GLFW_KEY_R)) && gizmoMovement != null){
                 gizmoMovement.SetTransformMode(GizmoMovement.TransformMode.ROTATE);
             }
             ImGui.setCursorPos(sizeX / 2f + 48f, 24);
-            if(ImGui.button("S", 32f, 32f) && gizmoMovement != null){
+            if((ImGui.button("S", 32f, 32f)  || WindowManager.getInstance().isKeyPressed(GLFW.GLFW_KEY_E)) && gizmoMovement != null){
                 gizmoMovement.SetTransformMode(GizmoMovement.TransformMode.SCALE);
             }
         }
@@ -153,7 +163,6 @@ public class GamePanel extends EditorPanel {
 
         ImGuiHelper.showProgressBar("Loading Game");
         removeEditorCamera();
-        //removeGizmo();
         editingSceneJson = SceneManager.currentScene.serializeToJson().toString();
         Scene gameplayScene = new Scene();
         gameplayScene.deserializeFromJson(editingSceneJson);
@@ -167,14 +176,11 @@ public class GamePanel extends EditorPanel {
         if(EngineSettings.isInGame){
             EngineSettings.isInGame = false;
             SceneManager.setCurrentScene((Scene)new Scene().deserializeFromJson(editingSceneJson));
-            GameObject gizmo = addGizmo();
-            if(gizmo == null) return;
-            addEditorCamera(gizmo);
-            gizmo.setEnabled(false);
+            addEditorCamera();
         }
     }
 
-    private void addEditorCamera(GameObject gizmo){
+    private void addEditorCamera(){
         if(SceneManager.currentScene == null) return;
         Camera editorCamera = new Camera();
         editorCamera.setPosition(SceneManager.currentScene.getEditorCameraPosition());
@@ -182,7 +188,7 @@ public class GamePanel extends EditorPanel {
         editorCamera.setName(EngineSettings.editorCameraName);
         editorCamera.addComponent(new ScenePreviewCameraControls());
         editorCamera.addComponent(new SelectSceneObjects(editorCamera,
-                EditorWindow.getEditorLayout().getEditorPanelOfType(HierarchyPanel.class), gizmo));
+                EditorWindow.getEditorLayout().getEditorPanelOfType(HierarchyPanel.class)));
         editorCamera.setShowInEditor(false);
         editorCamera.canBeSaved(false);
         SceneManager.currentScene.addEntity(editorCamera);
@@ -195,15 +201,11 @@ public class GamePanel extends EditorPanel {
         gizmo.translateLocal(Constants.VECTOR3_UP);
 
         DirectConstraint directConstraint = new DirectConstraint();
-        //MoveOnAxisConstraint moveGizmoOnAxis = new MoveOnAxisConstraint();
-        //RotateOnAxisConstraint rotateGizmoOnAxis = new RotateOnAxisConstraint();
         gizmoMovement = new GizmoMovement();
         directConstraint.runInEditor = true;
         if(hierarchyPanel != null) hierarchyPanel.setGizmo(gizmo);
 
         gizmo.addComponent(directConstraint);
-        //gizmo.addComponent(moveGizmoOnAxis);
-        //gizmo.addComponent(rotateGizmoOnAxis);
         gizmo.addComponent(gizmoMovement);
         gizmo.setShowInEditor(false);
         gizmo.canBeSaved(false);
@@ -219,15 +221,9 @@ public class GamePanel extends EditorPanel {
         SceneManager.currentScene.setEditorCameraPosition(editorCamera.getPosition());
         SceneManager.currentScene.setEditorCameraRotation(editorCamera.getRotation());
         SceneManager.currentScene.removeGameObject(editorCamera);
-    }
-
-    private void removeGizmo(){
-        if(SceneManager.currentScene == null) return;
-        gizmoMovement = null;
-        GameObject gizmo = SceneManager.currentScene.getGameObjectByName(EngineSettings.editorGizmoName);
-        if(gizmo == null) return;
-        if(hierarchyPanel != null) hierarchyPanel.setGizmo(null);
-        gizmo.remove();
+        SelectSceneObjects.selectedObject = null;
+        gizmoMovement.disableGizmo();
+        //TODO: Fix gizmo location on re-entering editor view after play mode
     }
 
     public void setAspectRatio(float aspectRatio){
@@ -256,6 +252,8 @@ public class GamePanel extends EditorPanel {
         }
 
         updateMouseOffset = true;
+
+        ImGuizmo.setRect(posX, posY, sizeX, sizeY);
     }
 
     public void startEngine(){
@@ -271,7 +269,7 @@ public class GamePanel extends EditorPanel {
                 GameObject gizmo = addGizmo();
                 if(gizmo == null) return;
                 gizmo.setEnabled(false);
-                addEditorCamera(gizmo);
+                addEditorCamera();
             }
         }
 
@@ -299,4 +297,5 @@ public class GamePanel extends EditorPanel {
     public void setHierarchyPanel(HierarchyPanel hierarchyPanel){
         this.hierarchyPanel = hierarchyPanel;
     }
+
 }

@@ -12,23 +12,19 @@ import nl.framegengine.editor.panels.HierarchyPanel;
 public class SelectSceneObjects extends Component {
     private Camera camera;
     private final HierarchyPanel hierarchyPanel;
-    private final GameObject gizmoObject;
-    private GizmoMovement gizmoMovement = null;
+
+    public static GameObject selectedObject = null;
 
 
-    public SelectSceneObjects(HierarchyPanel hierarchyPanel, GameObject gizmoObject){
+    public SelectSceneObjects(HierarchyPanel hierarchyPanel){
         runInEditor = true;
         this.hierarchyPanel = hierarchyPanel;
-        this.gizmoObject = gizmoObject;
-        if(gizmoObject != null) this.gizmoMovement = gizmoObject.getComponent(GizmoMovement.class);
     }
 
-    public SelectSceneObjects(Camera camera, HierarchyPanel hierarchyPanel, GameObject gizmoObject){
+    public SelectSceneObjects(Camera camera, HierarchyPanel hierarchyPanel){
         runInEditor = true;
         this.camera = camera;
         this.hierarchyPanel = hierarchyPanel;
-        this.gizmoObject = gizmoObject;
-        if(gizmoObject != null) this.gizmoMovement = gizmoObject.getComponent(GizmoMovement.class);
     }
 
     @Override
@@ -39,20 +35,13 @@ public class SelectSceneObjects extends Component {
     @Override
     public void update() {
         super.update();
-        if(camera == null) RenderManager.getRenderCamera();
+        if (camera == null) camera = RenderManager.getRenderCamera();
 
-        if(true) return;
-        //if(!(MouseInput.isLbClicked() && SceneManager.currentScene != null) || gizmoMovement.isCurrentlyMoving()) return;
+        if (!(MouseInput.isLbClicked() && SceneManager.currentScene != null) || GizmoMovement.isDragging()) return;
 
         Raycast.Ray mouseRay = Raycast.fromCameraByMouse(camera);
 
-        GameObject clickedGameObject = Raycast.getGameObject(mouseRay).gameObject;
-        if(clickedGameObject != null){
-            hierarchyPanel.setCurrentlySelectedGameObject(clickedGameObject);
-            gizmoObject.setEnabled(true);
-            return;
-        }
-        hierarchyPanel.setCurrentlySelectedGameObject(null);
-        gizmoObject.setEnabled(false);
+        selectedObject = Raycast.getGameObject(mouseRay).gameObject;
+        hierarchyPanel.setCurrentlySelectedGameObject(selectedObject);
     }
 }

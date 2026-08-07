@@ -5,9 +5,11 @@ import imgui.extension.imguizmo.flag.Operation;
 import nl.framegengine.core.components.Component;
 import nl.framegengine.core.engine.WindowManager;
 import nl.framegengine.core.entity.Camera;
-import nl.framegengine.core.entity.GameObject;
+import nl.framegengine.core.rendering.RenderManager;
 import nl.framegengine.core.utils.ObjectPool;
+import nl.framegengine.editor.EditorLayout;
 import org.joml.*;
+import org.lwjgl.glfw.GLFW;
 
 import static imgui.extension.imguizmo.flag.Mode.LOCAL;
 import static imgui.extension.imguizmo.flag.Mode.WORLD;
@@ -17,6 +19,11 @@ public class GizmoMovement extends Component {
     private int mode = Operation.TRANSLATE;
     private boolean local = true;
     private WindowManager windowManager;
+    private Camera camera = null;
+
+    private final float[] model = new float[16];
+    private final float[] view = new float[16];
+    private final float[] projection = new float[16];
 
     @Override
     public void initiate() {
@@ -24,16 +31,27 @@ public class GizmoMovement extends Component {
         windowManager = WindowManager.getInstance();
     }
 
-    public void render(Camera camera, GameObject selected) {
+    public void drawGizmo(){
+        if(camera == null) camera = RenderManager.getRenderCamera();
+        if(SelectSceneObjects.selectedObject == null) return;
 
-        if(selected == null)
-            return;
+        ImGuizmo.beginFrame();
+        ImGuizmo.setDrawList();
 
-        float[] model = selected.getMatrix().get(new float[16]);
+        SelectSceneObjects.selectedObject.getMatrix().get(model);
+        camera.getViewMatrix().get(view);
+        windowManager.getProjectionMatrix().get(projection);
+
+        ImGuizmo.setRect(
+                EditorLayout.fromPercentageX(20),
+                18,
+                EditorLayout.fromPercentageX(60),
+                EditorLayout.fromPercentageY(60) - 18
+        );
 
         ImGuizmo.manipulate(
-                camera.getViewMatrix().get(new float[16]),
-                windowManager.getProjectionMatrix().get(new float[16]),
+                view,
+                projection,
                 mode,
                 local ? LOCAL : WORLD,
                 model
@@ -42,9 +60,19 @@ public class GizmoMovement extends Component {
         if(ImGuizmo.isUsing()){
             Matrix4f modelMatrix = ObjectPool.MATRIX4F_OBJECT_POOL.obtain();
             modelMatrix.set(model);
-            selected.setMatrix(new Matrix4f(modelMatrix));
+            SelectSceneObjects.selectedObject.setMatrix(modelMatrix);
             ObjectPool.MATRIX4F_OBJECT_POOL.free(modelMatrix);
         }
+    }
+
+    public static boolean isDragging(){
+        return ImGuizmo.isUsing();
+    }
+
+    public void disableGizmo(){
+        camera = null;
+        mode = Operation.TRANSLATE;
+        local = true;
     }
 
     public void SetTransformMode(TransformMode transformMode){
