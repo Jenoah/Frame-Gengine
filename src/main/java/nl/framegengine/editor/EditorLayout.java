@@ -5,7 +5,7 @@ import nl.framegengine.editor.panels.*;
 
 public class EditorLayout {
     private final EditorPanel[] editorPanels = new EditorPanel[7];
-    private GameSettingsPopupPanel gameSettingsPopupPanel;
+    private final GameSettingsPopupPanel gameSettingsPopupPanel;
 
     public EditorLayout(){
         gameSettingsPopupPanel = new GameSettingsPopupPanel(0,0, 0, 0);
@@ -22,7 +22,6 @@ public class EditorLayout {
 
         ((HierarchyPanel)editorPanels[0]).setInfoPanel(((InfoPanel)editorPanels[3]));
         ((ControlPanel)editorPanels[5]).setGamePanel((GamePanel)editorPanels[1]);
-        ((GamePanel)editorPanels[1]).setHierarchyPanel((HierarchyPanel)editorPanels[0]);
         gameSettingsPopupPanel.updateTextureList();
     }
 

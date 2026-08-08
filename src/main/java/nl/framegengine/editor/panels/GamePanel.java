@@ -3,12 +3,8 @@ package nl.framegengine.editor.panels;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.extension.imguizmo.ImGuizmo;
-import imgui.extension.imguizmo.flag.Operation;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
-import nl.framegengine.core.components.constraint.DirectConstraint;
-import nl.framegengine.core.components.constraint.MoveOnAxisConstraint;
-import nl.framegengine.core.components.constraint.RotateOnAxisConstraint;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.engine.EngineManager;
 import nl.framegengine.core.engine.WindowManager;
@@ -18,7 +14,6 @@ import nl.framegengine.core.entity.Scene;
 import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.input.MouseInput;
 import nl.framegengine.core.rendering.RenderManager;
-import nl.framegengine.core.utils.Constants;
 import nl.framegengine.editor.*;
 import nl.framegengine.editor.sceneComponents.GizmoMovement;
 import nl.framegengine.editor.sceneComponents.ScenePreviewCameraControls;
@@ -26,9 +21,6 @@ import nl.framegengine.editor.sceneComponents.SelectSceneObjects;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.Arrays;
-
-import static imgui.extension.imguizmo.flag.Mode.LOCAL;
-import static imgui.extension.imguizmo.flag.Mode.WORLD;
 
 public class GamePanel extends EditorPanel {
 
@@ -38,7 +30,6 @@ public class GamePanel extends EditorPanel {
     private float aspectRatio = 1.7778f;
     private boolean showStats = false;
     private String editingSceneJson = null;
-    private HierarchyPanel hierarchyPanel = null;
 
     private final int[] fpsValues = new int[10];
     private int fpsIteration = 0;
@@ -54,8 +45,6 @@ public class GamePanel extends EditorPanel {
 
     float offsetX = 36f;
     float offsetY = 0f;
-
-    //Gizmo
 
     private boolean updateMouseOffset = false;
 
@@ -97,6 +86,7 @@ public class GamePanel extends EditorPanel {
 
         if(updateMouseOffset){
             MouseInput.setMouseOffset((int) (posX + offsetX), (int) (posY + offsetY));
+            ImGuizmo.setRect((posX + offsetX), (posY + offsetY), aspectWidth, aspectHeight);
             updateMouseOffset = false;
         }
 
@@ -195,25 +185,6 @@ public class GamePanel extends EditorPanel {
         RenderManager.setRenderCamera(editorCamera);
     }
 
-    private GameObject addGizmo(){
-        if(SceneManager.currentScene == null) return null;
-        GameObject gizmo = new GameObject(EngineSettings.editorGizmoName);
-        gizmo.translateLocal(Constants.VECTOR3_UP);
-
-        DirectConstraint directConstraint = new DirectConstraint();
-        gizmoMovement = new GizmoMovement();
-        directConstraint.runInEditor = true;
-        if(hierarchyPanel != null) hierarchyPanel.setGizmo(gizmo);
-
-        gizmo.addComponent(directConstraint);
-        gizmo.addComponent(gizmoMovement);
-        gizmo.setShowInEditor(false);
-        gizmo.canBeSaved(false);
-        SceneManager.currentScene.addEntity(gizmo);
-
-        return gizmo;
-    }
-
     private void removeEditorCamera(){
         if(SceneManager.currentScene == null) return;
         GameObject editorCamera = SceneManager.currentScene.getGameObjectByName(EngineSettings.editorCameraName);
@@ -223,7 +194,6 @@ public class GamePanel extends EditorPanel {
         SceneManager.currentScene.removeGameObject(editorCamera);
         SelectSceneObjects.selectedObject = null;
         gizmoMovement.disableGizmo();
-        //TODO: Fix gizmo location on re-entering editor view after play mode
     }
 
     public void setAspectRatio(float aspectRatio){
@@ -252,8 +222,6 @@ public class GamePanel extends EditorPanel {
         }
 
         updateMouseOffset = true;
-
-        ImGuizmo.setRect(posX, posY, sizeX, sizeY);
     }
 
     public void startEngine(){
@@ -266,9 +234,10 @@ public class GamePanel extends EditorPanel {
             editorGameLauncher = new EditorGameLauncher();
             editorGameLauncher.run(sizeX, sizeY - 20);
             if(!EngineSettings.isInGame){
-                GameObject gizmo = addGizmo();
-                if(gizmo == null) return;
-                gizmo.setEnabled(false);
+                if(gizmoMovement == null){
+                    gizmoMovement = new GizmoMovement();
+                    gizmoMovement.initiate();
+                }
                 addEditorCamera();
             }
         }
@@ -292,10 +261,6 @@ public class GamePanel extends EditorPanel {
 
     public void toggleWireframe(){
         RenderManager.toggleWireframe();
-    }
-
-    public void setHierarchyPanel(HierarchyPanel hierarchyPanel){
-        this.hierarchyPanel = hierarchyPanel;
     }
 
 }

@@ -7,9 +7,7 @@ import nl.framegengine.core.engine.WindowManager;
 import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.rendering.RenderManager;
 import nl.framegengine.core.utils.ObjectPool;
-import nl.framegengine.editor.EditorLayout;
 import org.joml.*;
-import org.lwjgl.glfw.GLFW;
 
 import static imgui.extension.imguizmo.flag.Mode.LOCAL;
 import static imgui.extension.imguizmo.flag.Mode.WORLD;
@@ -32,8 +30,8 @@ public class GizmoMovement extends Component {
     }
 
     public void drawGizmo(){
+        if(SelectSceneObjects.selectedObject == null || windowManager == null) return;
         if(camera == null) camera = RenderManager.getRenderCamera();
-        if(SelectSceneObjects.selectedObject == null) return;
 
         ImGuizmo.beginFrame();
         ImGuizmo.setDrawList();
@@ -41,13 +39,6 @@ public class GizmoMovement extends Component {
         SelectSceneObjects.selectedObject.getMatrix().get(model);
         camera.getViewMatrix().get(view);
         windowManager.getProjectionMatrix().get(projection);
-
-        ImGuizmo.setRect(
-                EditorLayout.fromPercentageX(20),
-                18,
-                EditorLayout.fromPercentageX(60),
-                EditorLayout.fromPercentageY(60) - 18
-        );
 
         ImGuizmo.manipulate(
                 view,
