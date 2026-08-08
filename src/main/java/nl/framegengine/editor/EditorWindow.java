@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
+import nl.framegengine.editor.theme.Styling;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
@@ -45,8 +46,12 @@ public class EditorWindow {
     public void init(){
         initWindow();
         initImGui();
+        Styling.ApplyFonts();
         imGuiGlfw.init(windowPtr, true);
         imGuiImplGl3.init(glslVersion);
+
+        Styling.ApplyColors();
+        Styling.ApplyStyle();
     }
 
     public void cleanUp(){

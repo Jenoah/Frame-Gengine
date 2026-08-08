@@ -15,6 +15,8 @@ import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.input.MouseInput;
 import nl.framegengine.core.rendering.RenderManager;
 import nl.framegengine.editor.*;
+import nl.framegengine.editor.editorComponents.Button;
+import nl.framegengine.editor.editorComponents.Icons;
 import nl.framegengine.editor.sceneComponents.GizmoMovement;
 import nl.framegengine.editor.sceneComponents.ScenePreviewCameraControls;
 import nl.framegengine.editor.sceneComponents.SelectSceneObjects;
@@ -92,29 +94,26 @@ public class GamePanel extends EditorPanel {
 
         updateFpsAverage();
         updateFrameTimeAverage();
-        ImGui.setCursorPos(8, 24);
+        ImGui.setCursorPos(8, EditorLayout.topSpacing + 16);
         ImGui.text("FPS: " + fpsAverage);
-        ImGui.setCursorPos(8, 36);
+        ImGui.setCursorPos(8, EditorLayout.topSpacing + 32);
         ImGui.text("Frametime: " + frameTimeAverage);
 
         if(showStats){
-            ImGui.setCursorPos(8, 48);
+            ImGui.setCursorPos(8, EditorLayout.topSpacing + 48);
             ImGui.pushTextWrapPos(sizeX / 2f);
             ImGui.text("Stats: " + RenderManager.getMetrics());
             ImGui.popTextWrapPos();
         }
 
         if(!EngineSettings.isInGame){
-            ImGui.setCursorPos(sizeX / 2f - 48f, 24);
-            if((ImGui.button("M", 32f, 32f) || WindowManager.getInstance().isKeyPressed(GLFW.GLFW_KEY_Q)) && gizmoMovement != null){
+            if((Button.Regular(Icons.TRANSFORM, sizeX / 2f - 48f, EditorLayout.topSpacing + 16) || WindowManager.getInstance().isKeyPressed(GLFW.GLFW_KEY_Q)) && gizmoMovement != null){
                 gizmoMovement.SetTransformMode(GizmoMovement.TransformMode.TRANSLATE);
             }
-            ImGui.setCursorPos(sizeX / 2f, 24);
-            if((ImGui.button("R", 32f, 32f) || WindowManager.getInstance().isKeyPressed(GLFW.GLFW_KEY_R)) && gizmoMovement != null){
+            if((Button.Regular(Icons.ROTATE, sizeX / 2f, EditorLayout.topSpacing + 16) || WindowManager.getInstance().isKeyPressed(GLFW.GLFW_KEY_R)) && gizmoMovement != null){
                 gizmoMovement.SetTransformMode(GizmoMovement.TransformMode.ROTATE);
             }
-            ImGui.setCursorPos(sizeX / 2f + 48f, 24);
-            if((ImGui.button("S", 32f, 32f)  || WindowManager.getInstance().isKeyPressed(GLFW.GLFW_KEY_E)) && gizmoMovement != null){
+            if((Button.Regular(Icons.SCALE, sizeX / 2f + 48f, EditorLayout.topSpacing + 16)  || WindowManager.getInstance().isKeyPressed(GLFW.GLFW_KEY_E)) && gizmoMovement != null){
                 gizmoMovement.SetTransformMode(GizmoMovement.TransformMode.SCALE);
             }
         }
@@ -206,7 +205,7 @@ public class GamePanel extends EditorPanel {
     }
 
     public void recalculateResolution(boolean refreshGameInstance) {
-        int availableHeight = sizeY - 20;
+        int availableHeight = sizeY - EditorLayout.topSpacing;
 
         float targetWidth = availableHeight * aspectRatio;
         if (targetWidth <= sizeX) {

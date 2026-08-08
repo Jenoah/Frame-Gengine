@@ -7,6 +7,8 @@ public class EditorLayout {
     private final EditorPanel[] editorPanels = new EditorPanel[7];
     private final GameSettingsPopupPanel gameSettingsPopupPanel;
 
+    public static final int topSpacing = 30;
+
     public EditorLayout(){
         gameSettingsPopupPanel = new GameSettingsPopupPanel(0,0, 0, 0);
 
@@ -26,10 +28,10 @@ public class EditorLayout {
     }
 
     public void recalculatePanels(){
-        editorPanels[0].setSizeAndPosition(0, 18, fromPercentageX(20), fromPercentageY(70) - 18);
-        editorPanels[1].setSizeAndPosition(fromPercentageX(20), 18, fromPercentageX(60), fromPercentageY(60) - 18);
+        editorPanels[0].setSizeAndPosition(0, topSpacing, fromPercentageX(20), fromPercentageY(70) - topSpacing);
+        editorPanels[1].setSizeAndPosition(fromPercentageX(20), topSpacing, fromPercentageX(60), fromPercentageY(60) - topSpacing);
         editorPanels[2].setSizeAndPosition(fromPercentageX(20), fromPercentageY(70), fromPercentageX(85), fromPercentageY(30));
-        editorPanels[3].setSizeAndPosition(fromPercentageX(80), 18, fromPercentageX(20), fromPercentageY(70) - 18);
+        editorPanels[3].setSizeAndPosition(fromPercentageX(80), topSpacing, fromPercentageX(20), fromPercentageY(70) - topSpacing);
         editorPanels[4].setSizeAndPosition(0, fromPercentageY(70), fromPercentageX(20), fromPercentageY(30));
         editorPanels[5].setSizeAndPosition(fromPercentageX(20), fromPercentageY(60), fromPercentageX(60), fromPercentageY(10));
         editorPanels[6].setSizeAndPosition(0, 0, fromPercentageX(50), fromPercentageY(80));

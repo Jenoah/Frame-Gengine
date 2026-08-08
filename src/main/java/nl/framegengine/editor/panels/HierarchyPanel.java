@@ -18,6 +18,8 @@ import nl.framegengine.core.visual.Mesh;
 import nl.framegengine.core.visual.MeshMaterialSet;
 import nl.framegengine.editor.EditorPanel;
 import nl.framegengine.editor.ImGuiHelper;
+import nl.framegengine.editor.editorComponents.Button;
+import nl.framegengine.editor.editorComponents.Icons;
 import nl.framegengine.editor.sceneComponents.SelectSceneObjects;
 import org.joml.Vector3f;
 
@@ -25,7 +27,6 @@ import java.util.List;
 import java.util.Set;
 
 public class HierarchyPanel extends EditorPanel {
-    private final ImVec2 buttonSize;
     private final ImVec4 activeButtonTextColor = new ImVec4(1f, 1f, 1f, 1f);
     private final ImVec4 inactiveButtonTextColor = new ImVec4(.75f, .75f, .75f, 1f);
     private final ImVec4 selectedButtonTextColor = new ImVec4(1, .5f, .5f, 1f);
@@ -43,7 +44,6 @@ public class HierarchyPanel extends EditorPanel {
 
     public HierarchyPanel(int posX, int posY, int sizeX, int sizeY) {
         super(posX, posY, sizeX, sizeY);
-        buttonSize = new ImVec2(sizeX, 20);
     }
 
     public void setCurrentlySelectedGameObject(GameObject currentlySelectedGameObject) {
@@ -73,44 +73,35 @@ public class HierarchyPanel extends EditorPanel {
 
         for (GameObject go : hierarchyObjects) {
             if(!go.isShowInEditor()) continue;
-            String goLabel = go.getName() + "##" + go.getGuid();
+            boolean hasChildren = !go.getChildren().isEmpty();
+            String goLabel = (hasChildren ? Icons.CARET_DOWN + " " : "") + Icons.GetIcon(go) + " " + go.getName() + "##" + go.getGuid();
             if(go.getParent() == null) {
                 if(currentlySelectedGameObject == go){
                     ImGui.pushStyleColor(ImGuiCol.Text, selectedButtonTextColor);
-                    if(ImGui.button(goLabel, buttonSize)){
-                        setCurrentlySelectedGameObject(go);
-                    }
                 }else if(!go.isEnabled()){
                     ImGui.pushStyleColor(ImGuiCol.Text, inactiveButtonTextColor);
-                    if(ImGui.button(goLabel, buttonSize)){
-                        setCurrentlySelectedGameObject(go);
-                    }
                 }else{
                     ImGui.pushStyleColor(ImGuiCol.Text, activeButtonTextColor);
-                    if(ImGui.button(goLabel, buttonSize)){
-                        setCurrentlySelectedGameObject(go);
-                    }
+                }
+
+                if(Button.Regular(goLabel)){
+                    setCurrentlySelectedGameObject(go);
                 }
 
                 ImGui.popStyleColor();
 
                 go.getChildren().forEach(child -> {
-                    String childLabel = child.getName() + "##" + child.getGuid();
+                    String childLabel = Icons.GetIcon(child) + " " + child.getName() + "##" + child.getGuid();
                     if(currentlySelectedGameObject == child){
                         ImGui.pushStyleColor(ImGuiCol.Text, selectedButtonTextColor);
-                        if(ImGui.button("- " + childLabel, buttonSize)){
-                            setCurrentlySelectedGameObject(child);
-                        }
                     }else if(!child.isEnabled()){
                         ImGui.pushStyleColor(ImGuiCol.Text, inactiveButtonTextColor);
-                        if(ImGui.button("- " + childLabel, buttonSize)){
-                            setCurrentlySelectedGameObject(child);
-                        }
                     }else{
                         ImGui.pushStyleColor(ImGuiCol.Text, activeButtonTextColor);
-                        if(ImGui.button("- " + childLabel, buttonSize)){
-                            setCurrentlySelectedGameObject(child);
-                        }
+                    }
+
+                    if(Button.Regular("    " + childLabel)){
+                        setCurrentlySelectedGameObject(child);
                     }
                     ImGui.popStyleColor();
                 });

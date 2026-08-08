@@ -5,6 +5,8 @@ import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImInt;
 import nl.framegengine.editor.EditorPanel;
 import nl.framegengine.editor.ImGuiHelper;
+import nl.framegengine.editor.editorComponents.Button;
+import nl.framegengine.editor.editorComponents.Icons;
 
 public class ControlPanel extends EditorPanel {
 
@@ -21,25 +23,25 @@ public class ControlPanel extends EditorPanel {
 
     @Override
     public void renderFrame() {
-        int buttonWidth = 64;
-        int buttonHeight = 32; // Height for buttons
+        float buttonWidth = 64;
+        float buttonHeight = 32; // Height for buttons
         int buttonCount = 4;
         int comboWidth = ImGuiHelper.calculateTextWidth(aspectRatios) + 32;
         int spacing = 20;
 
-        int totalWidth = buttonWidth * buttonCount + comboWidth + buttonCount * spacing;
+        float totalWidth = buttonWidth * buttonCount + comboWidth + buttonCount * spacing;
 
         float startX = (sizeX - totalWidth) * 0.5f;
         float startY = (sizeY - buttonHeight) * 0.5f;
 
         ImGui.setCursorPos(startX, startY);
 
-        if (ImGui.button("Play", buttonWidth, buttonHeight)) {
+        if (Button.Regular(Icons.PLAY)) {
             if (gamePanel != null) gamePanel.startGame();
         }
         ImGui.sameLine(0, spacing);
 
-        if (ImGui.button("Stop", buttonWidth, buttonHeight)) {
+        if (Button.Regular(Icons.STOP)) {
             if (gamePanel != null) gamePanel.stopGame();
         }
         ImGui.sameLine(0, spacing);
