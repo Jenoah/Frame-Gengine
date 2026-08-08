@@ -1,291 +1,83 @@
 package nl.framegengine.editor.sceneComponents;
 
+import imgui.extension.imguizmo.ImGuizmo;
+import imgui.extension.imguizmo.flag.Operation;
 import nl.framegengine.core.components.Component;
-import nl.framegengine.core.components.constraint.MoveOnAxisConstraint;
-import nl.framegengine.core.components.constraint.RotateOnAxisConstraint;
-import nl.framegengine.core.components.visual.RenderComponent;
-import nl.framegengine.core.debugging.Debug;
+import nl.framegengine.core.engine.WindowManager;
 import nl.framegengine.core.entity.Camera;
-import nl.framegengine.core.entity.GameObject;
-import nl.framegengine.core.input.MouseInput;
-import nl.framegengine.core.modelLoaders.OBJLoader.OBJLoader;
-import nl.framegengine.core.physics.Raycast;
 import nl.framegengine.core.rendering.RenderManager;
-import nl.framegengine.core.rendering.renderers.DebugRenderer;
-import nl.framegengine.core.shaders.ShaderManager;
-import nl.framegengine.core.utils.Calculus;
-import nl.framegengine.core.utils.Constants;
 import nl.framegengine.core.utils.ObjectPool;
-import nl.framegengine.core.visual.Material;
-import nl.framegengine.core.visual.Mesh;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
-import org.joml.Vector2f;
-import org.joml.Vector4f;
-import org.joml.Math;
-import java.util.ArrayList;
+import org.joml.*;
 
-import static nl.framegengine.core.physics.Raycast.fromCameraByMouse;
+import static imgui.extension.imguizmo.flag.Mode.LOCAL;
+import static imgui.extension.imguizmo.flag.Mode.WORLD;
 
 public class GizmoMovement extends Component {
 
-    private final MoveOnAxisConstraint moveOnAxisConstraint;
-    private final RotateOnAxisConstraint rotateOnAxisConstraint;
+    private int mode = Operation.TRANSLATE;
+    private boolean local = true;
+    private WindowManager windowManager;
+    private Camera camera = null;
 
-    private final GameObject xAxis, yAxis, zAxis;
-    private DebugRenderer.DebugMesh xAxisLine = null, yAxisLine = null, zAxisLine = null;
-    private DebugRenderer.DebugMesh xAxisCircle = null, yAxisCircle = null, zAxisCircle = null;
-    private Camera camera;
-    private boolean isDragging = false;
-    private TransformMode transformMode = TransformMode.Move;
-    private final Vector2f mouseDownPosition = new Vector2f(0);
-    private ArrayList<GameObject> axisArray = new ArrayList<>(3);
-
-    public GizmoMovement(MoveOnAxisConstraint moveOnAxisConstraint, RotateOnAxisConstraint rotateOnAxisConstraint){
-        this.moveOnAxisConstraint = moveOnAxisConstraint;
-        this.rotateOnAxisConstraint = rotateOnAxisConstraint;
-        runInEditor = true;
-        Mesh coneMesh = OBJLoader.loadOBJModel("/models/cone.obj").stream().findFirst().get().getMesh();
-
-        this.xAxis = new GameObject("x-axis");
-        this.yAxis = new GameObject("y-axis");
-        this.zAxis = new GameObject("z-axis");
-
-        this.xAxis.setScale(0.2f);
-        this.yAxis.setScale(0.2f);
-        this.zAxis.setScale(0.2f);
-
-        Material axisMaterial = new Material(ShaderManager.unlitShader).setDiffuseColor(new Vector4f(Constants.COLOR_RED, 1f)).
-                setOnTop(true).castShadow(false).setDoubleSided(true);
-        RenderComponent xAxisConeRenderComponent = new RenderComponent(new Mesh(coneMesh), axisMaterial);
-        RenderComponent yAxisConeRenderComponent = new RenderComponent(new Mesh(coneMesh), new Material(axisMaterial).setDiffuseColor(new Vector4f(Constants.COLOR_GREEN, 1)));
-        RenderComponent zAxisConeRenderComponent = new RenderComponent(new Mesh(coneMesh), new Material(axisMaterial).setDiffuseColor(new Vector4f(Constants.COLOR_BLUE, 1)));
-
-        xAxis.addComponent(xAxisConeRenderComponent);
-        yAxis.addComponent(yAxisConeRenderComponent);
-        zAxis.addComponent(zAxisConeRenderComponent);
-
-        xAxis.initiate();
-        yAxis.initiate();
-        zAxis.initiate();
-
-        axisArray.add(xAxis);
-        axisArray.add(yAxis);
-        axisArray.add(zAxis);
-    }
+    private final float[] model = new float[16];
+    private final float[] view = new float[16];
+    private final float[] projection = new float[16];
 
     @Override
     public void initiate() {
         super.initiate();
-        this.xAxis.setParent(root);
-        this.yAxis.setParent(root);
-        this.zAxis.setParent(root);
-
-        setTransformMode(TransformMode.Move);
+        windowManager = WindowManager.getInstance();
     }
 
-    @Override
-    public void enable() {
-        super.enable();
-        setTransformMode(this.transformMode);
-    }
-
-    private void updateAxisLines(){
-        Vector3f rootPosition = ObjectPool.VECTOR3F_POOL.obtain().set(root.getPosition());
-        Quaternionf destRotation = ObjectPool.QUATERNIONF_OBJECT_POOL.obtain().set(root.getRotation());
-
-        if(this.transformMode == TransformMode.Move) {
-            if(xAxisLine != null) xAxisLine.worldPosition.set(rootPosition);
-            if(yAxisLine != null) yAxisLine.worldPosition.set(rootPosition);
-            if(zAxisLine != null) zAxisLine.worldPosition.set(rootPosition);
-        }else if(this.transformMode == TransformMode.Rotate){
-            if(xAxisCircle != null){
-                xAxisCircle.worldPosition.set(rootPosition);
-                destRotation.set(root.getRotation());
-                xAxisCircle.worldRotation.set(destRotation.rotateY(Constants.DEGREES_90_IN_RADIANS));
-            }
-            if(yAxisCircle != null){
-                yAxisCircle.worldPosition.set(rootPosition);
-                destRotation.set(root.getRotation());
-                yAxisCircle.worldRotation.set(destRotation.rotateX(Constants.DEGREES_90_IN_RADIANS));
-            }
-            if(zAxisCircle != null){
-                zAxisCircle.worldPosition.set(rootPosition);
-                destRotation.set(root.getRotation());
-                zAxisCircle.worldRotation.set(destRotation.rotateZ(Constants.DEGREES_90_IN_RADIANS));
-            }
-        }
-
-        ObjectPool.VECTOR3F_POOL.free(rootPosition);
-        ObjectPool.QUATERNIONF_OBJECT_POOL.free(destRotation);
-    }
-
-    @Override
-    public void disable() {
-        super.disable();
-        disableMove();
-        disableRotate();
-    }
-
-    @Override
-    public void cleanUp() {
-        super.cleanUp();
-        disableMove();
-        disableRotate();
-    }
-
-    private void disableMove(){
-        if(xAxisLine != null){
-            xAxisLine.persistent = false;
-            xAxisLine = null;
-        }
-        if(yAxisLine != null){
-            yAxisLine.persistent = false;
-            yAxisLine = null;
-        }
-        if(zAxisLine != null){
-            zAxisLine.persistent = false;
-            zAxisLine = null;
-        }
-    }
-
-    private void enableMove(){
-        if (xAxisLine == null) xAxisLine = RenderManager.debugLine(Constants.VECTOR3_ZERO, Constants.VECTOR3_RIGHT, Constants.COLOR_RED, true);
-        if (yAxisLine == null) yAxisLine = RenderManager.debugLine(Constants.VECTOR3_ZERO, Constants.VECTOR3_UP, Constants.COLOR_GREEN, true);
-        if (zAxisLine == null) zAxisLine = RenderManager.debugLine(Constants.VECTOR3_ZERO, Constants.VECTOR3_FORWARD, Constants.COLOR_BLUE, true);
-
-        Vector3f rootPosition = root.getPosition();
-
-        this.xAxis.setWorldPosition(Calculus.addVectors(rootPosition, Calculus.multiplyVector(Constants.VECTOR3_RIGHT, 0.8f)));
-        this.yAxis.setWorldPosition(Calculus.addVectors(rootPosition, Calculus.multiplyVector(Constants.VECTOR3_UP, 0.8f)));
-        this.zAxis.setWorldPosition(Calculus.addVectors(rootPosition, Calculus.multiplyVector(Constants.VECTOR3_FORWARD, 0.8f)));
-
-        this.xAxis.setWorldRotation(new Quaternionf().fromAxisAngleRad(Constants.VECTOR3_BACK, Math.toRadians(270f)));
-        this.yAxis.setWorldRotation(Constants.QUATERNION_LEFT);
-        this.zAxis.setWorldRotation(Constants.QUATERNION_DOWN);
-    }
-
-    private void disableRotate(){
-        if(xAxisCircle != null){
-            xAxisCircle.persistent = false;
-            xAxisCircle = null;
-        }
-        if(yAxisCircle != null){
-            yAxisCircle.persistent = false;
-            yAxisCircle = null;
-        }
-        if(zAxisCircle != null){
-            zAxisCircle.persistent = false;
-            zAxisCircle = null;
-        }
-    }
-
-    private void enableRotate(){
-        if(xAxisCircle == null){
-            xAxisCircle = RenderManager.debugCircle(Constants.VECTOR3_ZERO, 1f, Constants.COLOR_RED, true);
-            xAxisCircle.worldRotation = Constants.QUATERNION_FORWARD;
-        }
-        if(yAxisCircle == null){
-            yAxisCircle = RenderManager.debugCircle(Constants.VECTOR3_ZERO, 1f, Constants.COLOR_GREEN, true);
-            yAxisCircle.worldRotation = Constants.QUATERNION_UP;
-        }
-        if(zAxisCircle == null){
-            zAxisCircle = RenderManager.debugCircle(Constants.VECTOR3_ZERO, 1f, Constants.COLOR_BLUE, true);
-            zAxisCircle.worldRotation = Constants.QUATERNION_RIGHT;
-        }
-
-        this.xAxis.setPosition(Constants.VECTOR3_FORWARD);
-        this.xAxis.setRotation(Constants.QUATERNION_LEFT);
-
-        this.yAxis.setPosition(Constants.VECTOR3_RIGHT);
-        this.yAxis.setRotation(Constants.QUATERNION_DOWN);
-
-        this.zAxis.setPosition(Constants.VECTOR3_UP);
-        this.zAxis.setRotation(new Quaternionf().fromAxisAngleRad(Constants.VECTOR3_BACK, Math.toRadians(270f)));
-    }
-
-    public void setTransformMode(TransformMode transformMode){
-        this.transformMode = transformMode;
-        if(!this.getEnabled()) return;
-
-        if(this.transformMode == TransformMode.Move){
-            disableRotate();
-            enableMove();
-        }else if (this.transformMode == TransformMode.Rotate){
-            disableMove();
-            enableRotate();
-        }
-
-        updateAxisLines();
-    }
-
-    @Override
-    public void update() {
-        super.update();
+    public void drawGizmo(){
+        if(SelectSceneObjects.selectedObject == null || windowManager == null) return;
         if(camera == null) camera = RenderManager.getRenderCamera();
 
-        if(MouseInput.isLbReleased()) isDragging = false;
-        if(!MouseInput.isLbDown()) return;
+        ImGuizmo.beginFrame();
+        ImGuizmo.setDrawList();
 
-        Raycast.Ray mouseRay = fromCameraByMouse(camera);
+        SelectSceneObjects.selectedObject.getMatrix().get(model);
+        camera.getViewMatrix().get(view);
+        windowManager.getProjectionMatrix().get(projection);
 
-        if(MouseInput.isLbClicked()) {
-            Raycast.RayHit hitAxis = Raycast.getClosestIntersectionFromList(mouseRay, axisArray);
-            if(hitAxis.gameObject == null) return;
+        ImGuizmo.manipulate(
+                view,
+                projection,
+                mode,
+                local ? LOCAL : WORLD,
+                model
+        );
 
-            if (hitAxis.gameObject == xAxis) {
-                isDragging = true;
-                mouseDownPosition.set(MouseInput.getMousePositionInPixels());
-                moveOnAxisConstraint.setConstraintAxis(Constants.VECTOR3_RIGHT);
-                rotateOnAxisConstraint.setConstraintAxis(Constants.VECTOR3_RIGHT);
-                rotateOnAxisConstraint.setOffset(root.getRotation());
-                moveOnAxisConstraint.setOffset(Calculus.subtractVectors(root.getPosition(), Raycast.closestPointOnLine(root.getPosition(), Constants.VECTOR3_RIGHT, mouseRay)));
-                updateAxisLines();
-            } else if (hitAxis.gameObject == yAxis) {
-                isDragging = true;
-                mouseDownPosition.set(MouseInput.getMousePositionInPixels());
-                moveOnAxisConstraint.setConstraintAxis(Constants.VECTOR3_UP);
-                rotateOnAxisConstraint.setConstraintAxis(Constants.VECTOR3_UP);
-                rotateOnAxisConstraint.setOffset(root.getRotation());
-                moveOnAxisConstraint.setOffset(Calculus.subtractVectors(root.getPosition(), Raycast.closestPointOnLine(root.getPosition(), Constants.VECTOR3_UP, mouseRay)));
-                updateAxisLines();
-            } else if (hitAxis.gameObject == zAxis) {
-                isDragging = true;
-                mouseDownPosition.set(MouseInput.getMousePositionInPixels());
-                moveOnAxisConstraint.setConstraintAxis(Constants.VECTOR3_FORWARD);
-                rotateOnAxisConstraint.setConstraintAxis(Constants.VECTOR3_FORWARD);
-                rotateOnAxisConstraint.setOffset(root.getRotation());
-                moveOnAxisConstraint.setOffset(Calculus.subtractVectors(root.getPosition(), Raycast.closestPointOnLine(root.getPosition(), Constants.VECTOR3_FORWARD, mouseRay)));
-                updateAxisLines();
-            }
-        }
-
-        if(isDragging){
-            if(transformMode == TransformMode.Move){
-                move(mouseRay);
-            }else if(transformMode == TransformMode.Rotate){
-                rotate();
-            }
+        if(ImGuizmo.isUsing()){
+            Matrix4f modelMatrix = ObjectPool.MATRIX4F_OBJECT_POOL.obtain();
+            modelMatrix.set(model);
+            SelectSceneObjects.selectedObject.setMatrix(modelMatrix);
+            ObjectPool.MATRIX4F_OBJECT_POOL.free(modelMatrix);
         }
     }
 
-    private void move(Raycast.Ray mouseRay){
-        moveOnAxisConstraint.move(mouseRay.origin, mouseRay.direction);
-        updateAxisLines();
+    public static boolean isDragging(){
+        return ImGuizmo.isUsing();
     }
 
-    private void rotate(){
-        rotateOnAxisConstraint.rotate2D(MouseInput.getMousePositionInPixels(), mouseDownPosition, camera);
-        updateAxisLines();
+    public void disableGizmo(){
+        camera = null;
+        mode = Operation.TRANSLATE;
+        local = true;
     }
 
-    public final boolean isCurrentlyMoving(){
-        return isDragging;
+    public void SetTransformMode(TransformMode transformMode){
+        switch (transformMode){
+            case TRANSLATE -> mode = Operation.TRANSLATE;
+            case ROTATE -> mode = Operation.ROTATE;
+            case SCALE -> mode = Operation.SCALE;
+        }
     }
 
-    public enum TransformMode{
-        Move,
-        Rotate,
-        Scale
+    public enum TransformMode {
+        TRANSLATE,
+        ROTATE,
+        SCALE
+
     }
 }

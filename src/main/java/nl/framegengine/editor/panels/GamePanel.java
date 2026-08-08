@@ -2,11 +2,9 @@ package nl.framegengine.editor.panels;
 
 import imgui.ImGui;
 import imgui.ImVec2;
+import imgui.extension.imguizmo.ImGuizmo;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
-import nl.framegengine.core.components.constraint.DirectConstraint;
-import nl.framegengine.core.components.constraint.MoveOnAxisConstraint;
-import nl.framegengine.core.components.constraint.RotateOnAxisConstraint;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.engine.EngineManager;
 import nl.framegengine.core.engine.WindowManager;
@@ -16,11 +14,11 @@ import nl.framegengine.core.entity.Scene;
 import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.input.MouseInput;
 import nl.framegengine.core.rendering.RenderManager;
-import nl.framegengine.core.utils.Constants;
 import nl.framegengine.editor.*;
 import nl.framegengine.editor.sceneComponents.GizmoMovement;
 import nl.framegengine.editor.sceneComponents.ScenePreviewCameraControls;
 import nl.framegengine.editor.sceneComponents.SelectSceneObjects;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.Arrays;
 
@@ -32,7 +30,6 @@ public class GamePanel extends EditorPanel {
     private float aspectRatio = 1.7778f;
     private boolean showStats = false;
     private String editingSceneJson = null;
-    private HierarchyPanel hierarchyPanel = null;
 
     private final int[] fpsValues = new int[10];
     private int fpsIteration = 0;
@@ -83,10 +80,13 @@ public class GamePanel extends EditorPanel {
 
             ImGui.image(EditorWindow.getInstance().getGameFBOID(), aspectWidth, aspectHeight, 0, 1, 1, 0);
             inFocus = ImGui.isItemHovered();
+
+            gizmoMovement.drawGizmo();
         }
 
         if(updateMouseOffset){
             MouseInput.setMouseOffset((int) (posX + offsetX), (int) (posY + offsetY));
+            ImGuizmo.setRect((posX + offsetX), (posY + offsetY), aspectWidth, aspectHeight);
             updateMouseOffset = false;
         }
 
@@ -106,16 +106,16 @@ public class GamePanel extends EditorPanel {
 
         if(!EngineSettings.isInGame){
             ImGui.setCursorPos(sizeX / 2f - 48f, 24);
-            if(ImGui.button("M", 32f, 32f) && gizmoMovement != null){
-                gizmoMovement.setTransformMode(GizmoMovement.TransformMode.Move);
+            if((ImGui.button("M", 32f, 32f) || WindowManager.getInstance().isKeyPressed(GLFW.GLFW_KEY_Q)) && gizmoMovement != null){
+                gizmoMovement.SetTransformMode(GizmoMovement.TransformMode.TRANSLATE);
             }
             ImGui.setCursorPos(sizeX / 2f, 24);
-            if(ImGui.button("R", 32f, 32f) && gizmoMovement != null){
-                gizmoMovement.setTransformMode(GizmoMovement.TransformMode.Rotate);
+            if((ImGui.button("R", 32f, 32f) || WindowManager.getInstance().isKeyPressed(GLFW.GLFW_KEY_R)) && gizmoMovement != null){
+                gizmoMovement.SetTransformMode(GizmoMovement.TransformMode.ROTATE);
             }
             ImGui.setCursorPos(sizeX / 2f + 48f, 24);
-            if(ImGui.button("S", 32f, 32f) && gizmoMovement != null){
-                gizmoMovement.setTransformMode(GizmoMovement.TransformMode.Scale);
+            if((ImGui.button("S", 32f, 32f)  || WindowManager.getInstance().isKeyPressed(GLFW.GLFW_KEY_E)) && gizmoMovement != null){
+                gizmoMovement.SetTransformMode(GizmoMovement.TransformMode.SCALE);
             }
         }
     }
@@ -153,7 +153,6 @@ public class GamePanel extends EditorPanel {
 
         ImGuiHelper.showProgressBar("Loading Game");
         removeEditorCamera();
-        //removeGizmo();
         editingSceneJson = SceneManager.currentScene.serializeToJson().toString();
         Scene gameplayScene = new Scene();
         gameplayScene.deserializeFromJson(editingSceneJson);
@@ -167,14 +166,11 @@ public class GamePanel extends EditorPanel {
         if(EngineSettings.isInGame){
             EngineSettings.isInGame = false;
             SceneManager.setCurrentScene((Scene)new Scene().deserializeFromJson(editingSceneJson));
-            GameObject gizmo = addGizmo();
-            if(gizmo == null) return;
-            addEditorCamera(gizmo);
-            gizmo.setEnabled(false);
+            addEditorCamera();
         }
     }
 
-    private void addEditorCamera(GameObject gizmo){
+    private void addEditorCamera(){
         if(SceneManager.currentScene == null) return;
         Camera editorCamera = new Camera();
         editorCamera.setPosition(SceneManager.currentScene.getEditorCameraPosition());
@@ -182,34 +178,11 @@ public class GamePanel extends EditorPanel {
         editorCamera.setName(EngineSettings.editorCameraName);
         editorCamera.addComponent(new ScenePreviewCameraControls());
         editorCamera.addComponent(new SelectSceneObjects(editorCamera,
-                EditorWindow.getEditorLayout().getEditorPanelOfType(HierarchyPanel.class), gizmo));
+                EditorWindow.getEditorLayout().getEditorPanelOfType(HierarchyPanel.class)));
         editorCamera.setShowInEditor(false);
         editorCamera.canBeSaved(false);
         SceneManager.currentScene.addEntity(editorCamera);
         RenderManager.setRenderCamera(editorCamera);
-    }
-
-    private GameObject addGizmo(){
-        if(SceneManager.currentScene == null) return null;
-        GameObject gizmo = new GameObject(EngineSettings.editorGizmoName);
-        gizmo.translateLocal(Constants.VECTOR3_UP);
-
-        DirectConstraint directConstraint = new DirectConstraint();
-        MoveOnAxisConstraint moveGizmoOnAxis = new MoveOnAxisConstraint();
-        RotateOnAxisConstraint rotateGizmoOnAxis = new RotateOnAxisConstraint();
-        gizmoMovement = new GizmoMovement(moveGizmoOnAxis, rotateGizmoOnAxis);
-        directConstraint.runInEditor = true;
-        if(hierarchyPanel != null) hierarchyPanel.setGizmo(gizmo);
-
-        gizmo.addComponent(directConstraint);
-        gizmo.addComponent(moveGizmoOnAxis);
-        gizmo.addComponent(rotateGizmoOnAxis);
-        gizmo.addComponent(gizmoMovement);
-        gizmo.setShowInEditor(false);
-        gizmo.canBeSaved(false);
-        SceneManager.currentScene.addEntity(gizmo);
-
-        return gizmo;
     }
 
     private void removeEditorCamera(){
@@ -219,15 +192,8 @@ public class GamePanel extends EditorPanel {
         SceneManager.currentScene.setEditorCameraPosition(editorCamera.getPosition());
         SceneManager.currentScene.setEditorCameraRotation(editorCamera.getRotation());
         SceneManager.currentScene.removeGameObject(editorCamera);
-    }
-
-    private void removeGizmo(){
-        if(SceneManager.currentScene == null) return;
-        gizmoMovement = null;
-        GameObject gizmo = SceneManager.currentScene.getGameObjectByName(EngineSettings.editorGizmoName);
-        if(gizmo == null) return;
-        if(hierarchyPanel != null) hierarchyPanel.setGizmo(null);
-        gizmo.remove();
+        SelectSceneObjects.selectedObject = null;
+        gizmoMovement.disableGizmo();
     }
 
     public void setAspectRatio(float aspectRatio){
@@ -268,10 +234,11 @@ public class GamePanel extends EditorPanel {
             editorGameLauncher = new EditorGameLauncher();
             editorGameLauncher.run(sizeX, sizeY - 20);
             if(!EngineSettings.isInGame){
-                GameObject gizmo = addGizmo();
-                if(gizmo == null) return;
-                gizmo.setEnabled(false);
-                addEditorCamera(gizmo);
+                if(gizmoMovement == null){
+                    gizmoMovement = new GizmoMovement();
+                    gizmoMovement.initiate();
+                }
+                addEditorCamera();
             }
         }
 
@@ -296,7 +263,4 @@ public class GamePanel extends EditorPanel {
         RenderManager.toggleWireframe();
     }
 
-    public void setHierarchyPanel(HierarchyPanel hierarchyPanel){
-        this.hierarchyPanel = hierarchyPanel;
-    }
 }
