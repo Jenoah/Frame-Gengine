@@ -1,7 +1,6 @@
 package nl.framegengine.editor.panels;
 
 import imgui.ImGui;
-import imgui.ImVec2;
 import imgui.ImVec4;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
@@ -44,6 +43,7 @@ public class HierarchyPanel extends EditorPanel {
 
     public HierarchyPanel(int posX, int posY, int sizeX, int sizeY) {
         super(posX, posY, sizeX, sizeY);
+        windowName = Icons.FILTER + " Hierarchy";
     }
 
     public void setCurrentlySelectedGameObject(GameObject currentlySelectedGameObject) {

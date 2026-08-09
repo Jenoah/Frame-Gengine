@@ -17,6 +17,7 @@ import nl.framegengine.core.visual.TextureLoader;
 import nl.framegengine.editor.EditorPanel;
 import nl.framegengine.editor.ImGuiHelper;
 import nl.framegengine.editor.ManifestHelper;
+import nl.framegengine.editor.editorComponents.Icons;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -37,6 +38,7 @@ public class InfoPanel extends EditorPanel {
         super(posX, posY, sizeX, sizeY);
         ManifestHelper.addEventCallback(this::updateTextureList);
         updateTextureList();
+        windowName = Icons.BOX + " Info";
     }
 
     @Override

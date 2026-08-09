@@ -55,6 +55,7 @@ public class GamePanel extends EditorPanel {
         recalculateResolution();
 
         addWindowFlag(ImGuiWindowFlags.NoNavFocus);
+        windowName = Icons.DISPLAY + " Game";
     }
 
     @Override

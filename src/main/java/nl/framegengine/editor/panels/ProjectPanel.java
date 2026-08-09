@@ -12,6 +12,7 @@ import nl.framegengine.core.visual.MaterialManager;
 import nl.framegengine.editor.*;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.utils.FileHelper;
+import nl.framegengine.editor.editorComponents.Icons;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +20,7 @@ import java.io.IOException;
 public class ProjectPanel extends EditorPanel {
     public ProjectPanel(int posX, int posY, int sizeX, int sizeY) {
         super(posX, posY, sizeX, sizeY);
+        windowName = Icons.FOLDER + " Project";
     }
 
     @Override

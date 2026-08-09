@@ -17,6 +17,10 @@ public class Icons {
     public static final String BOX          = "\uF1C8";
     public static final String CARET_DOWN   = "\uF229";
     public static final String DIAMOND      = "\uF2F1";
+    public static final String FILTER       = "\uF3CA";
+    public static final String DISPLAY      = "\uF302";
+    public static final String FOLDER       = "\uF3D7";
+    public static final String TERMINAL     = "\uF5C3";
 
     public static String GetIcon(GameObject object){
         if(object instanceof Camera) return CAMERA;

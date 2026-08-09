@@ -4,6 +4,7 @@ import imgui.ImGui;
 import nl.framegengine.core.debugging.ConsoleColors;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.editor.EditorPanel;
+import nl.framegengine.editor.editorComponents.Icons;
 
 public class ConsolePanel extends EditorPanel {
 
@@ -11,6 +12,7 @@ public class ConsolePanel extends EditorPanel {
 
     public ConsolePanel(int posX, int posY, int sizeX, int sizeY) {
         super(posX, posY, sizeX, sizeY);
+        windowName = Icons.TERMINAL + " Console";
     }
 
     @Override
