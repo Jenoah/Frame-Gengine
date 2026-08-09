@@ -31,7 +31,7 @@ public class Collapse {
         }
 
         ImGui.sameLine(0, 2);
-        collapseWithButton.isPressed = Button.Regular(text);
+        collapseWithButton.isPressed = Button.Regular(text, true);
 
         return collapseWithButton;
     }

@@ -21,6 +21,7 @@ import nl.framegengine.editor.editorComponents.Button;
 import nl.framegengine.editor.editorComponents.Collapse;
 import nl.framegengine.editor.editorComponents.Icons;
 import nl.framegengine.editor.sceneComponents.SelectSceneObjects;
+import org.joml.Math;
 import org.joml.Vector3f;
 import java.util.List;
 import java.util.Set;
@@ -72,7 +73,7 @@ public class HierarchyPanel extends EditorPanel {
         ImGui.pushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0f, 0.5f);
 
         for (GameObject go : hierarchyObjects) {
-            DrawObject(go);
+            DrawObject(go, 0);
         }
         ImGui.popStyleColor(2);
         ImGui.popStyleVar();
@@ -82,10 +83,10 @@ public class HierarchyPanel extends EditorPanel {
         }
     }
 
-    private void DrawObject(GameObject go){
+    private void DrawObject(GameObject go, int level){
         if(!go.isShowInEditor()) return;
         boolean hasChildren = !go.getChildren().isEmpty();
-        String goLabel = Icons.GetIcon(go) + " " + go.getName() + "##" + go.getGuid();
+        String goLabel = (level > 0 ? Icons.ARROW_BAR_RIGHT + " " : "") + Icons.GetIcon(go) + " " + go.getName() + "##" + go.getGuid();
 
         if(currentlySelectedGameObject == go){
             ImGui.pushStyleColor(ImGuiCol.Text, selectedButtonTextColor);
@@ -96,18 +97,19 @@ public class HierarchyPanel extends EditorPanel {
         }
 
         if(!hasChildren){
-            if (Button.Regular(goLabel)) {
+            if (Button.Regular(goLabel, true)) {
                 setCurrentlySelectedGameObject(go);
             }
         }else {
             Collapse.CollapseWithButton collapse = Collapse.WithButton(goLabel, go.getGuid());
             if(collapse.isPressed) setCurrentlySelectedGameObject(go);
             if(collapse.isExpanded){
-                ImGui.indent(32);
+                int indentationAmount = 32 * Math.max(0, level - 1) + 1;
+                ImGui.indent(indentationAmount);
                 go.getChildren().forEach(child -> {
-                    DrawObject(child);
+                    DrawObject(child, level + 1);
                 });
-                ImGui.unindent();
+                ImGui.unindent(indentationAmount);
             }
         }
 
