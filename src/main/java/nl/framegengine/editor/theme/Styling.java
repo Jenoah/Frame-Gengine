@@ -19,7 +19,7 @@ public class Styling {
         style.setGrabRounding(5.0f);
         style.setTabRounding(5.0f);
 
-        style.setWindowBorderSize(0.0f);
+        style.setWindowBorderSize(1.0f);
         style.setChildBorderSize(0.0f);
         style.setPopupBorderSize(1.0f);
         style.setFrameBorderSize(0.0f);
@@ -42,6 +42,11 @@ public class Styling {
         style.setColor(ImGuiCol.ChildBg,        0.125f, 0.141f, 0.169f, 1.0f);
         style.setColor(ImGuiCol.PopupBg,        0.110f, 0.122f, 0.145f, 1.0f);
 
+        style.setColor(ImGuiCol.MenuBarBg,      0.094f, 0.102f, 0.122f, 1.0f);
+
+        style.setColor(ImGuiCol.TitleBg,        0.082f, 0.094f, 0.114f, 1.0f);
+        style.setColor(ImGuiCol.TitleBgActive,  0.082f, 0.094f, 0.114f, 1.0f);
+
         style.setColor(ImGuiCol.FrameBg,        0.082f, 0.094f, 0.114f, 1.0f);
         style.setColor(ImGuiCol.FrameBgHovered, 0.161f, 0.184f, 0.220f, 1.0f);
         style.setColor(ImGuiCol.FrameBgActive,  0.188f, 0.220f, 0.278f, 1.0f);
@@ -54,7 +59,7 @@ public class Styling {
         style.setColor(ImGuiCol.HeaderHovered,  0.161f, 0.184f, 0.220f, 1.0f);
         style.setColor(ImGuiCol.HeaderActive,   0.231f, 0.510f, 0.965f, 1.0f);
 
-        style.setColor(ImGuiCol.Border,         0.169f, 0.188f, 0.220f, 1.0f);
+        style.setColor(ImGuiCol.Border,         0.105f, 0.121f, 0.149f, 1.0f);
 
         style.setColor(ImGuiCol.Text,           0.898f, 0.906f, 0.922f, 1.0f);
         style.setColor(ImGuiCol.TextDisabled,   0.420f, 0.447f, 0.490f, 1.0f);

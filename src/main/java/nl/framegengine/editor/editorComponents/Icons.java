@@ -16,6 +16,7 @@ public class Icons {
     public static final String CAMERA       = "\uF21A";
     public static final String BOX          = "\uF1C8";
     public static final String CARET_DOWN   = "\uF229";
+    public static final String CARET_RIGHT  = "\uF231";
     public static final String DIAMOND      = "\uF2F1";
     public static final String FILTER       = "\uF3CA";
     public static final String DISPLAY      = "\uF302";

@@ -123,7 +123,7 @@ public class EditorWindow {
     }
 
     private void prepareFrame(){
-        glClearColor(.2f, 0.2f, 0.2f, 1);
+        glClearColor(0.105f, 0.121f, 0.149f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         imGuiGlfw.newFrame();

@@ -18,10 +18,10 @@ import nl.framegengine.core.visual.MeshMaterialSet;
 import nl.framegengine.editor.EditorPanel;
 import nl.framegengine.editor.ImGuiHelper;
 import nl.framegengine.editor.editorComponents.Button;
+import nl.framegengine.editor.editorComponents.Collapse;
 import nl.framegengine.editor.editorComponents.Icons;
 import nl.framegengine.editor.sceneComponents.SelectSceneObjects;
 import org.joml.Vector3f;
-
 import java.util.List;
 import java.util.Set;
 
@@ -72,40 +72,7 @@ public class HierarchyPanel extends EditorPanel {
         ImGui.pushStyleVar(ImGuiStyleVar.ButtonTextAlign, 0f, 0.5f);
 
         for (GameObject go : hierarchyObjects) {
-            if(!go.isShowInEditor()) continue;
-            boolean hasChildren = !go.getChildren().isEmpty();
-            String goLabel = (hasChildren ? Icons.CARET_DOWN + " " : "") + Icons.GetIcon(go) + " " + go.getName() + "##" + go.getGuid();
-            if(go.getParent() == null) {
-                if(currentlySelectedGameObject == go){
-                    ImGui.pushStyleColor(ImGuiCol.Text, selectedButtonTextColor);
-                }else if(!go.isEnabled()){
-                    ImGui.pushStyleColor(ImGuiCol.Text, inactiveButtonTextColor);
-                }else{
-                    ImGui.pushStyleColor(ImGuiCol.Text, activeButtonTextColor);
-                }
-
-                if(Button.Regular(goLabel)){
-                    setCurrentlySelectedGameObject(go);
-                }
-
-                ImGui.popStyleColor();
-
-                go.getChildren().forEach(child -> {
-                    String childLabel = Icons.GetIcon(child) + " " + child.getName() + "##" + child.getGuid();
-                    if(currentlySelectedGameObject == child){
-                        ImGui.pushStyleColor(ImGuiCol.Text, selectedButtonTextColor);
-                    }else if(!child.isEnabled()){
-                        ImGui.pushStyleColor(ImGuiCol.Text, inactiveButtonTextColor);
-                    }else{
-                        ImGui.pushStyleColor(ImGuiCol.Text, activeButtonTextColor);
-                    }
-
-                    if(Button.Regular("    " + childLabel)){
-                        setCurrentlySelectedGameObject(child);
-                    }
-                    ImGui.popStyleColor();
-                });
-            }
+            DrawObject(go);
         }
         ImGui.popStyleColor(2);
         ImGui.popStyleVar();
@@ -113,6 +80,40 @@ public class HierarchyPanel extends EditorPanel {
         if(ImGui.isWindowHovered() && !ImGui.isAnyItemHovered() && ImGui.isMouseReleased(ImGuiMouseButton.Left)){
             setCurrentlySelectedGameObject(null);
         }
+    }
+
+    private void DrawObject(GameObject go){
+        if(!go.isShowInEditor()) return;
+        boolean hasChildren = !go.getChildren().isEmpty();
+        String goLabel = Icons.GetIcon(go) + " " + go.getName() + "##" + go.getGuid();
+
+        if(currentlySelectedGameObject == go){
+            ImGui.pushStyleColor(ImGuiCol.Text, selectedButtonTextColor);
+        }else if(!go.isEnabled()){
+            ImGui.pushStyleColor(ImGuiCol.Text, inactiveButtonTextColor);
+        }else{
+            ImGui.pushStyleColor(ImGuiCol.Text, activeButtonTextColor);
+        }
+
+        if(!hasChildren){
+            if (Button.Regular(goLabel)) {
+                setCurrentlySelectedGameObject(go);
+            }
+        }else {
+            Collapse.CollapseWithButton collapse = Collapse.WithButton(goLabel, go.getGuid());
+            if(collapse.isPressed) setCurrentlySelectedGameObject(go);
+            if(collapse.isExpanded){
+                ImGui.indent(32);
+                go.getChildren().forEach(child -> {
+                    DrawObject(child);
+                });
+                ImGui.unindent();
+            }
+        }
+
+        ImGui.popStyleColor();
+
+
     }
 
     public void setInfoPanel(InfoPanel infoPanel){
