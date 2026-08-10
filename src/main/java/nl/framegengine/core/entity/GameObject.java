@@ -192,6 +192,14 @@ public class GameObject implements IJsonSerializable {
         return this;
     }
 
+    public GameObject setRotation(float x, float y, float z) {
+        Vector3f radians = ObjectPool.VECTOR3F_POOL.obtain().set(x, y, z).mul(Math.toRadians(1));
+        localRotation.identity().rotateXYZ(radians.x, radians.y, radians.z).normalize();
+        ObjectPool.VECTOR3F_POOL.free(radians);
+        callUpdate();
+        return this;
+    }
+
     public GameObject addRotation(Vector3f rotation){
         if(rotation.equals(Constants.VECTOR3_ZERO)) return this;
         Vector3f radians = new Vector3f(rotation).mul(Math.toRadians(1));

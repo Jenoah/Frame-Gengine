@@ -358,4 +358,8 @@ public class JsonHelper {
         ObjectPool.JSON_OBJECT_BUILDER_POOL.free(jsonObject);
         return result;
     }
+
+    public static String getIJsonSerializableType(IJsonSerializable jsonSerializable){
+        return jsonSerializable.getClass().getSimpleName();
+    }
 }

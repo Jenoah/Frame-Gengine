@@ -4,6 +4,7 @@ import imgui.ImFontConfig;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.ImGuiStyle;
+import imgui.ImVec2;
 import imgui.flag.ImGuiCol;
 import nl.framegengine.core.utils.FileHelper;
 
@@ -73,7 +74,7 @@ public class Styling {
         ImFontConfig iconConfig = new ImFontConfig();
         iconConfig.setMergeMode(true);
         iconConfig.setPixelSnapH(true);
-        iconConfig.setGlyphExtraSpacing(0f, 9.0f);
+        iconConfig.getGlyphOffset(new ImVec2(0f, 9f));
 
         byte[] iconsFont = FileHelper.loadResourceAsBytes("/fonts/bootstrap-icons.ttf");
 

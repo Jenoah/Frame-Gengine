@@ -1,8 +1,8 @@
 package nl.framegengine.editor.editorComponents;
 
 import nl.framegengine.core.entity.Camera;
-import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.lighting.Light;
+import nl.framegengine.core.utils.IJsonSerializable;
 
 public class Icons {
     public static final String PLAY             = "\uF4F4";
@@ -24,7 +24,7 @@ public class Icons {
     public static final String FOLDER           = "\uF3D7";
     public static final String TERMINAL         = "\uF5C3";
 
-    public static String GetIcon(GameObject object){
+    public static String GetIcon(IJsonSerializable object){
         if(object instanceof Camera) return CAMERA;
         if(object instanceof Light) return LIGHT;
         return BOX;

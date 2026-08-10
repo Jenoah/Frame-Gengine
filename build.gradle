@@ -5,10 +5,10 @@ plugins {
 group = 'nl.framegengine'
 version = '1.0-SNAPSHOT'
 
-project.ext.lwjglVersion = "3.4.1"
-project.ext.jomlVersion = "1.10.7"
+project.ext.lwjglVersion = "3.4.2"
+project.ext.jomlVersion = "1.10.9"
 project.ext.lwjglNatives = "natives-macos-arm64"
-project.ext.imguiVersion = "1.89.0"
+project.ext.imguiVersion = "1.90.0"
 
 repositories {
     mavenCentral()
