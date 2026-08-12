@@ -1,6 +1,5 @@
 package nl.framegengine.editor.panels;
 
-import imgui.ImDrawList;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.*;
@@ -10,6 +9,7 @@ import imgui.type.ImInt;
 import imgui.type.ImString;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.GameObject;
+import nl.framegengine.core.lighting.Light;
 import nl.framegengine.core.utils.ClassHelper;
 import nl.framegengine.core.utils.IJsonSerializable;
 import nl.framegengine.core.utils.JsonHelper;
@@ -21,6 +21,7 @@ import nl.framegengine.editor.EditorPanel;
 import nl.framegengine.editor.ImGuiHelper;
 import nl.framegengine.editor.ManifestHelper;
 import nl.framegengine.editor.editorComponents.Icons;
+import nl.framegengine.editor.editorComponents.Panel;
 import nl.framegengine.editor.editorComponents.Text;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -35,9 +36,6 @@ public class InfoPanel extends EditorPanel {
     private final List<Field> hierarchyObjects = new ArrayList<>();
 
     private String[] textureNames = new String[0];
-    private final float paddingX = ImGui.getStyle().getWindowPaddingX();
-    private final float paddingY = ImGui.getStyle().getWindowPaddingY();
-    private final Set<String> fieldsToIgnore = Set.of("scale", "localPosition", "isEnabled", "localRotation");
 
     public InfoPanel(int posX, int posY, int sizeX, int sizeY) {
         super(posX, posY, sizeX, sizeY);
@@ -55,16 +53,29 @@ public class InfoPanel extends EditorPanel {
             DrawTransform((GameObject) currentlySelectedObject);
         }
 
+        if(currentlySelectedObject instanceof Light){
+            DrawLightSettingsPanel((Light)currentlySelectedObject);
+        }
+
+        boolean isPanel = currentlySelectedObject instanceof IJsonSerializable;
+        if(isPanel) Panel.startPanel();
+
         for (Field field : hierarchyObjects) {
             try {
                 field.setAccessible(true);
                 Object value = field.get(currentlySelectedObject);
                 if(value == null) continue;
+                if(value instanceof IJsonSerializable){
+                    Panel.endPanel();
+                    Panel.startPanel();
+                }
                 drawOption(field, currentlySelectedObject);
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
         }
+
+        if(isPanel) Panel.endPanel();
     }
 
 
@@ -89,7 +100,8 @@ public class InfoPanel extends EditorPanel {
         Object objectValue = field.get(drawingObject);
         String fieldName = field.getName() + "##" + field.hashCode();
 
-        if(fieldsToIgnore.contains(field.getName())) return;
+        if(drawingObject instanceof GameObject && GameObject.fieldsToIgnore.contains(field.getName())) return;
+        if(drawingObject instanceof Light && Light.fieldsToIgnore.contains(field.getName())) return;
 
         // Special handling for Texture fields (even if null)
         if (field.getType() == Texture.class) {
@@ -316,7 +328,7 @@ public class InfoPanel extends EditorPanel {
     private void DrawTitlePanel(IJsonSerializable jsonObject) {
         boolean isGameObject = jsonObject instanceof GameObject;
 
-        startPanel();
+        Panel.startPanel();
 
         String objectType = JsonHelper.getIJsonSerializableType(jsonObject);
         ImGui.text(Icons.GetIcon(jsonObject) + " " + objectType);
@@ -330,7 +342,7 @@ public class InfoPanel extends EditorPanel {
 
             float rightEdge = ImGui.getCursorPosX() + ImGui.getContentRegionAvailX();
 
-            ImGui.setCursorPosX(rightEdge - checkboxWidth - paddingX);
+            ImGui.setCursorPosX(rightEdge - checkboxWidth - Panel.getPaddingX());
 
             if (ImGui.checkbox("Enabled##" + gameObject.getGuid(), gameObject.isEnabled())) {
                 gameObject.setEnabled(!gameObject.isEnabled());
@@ -338,16 +350,16 @@ public class InfoPanel extends EditorPanel {
             }
         }
 
-        endPanel();
+        Panel.endPanel();
     }
 
     private void DrawTransform(GameObject gameObject){
-        startPanel();
+        Panel.startPanel();
         ImGui.text(Icons.TRANSFORM + " Transform");
 
-        float tableWidth = panelWidth - paddingX * 2.0f;
+        float tableWidth = Panel.getPanelWidth() - Panel.getPaddingX() * 2.0f;
 
-        ImGui.setCursorPosX(ImGui.getCursorPosX() + paddingX);
+        ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingY());
         if (ImGui.beginTable("transform##" + gameObject.getGuid(), 2, ImGuiTableFlags.SizingStretchProp, new ImVec2(tableWidth, 0))) {
 
             ImGui.tableSetupColumn("Label", ImGuiTableColumnFlags.WidthStretch, 1.0f);
@@ -435,61 +447,91 @@ public class InfoPanel extends EditorPanel {
             ObjectPool.VECTOR3F_POOL.free(transformVector);
         }
 
-        endPanel();
+        Panel.endPanel();
         ImGui.spacing();
     }
 
-    private float panelWidth;
+    private void DrawLightSettingsPanel(Light light) {
+        Panel.startPanel();
 
-    private void startPanel(){
-        ImDrawList drawList = ImGui.getWindowDrawList();
+        ImGui.text(Icons.LIGHT + " " + light.getClass().getSimpleName());
 
-        panelWidth = ImGui.getContentRegionAvailX();
+        float tableWidth = Panel.getPanelWidth() - Panel.getPaddingX() * 2.0f;
+        ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingY());
 
-        drawList.channelsSplit(2);
-        drawList.channelsSetCurrent(1);
+        if (ImGui.beginTable("lightSettings##" + light.getGuid(), 2, ImGuiTableFlags.SizingStretchProp, new ImVec2(tableWidth, 0))) {
 
-        ImGui.beginGroup();
+            ImGui.tableSetupColumn("Label", ImGuiTableColumnFlags.WidthStretch, 1.0f);
+            ImGui.tableSetupColumn("Value", ImGuiTableColumnFlags.WidthStretch, 3.0f);
 
-        ImGui.setCursorPosX(ImGui.getCursorPosX() + paddingX);
-        ImGui.setCursorPosY(ImGui.getCursorPosY() + paddingY);
+            ImGui.tableNextRow();
+            ImGui.tableNextColumn();
+            ImGui.tableNextColumn();
+
+            if (ImGui.beginTable(
+                    "lightSettingsRGBHeader##" + light.getGuid(), 3, ImGuiTableFlags.SizingStretchSame)) {
+
+                ImGui.tableNextColumn();
+                Text.ColoredAndCentered("R", 0.85f, 0.25f, 0.25f);
+
+                ImGui.tableNextColumn();
+                Text.ColoredAndCentered("G", 0.30f, 0.85f, 0.30f);
+
+                ImGui.tableNextColumn();
+                Text.ColoredAndCentered("B", 0.35f, 0.50f, 1.00f);
+
+                ImGui.endTable();
+            }
+
+            ImGui.tableNextRow();
+            ImGui.tableNextColumn();
+
+            ImGui.text("Color");
+
+            ImGui.tableNextColumn();
+            Vector3f colorVector = ObjectPool.VECTOR3F_POOL.obtain()
+                    .set(light.getColor());
+
+            float[] lightColor = {
+                    colorVector.x,
+                    colorVector.y,
+                    colorVector.z
+            };
+
+
+            ImGui.setNextItemWidth(-1);
+            if (ImGui.inputFloat3("##lightColor", lightColor)) {
+                light.setColor(lightColor[0], lightColor[1], lightColor[2]);
+            }
+
+            ImGui.endTable();
+
+            ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingY());
+            ImFloat intensity = new ImFloat(light.getIntensity());
+            if (ImGui.inputFloat("intensity##" + light.getGuid(), intensity)) {
+                light.setIntensity(intensity.get());
+            }
+
+            ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingY());
+            ImFloat linear = new ImFloat(light.getIntensity());
+            if (ImGui.inputFloat("linear##" + light.getGuid(), linear)) {
+                light.setIntensity(linear.get());
+            }
+
+            ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingY());
+            ImFloat exponent = new ImFloat(light.getExponent());
+            if (ImGui.inputFloat("intensity##" + light.getGuid(), exponent)) {
+                light.setIntensity(exponent.get());
+            }
+
+            ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingY());
+            ImFloat constant = new ImFloat(light.getConstant());
+            if (ImGui.inputFloat("constant##" + light.getGuid(), constant)) {
+                light.setIntensity(constant.get());
+            }
+
+            Panel.endPanel();
+        }
     }
 
-    private void endPanel() {
-        ImDrawList drawList = ImGui.getWindowDrawList();
-
-        // Bottom padding
-        ImGui.dummy(0, paddingY);
-
-        ImGui.endGroup();
-
-        ImVec2 min = ImGui.getItemRectMin();
-        ImVec2 max = ImGui.getItemRectMax();
-
-        // Force the panel to span the entire available width.
-        max.x = min.x + panelWidth;
-
-        drawList.channelsSetCurrent(0);
-
-        drawList.addRectFilled(
-                min.x,
-                min.y,
-                max.x,
-                max.y,
-                ImGui.getColorU32(ImGuiCol.ChildBg),
-                6.0f
-        );
-
-        drawList.addRect(
-                min.x,
-                min.y,
-                max.x,
-                max.y,
-                ImGui.getColorU32(ImGuiCol.Border),
-                6.0f
-        );
-
-        drawList.channelsMerge();
-        ImGui.spacing();
-    }
 }

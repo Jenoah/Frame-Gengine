@@ -15,6 +15,7 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import javax.json.JsonObject;
+import java.util.Set;
 
 public class Light extends GameObject {
 
@@ -24,6 +25,8 @@ public class Light extends GameObject {
     protected float linear;
     protected float exponent;
     protected boolean isShowingProxy = false;
+    public static final Set<String> fieldsToIgnore = Set.of("intensity", "color", "constant", "linear", "exponent", "isShowingProxy");
+
 
     public Light(){}
 
@@ -58,7 +61,11 @@ public class Light extends GameObject {
     }
 
     public void setColor(Vector3f color) {
-        this.color = color;
+        this.color.set(color);
+    }
+
+    public void setColor(float r, float g, float b) {
+        this.color.set(r, g, b);
     }
 
     public float getIntensity() {

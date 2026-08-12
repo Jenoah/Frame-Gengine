@@ -34,6 +34,7 @@ public class GameObject implements IJsonSerializable {
 
     private static final Hashtable<String, GameObject> instancedObjects = new Hashtable<>();
     private static final Hashtable<String, List<GameObject>> parentWhenPresent = new Hashtable<>();
+    public static final Set<String> fieldsToIgnore = Set.of("fieldsToIgnore", "scale", "localPosition", "isEnabled", "localRotation", "willUpdate", "canBeSaved");
 
     private final List<GameObject> children;
     private GameObject parent;
