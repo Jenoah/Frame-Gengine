@@ -10,6 +10,7 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Set;
 
 public class Component implements IJsonSerializable {
     protected GameObject root = null;
@@ -17,6 +18,8 @@ public class Component implements IJsonSerializable {
     public boolean runInEditor = false;
     protected boolean hasCleanedUp = false;
     protected boolean addedDuringPlaymode = false;
+
+    public static final Set<String> fieldsToIgnore = Set.of("fieldsToIgnore");
 
     private boolean isEnabled = true;
 

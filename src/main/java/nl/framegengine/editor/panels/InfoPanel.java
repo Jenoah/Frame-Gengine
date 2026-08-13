@@ -7,6 +7,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import imgui.type.ImString;
+import nl.framegengine.core.components.Component;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.lighting.Light;
@@ -101,7 +102,7 @@ public class InfoPanel extends EditorPanel {
         String fieldName = field.getName() + "##" + field.hashCode();
 
         if(drawingObject instanceof GameObject && GameObject.fieldsToIgnore.contains(field.getName())) return;
-        if(drawingObject instanceof Light && Light.fieldsToIgnore.contains(field.getName())) return;
+        if(drawingObject instanceof Component && Component.fieldsToIgnore.contains(field.getName())) return;
 
         // Special handling for Texture fields (even if null)
         if (field.getType() == Texture.class) {
