@@ -15,12 +15,12 @@ public class PointLight extends Light {
 
     public PointLight() { super(); }
 
-    public PointLight(Vector3f color, Vector3f position, float intensity, float constant, float linear, float exponent) {
-        super(color, position, intensity, constant, linear, exponent);
+    public PointLight(Vector3f color, float intensity, float constant, float linear, float exponent) {
+        super(color, intensity, constant, linear, exponent);
     }
 
-    public PointLight(Vector3f color, Vector3f position, float intensity, float distance) {
-        super(color, position, intensity, distance);
+    public PointLight(Vector3f color, float intensity, float distance) {
+        super(color, intensity, distance);
     }
 
     @Override
@@ -34,7 +34,7 @@ public class PointLight extends Light {
             Mesh proxyMesh = PrimitiveLoader.getQuadMesh();
 
             MeshMaterialSet mms = new MeshMaterialSet(proxyMesh, proxyMaterial);
-            addComponent(new RenderComponent(mms));
+            root.addComponent(new RenderComponent(mms));
 
             isShowingProxy = true;
         }

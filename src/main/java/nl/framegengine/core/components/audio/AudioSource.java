@@ -29,6 +29,7 @@ public class AudioSource extends Component {
         checkALError();
         set3d(true);
         if(SceneManager.currentScene != null && SceneManager.currentScene.getAudioManager() != null){
+            if(this.audioManager == null) this.audioManager = SceneManager.currentScene.getAudioManager();
             audioManager.addAudioSource(getGuid(), this);
         }
     }

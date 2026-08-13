@@ -80,8 +80,8 @@ public class Scene implements IJsonSerializable {
 
     public void postStart() {
         RenderManager.setRenderCamera(mainCamera);
-        mainCamera.callUpdate();
-        mainCamera.onUpdateTransform();
+        mainCamera.getRoot().callUpdate();
+        mainCamera.getRoot().onUpdateTransform();
     }
 
     public void update() {
@@ -200,16 +200,16 @@ public class Scene implements IJsonSerializable {
     public void setMainCamera(Camera camera){
         AudioListener mainCameraAudioListener = null;
         if(mainCamera != null){
-            mainCameraAudioListener = mainCamera.getComponent(AudioListener.class);
+            mainCameraAudioListener = mainCamera.getRoot().getComponent(AudioListener.class);
             AudioListener.Instance = null;
         }
         mainCamera = camera;
 
         AudioListener audioListener = new AudioListener();
-        mainCamera.addComponent(audioListener);
+        mainCamera.getRoot().addComponent(audioListener);
         audioManager.setAudioListener(audioListener);
 
-        if(mainCameraAudioListener != null) mainCamera.removeComponent(mainCameraAudioListener);
+        if(mainCameraAudioListener != null) mainCamera.getRoot().removeComponent(mainCameraAudioListener);
     }
 
     public Camera getMainCamera(){ return mainCamera; }
@@ -374,7 +374,7 @@ public class Scene implements IJsonSerializable {
 
         gameObjects.forEach(go -> {
             if(go.getParent() == null) rootGameObjects.add(go);
-            if(mainCamera == null && go instanceof Camera camera) setMainCamera(camera);
+            if(mainCamera == null && go.getComponent(Camera.class) != null) setMainCamera(go.getComponent(Camera.class));
         });
     }
 

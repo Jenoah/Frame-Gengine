@@ -1,5 +1,6 @@
 package nl.framegengine.core.entity;
 
+import nl.framegengine.core.components.Component;
 import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.engine.WindowManager;
 import nl.framegengine.core.modelLoaders.PrimitiveLoader;
@@ -14,7 +15,7 @@ import nl.framegengine.core.visual.Texture;
 import nl.framegengine.editor.EngineSettings;
 import org.joml.*;
 
-public class Camera extends GameObject {
+public class Camera extends Component {
 
     private static Camera mainCamera = null;
 
@@ -32,47 +33,22 @@ public class Camera extends GameObject {
 
         if(mainCamera == null) mainCamera = this;
         windowManager = WindowManager.getInstance();
-
-        setPosition(new Vector3f(0, 0, 0));
+        runInEditor = true;
 
         for (int i = 0; i < frustumPlanes.length; i++) {
             frustumPlanes[i] = new FrustumPlane();
         }
 
         updateViewFrustum();
-        callUpdate();
+        //root.callUpdate();
     }
 
-    public Camera(Vector3f position, Vector3f rotation) {
-        super();
-
-        windowManager = WindowManager.getInstance();
-
-        setPosition(position);
-        setRotation(rotation);
-
-        for (int i = 0; i < frustumPlanes.length; i++) {
-            frustumPlanes[i] = new FrustumPlane();
-        }
-
-        updateViewFrustum();
-        callUpdate();
-    }
-
-    public Camera(Vector3f position, Quaternionf rotation) {
-        super();
-
-        windowManager = WindowManager.getInstance();
-
-        setPosition(position);
-        setRotation(rotation);
-
-        for (int i = 0; i < frustumPlanes.length; i++) {
-            frustumPlanes[i] = new FrustumPlane();
-        }
-
-        updateViewFrustum();
-        callUpdate();
+    @Override
+    public void initiate() {
+        super.initiate();
+        root.addUpdateTransformActions(this::updateViewMatrix);
+        root.addUpdateTransformActions(this::updateViewProjectionMatrix);
+        root.addUpdateTransformActions(this::updateViewFrustum);
     }
 
     public void updateViewFrustum(){
@@ -173,10 +149,10 @@ public class Camera extends GameObject {
     }
 
     public final Matrix4f updateViewMatrix(){
-        Vector3f currentPosition = getPosition();
+        Vector3f currentPosition = root.getPosition();
 
         this.viewMatrix.identity()
-                .rotate(getRotation())
+                .rotate(root.getRotation())
                 .translate(-currentPosition.x, -currentPosition.y, -currentPosition.z);
 
         return this.viewMatrix;
@@ -188,22 +164,17 @@ public class Camera extends GameObject {
 
     public void sortGameObjectsInScene(){
         if(SceneManager.currentScene == null) return; //TODO: Implement hadUpdated() to check to increase performance
-        Vector3f currentCameraPosition = ObjectPool.VECTOR3F_POOL.obtain().set(getPosition());
-        SceneManager.currentScene.getSortedGameObjects().forEach(go -> go.setRenderCameraSquaredDistance(getPosition()));
+        Vector3f currentCameraPosition = ObjectPool.VECTOR3F_POOL.obtain().set(root.getPosition());
+        SceneManager.currentScene.getSortedGameObjects().forEach(go -> go.setRenderCameraSquaredDistance(root.getPosition()));
         ObjectPool.VECTOR3F_POOL.free(currentCameraPosition);
-    }
-
-    @Override
-    protected void onUpdateTransform() {
-        super.onUpdateTransform();
-        updateViewMatrix();
-        updateViewProjectionMatrix();
-        updateViewFrustum();
     }
 
     @Override
     public void cleanUp() {
         super.cleanUp();
+        root.removeUpdateTransformActions(this::updateViewMatrix);
+        root.removeUpdateTransformActions(this::updateViewProjectionMatrix);
+        root.removeUpdateTransformActions(this::updateViewFrustum);
         mainCamera = null;
     }
 
@@ -216,7 +187,7 @@ public class Camera extends GameObject {
             Mesh proxyMesh = PrimitiveLoader.getQuadMesh();
 
             MeshMaterialSet mms = new MeshMaterialSet(proxyMesh, proxyMaterial);
-            addComponent(new RenderComponent(mms));
+            root.addComponent(new RenderComponent(mms));
 
             isShowingProxy = true;
         }
