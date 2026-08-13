@@ -1,5 +1,6 @@
 package nl.framegengine.core.lighting;
 
+import nl.framegengine.core.components.Component;
 import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.modelLoaders.PrimitiveLoader;
@@ -17,7 +18,7 @@ import org.joml.Vector4f;
 import javax.json.JsonObject;
 import java.util.Set;
 
-public class Light extends GameObject {
+public class Light extends Component {
 
     protected Vector3f color;
     protected float intensity;
@@ -30,22 +31,19 @@ public class Light extends GameObject {
 
     public Light(){}
 
-    public Light(Vector3f color, Vector3f position, float intensity, float constant, float linear, float exponent) {
+    public Light(Vector3f color, float intensity, float constant, float linear, float exponent) {
         this.color = color;
         this.intensity = intensity;
         this.constant = constant;
         this.linear = linear;
         this.exponent = exponent;
-
-        setPosition(position);
     }
 
-    public Light(Vector3f color, Vector3f position, float intensity, float distance) {
-        this(color, position, intensity, 1, 0, 0);
+    public Light(Vector3f color, float intensity, float distance) {
+        this(color, intensity, 1, 0, 0);
         this.color = color;
         this.intensity = intensity;
         setValuesByDistance(distance);
-        this.setPosition(position);
     }
 
     public void setValuesByDistance(float distance){
@@ -111,7 +109,7 @@ public class Light extends GameObject {
             Mesh proxyMesh = isPointLight ? PrimitiveLoader.getQuadMesh() : PrimitiveLoader.getQuadRotatedMesh();
 
             MeshMaterialSet mms = new MeshMaterialSet(proxyMesh, proxyMaterial);
-            addComponent(new RenderComponent(mms));
+            root.addComponent(new RenderComponent(mms));
 
             isShowingProxy = true;
         }
@@ -126,7 +124,7 @@ public class Light extends GameObject {
 
     public IJsonSerializable deserializeFromJson(String json) {
         super.deserializeFromJson(json);
-        if(getComponent(RenderComponent.class) != null) removeComponent(getComponent(RenderComponent.class));
+        if(root != null && root.getComponent(RenderComponent.class) != null) root.removeComponent(root.getComponent(RenderComponent.class));
         return this;
     }
 }

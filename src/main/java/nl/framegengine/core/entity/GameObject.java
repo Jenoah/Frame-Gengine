@@ -8,14 +8,13 @@ import nl.framegengine.core.rendering.RenderManager;
 import nl.framegengine.editor.EngineSettings;
 import org.joml.*;
 import org.joml.Math;
-
 import javax.json.*;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 
-public class GameObject implements IJsonSerializable {
+public class GameObject implements IJsonSerializable{
     private String name = "GameObject";
     private final Vector3f localPosition = new Vector3f();
     private final Quaternionf localRotation = new Quaternionf();
@@ -44,6 +43,7 @@ public class GameObject implements IJsonSerializable {
     private boolean isRemoving = false;
 
     protected final Set<Component> components = new HashSet<>();
+    private final Set<Runnable> updateTransformActions = new HashSet<>();
 
     public GameObject() {
         this.children = new ArrayList<>();
@@ -462,6 +462,7 @@ public class GameObject implements IJsonSerializable {
 
     protected void onUpdateTransform(){
         if(!willUpdate) return;
+        if(!updateTransformActions.isEmpty()) updateTransformActions.forEach(Runnable::run);
         children.forEach(child -> {
             child.callUpdate();
             child.onUpdateTransform();
@@ -574,7 +575,7 @@ public class GameObject implements IJsonSerializable {
     }
 
     public void setRenderCameraSquaredDistance(Camera camera) {
-        this.renderCameraSquaredDistance = camera.getPosition().distanceSquared(getPosition());
+        this.renderCameraSquaredDistance = camera.getRoot().getPosition().distanceSquared(getPosition());
     }
 
     public void setRenderCameraSquaredDistance(Vector3f cameraPosition) {
@@ -594,6 +595,14 @@ public class GameObject implements IJsonSerializable {
 
     public void canBeSaved(boolean canBeSaved) {
         this.canBeSaved = canBeSaved;
+    }
+
+    public void addUpdateTransformActions(Runnable runnable){
+        updateTransformActions.add(runnable);
+    }
+
+    public void removeUpdateTransformActions(Runnable runnable){
+        updateTransformActions.remove(runnable);
     }
 
     @Override

@@ -119,16 +119,19 @@ class LightTest {
         Vector3f color    = new Vector3f(1f, 0f, 0f);
         Vector3f position = new Vector3f(2f, 3f, 4f);
 
-        Light light = new Light(color, position, 2.0f, 1.0f, 0.5f, 0.25f);
+        GameObject lightObject = new GameObject("Light");
+        lightObject.setPosition(position);
+        Light light = new Light(color, 2.0f, 1.0f, 0.5f, 0.25f);
+        lightObject.addComponent(light);
 
         assertSame(color, light.getColor());
         assertEquals(2.0f,  light.getIntensity(), EPSILON);
         assertEquals(1.0f,  light.getConstant(),  EPSILON);
         assertEquals(0.5f,  light.getLinear(),    EPSILON);
         assertEquals(0.25f, light.getExponent(),   EPSILON);
-        assertEquals(2f, light.getPosition().x, EPSILON);
-        assertEquals(3f, light.getPosition().y, EPSILON);
-        assertEquals(4f, light.getPosition().z, EPSILON);
+        assertEquals(2f, light.getRoot().getPosition().x, EPSILON);
+        assertEquals(3f, light.getRoot().getPosition().y, EPSILON);
+        assertEquals(4f, light.getRoot().getPosition().z, EPSILON);
     }
 
     @Test
@@ -137,7 +140,10 @@ class LightTest {
         Vector3f position = new Vector3f(0f, 0f, 0f);
         float distance = 4f;
 
-        Light light = new Light(color, position, 1.0f, distance);
+        GameObject lightObject = new GameObject("Light");
+        lightObject.setPosition(position);
+        Light light = new Light(color, 1.0f, distance);
+        lightObject.addComponent(light);
 
         // Expected: distancePlusOne=5, linear=0.2, exponent=0.04
         assertEquals(1.0f,  light.getConstant(), EPSILON);
@@ -172,7 +178,10 @@ class LightTest {
         Vector3f color    = new Vector3f(0f, 1f, 0f);
         Vector3f position = new Vector3f(1f, 2f, 3f);
 
+        GameObject lightObject = new GameObject("Light");
+        lightObject.setPosition(position);
         SpotLight spot = new SpotLight(color, position, 1.5f, 1.0f, 0.5f, 0.25f, 20f, 35f);
+        lightObject.addComponent(spot);
 
         assertEquals(20f, spot.getCutOff(),     EPSILON);
         assertEquals(35f, spot.getOuterCutOff(), EPSILON);
@@ -183,7 +192,11 @@ class LightTest {
         Vector3f color    = new Vector3f(1f, 1f, 0f);
         Vector3f position = new Vector3f(0f, 0f, 0f);
 
-        SpotLight spot = new SpotLight(color, position, 1.0f, 9f, 15f, 25f);
+        GameObject lightObject = new GameObject("Light");
+        lightObject.setPosition(position);
+        SpotLight spot = new SpotLight(color, 1.0f, 9f, 15f, 25f);
+        lightObject.addComponent(spot);
+
 
         // Attenuation via setValuesByDistance(9): linear=0.1, exponent=0.01
         assertEquals(1.0f,  spot.getConstant(), EPSILON);

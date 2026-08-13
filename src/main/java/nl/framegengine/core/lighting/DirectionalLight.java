@@ -3,6 +3,8 @@ package nl.framegengine.core.lighting;
 import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.modelLoaders.PrimitiveLoader;
 import nl.framegengine.core.shaders.ShaderManager;
+import nl.framegengine.core.utils.Constants;
+import nl.framegengine.core.utils.ObjectPool;
 import nl.framegengine.core.visual.Material;
 import nl.framegengine.core.visual.Mesh;
 import nl.framegengine.core.visual.MeshMaterialSet;
@@ -14,16 +16,28 @@ import org.joml.Vector4f;
 
 public class DirectionalLight extends Light{
 
+    private final Vector3f lookAtDirection = new Vector3f(0);
+
     public DirectionalLight(){ super(); }
 
+    @Override
+    public void initiate() {
+        super.initiate();
+        root.lookAtDirection(lookAtDirection);
+    }
+
     public DirectionalLight(Vector3f color, Vector3f direction, float intensity) {
-        super(color, new Vector3f(0), intensity, 0);
-        lookAtDirection(direction);
+        super(color, intensity, 0);
+        lookAtDirection.set(direction);
+
     }
 
     public DirectionalLight(Vector3f color, Quaternionf direction, float intensity) {
-        super(color, new Vector3f(0), intensity, 0);
-        lookAtDirection(direction);
+        super(color, intensity, 0);
+
+        direction.normalize();
+        direction.getEulerAnglesXYZ(lookAtDirection);
+        if(lookAtDirection.lengthSquared() <= 0.01) lookAtDirection.set(0, 0, -1);
     }
 
     @Override
@@ -37,7 +51,7 @@ public class DirectionalLight extends Light{
             Mesh proxyMesh = PrimitiveLoader.getQuadRotatedMesh();
 
             MeshMaterialSet mms = new MeshMaterialSet(proxyMesh, proxyMaterial);
-            addComponent(new RenderComponent(mms));
+            root.addComponent(new RenderComponent(mms));
 
             isShowingProxy = true;
         }

@@ -32,7 +32,7 @@ public class PlayerMovement extends Component {
         super.initiate();
 
         this.windowManager = WindowManager.getInstance();
-        this.cameraObject = Camera.getMainCamera();
+        this.cameraObject = Camera.getMainCamera().getRoot();
     }
 
     @Override

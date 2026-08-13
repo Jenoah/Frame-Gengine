@@ -52,8 +52,8 @@ public class ComponentRenderer implements IRenderer {
     public void render() {
         if ((sortedRenderObjects.isEmpty() && sortedTransparentRenderObjects.isEmpty()) || mainCamera == null) return;
 
-        if(mainCamera.getPosition().distanceSquared(previousCameraPosition) > TRANSPARENT_RESORT_THRESHOLD){
-            previousCameraPosition.set(mainCamera.getPosition());
+        if(mainCamera.getRoot().getPosition().distanceSquared(previousCameraPosition) > TRANSPARENT_RESORT_THRESHOLD){
+            previousCameraPosition.set(mainCamera.getRoot().getPosition());
             needsTransparentRebatch = true;
         }
 

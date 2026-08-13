@@ -199,36 +199,43 @@ public class HierarchyPanel extends EditorPanel {
             }
             if (ImGui.beginMenu("Built-in")) {
                 if (ImGui.menuItem("Camera")) {
+                    GameObject cameraGO = new GameObject("Camera");
                     Camera cameraObject = new Camera();
-                    SceneManager.currentScene.addEntity(cameraObject);
+                    cameraGO.addComponent(cameraObject);
+                    SceneManager.currentScene.addEntity(cameraGO);
                     ImGui.closeCurrentPopup();
                 }
                 if (ImGui.beginMenu("Light")) {
                     if (ImGui.menuItem("Directional light")) {
+                        GameObject directionalLightObject = new GameObject("Directional light");
                         DirectionalLight directionalLight = new DirectionalLight(new Vector3f(1f, 0.6f, 0), new Vector3f(-1, -1, -1).normalize(), 10);
-                        directionalLight.setName("Directional light");
-                        directionalLight.setPosition(0, 1, 0);
+                        directionalLightObject.addComponent(directionalLight);
+                        directionalLightObject.setPosition(0, 1, 0);
                         directionalLight.showProxy();
                         SceneManager.currentScene.setDirectionalLight(directionalLight);
-                        SceneManager.currentScene.addEntity(directionalLight);
+                        SceneManager.currentScene.addEntity(directionalLightObject);
                         SceneManager.currentScene.updateLights();
                         ImGui.closeCurrentPopup();
                     }
                     if (ImGui.menuItem("Point light")) {
-                        PointLight pointLight = new PointLight(new Vector3f(1, 1, 0), new Vector3f(0f, 1f, 0f), 5, 15);
-                        pointLight.setName("Point light");
+                        GameObject pointLightObject = new GameObject("Point light");
+                        PointLight pointLight = new PointLight(new Vector3f(1, 1, 0), 5, 15);
+                        pointLightObject.setPosition(new Vector3f(0f, 1f, 0f));
+                        pointLightObject.addComponent(pointLight);
                         pointLight.showProxy();
                         SceneManager.currentScene.addPointLight(pointLight);
-                        SceneManager.currentScene.addEntity(pointLight);
+                        SceneManager.currentScene.addEntity(pointLightObject);
                         SceneManager.currentScene.updateLights();
                         ImGui.closeCurrentPopup();
                     }
                     if (ImGui.menuItem("Spot light")) {
-                        SpotLight spotLight = new SpotLight(new Vector3f(1, 1, 0), new Vector3f(0f, 1f, 0f), 3f, 10f, 0.8660254f, 0.81915206f);
-                        spotLight.setName("Spot light");
+                        GameObject spotLightObject = new GameObject("Spot light");
+                        spotLightObject.setPosition(new Vector3f(0f, 1f, 0f));
+                        SpotLight spotLight = new SpotLight(new Vector3f(1, 1, 0), 3f, 10f, 0.8660254f, 0.81915206f);
+                        spotLightObject.addComponent(spotLight);
                         spotLight.showProxy();
                         SceneManager.currentScene.addSpotLight(spotLight);
-                        SceneManager.currentScene.addEntity(spotLight);
+                        SceneManager.currentScene.addEntity(spotLightObject);
                         SceneManager.currentScene.updateLights();
                         ImGui.closeCurrentPopup();
                     }

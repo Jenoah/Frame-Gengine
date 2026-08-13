@@ -1,6 +1,5 @@
 package nl.framegengine.core.physics;
 
-import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.engine.WindowManager;
 import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.entity.GameObject;
@@ -83,7 +82,7 @@ public class Raycast {
         Vector3f tempTargetOriginDifference = target.sub(origin);
 
         rayDirection.set(tempTargetOriginDifference.normalize());
-        Ray ray = new Ray(camera.getPosition(), rayDirection);
+        Ray ray = new Ray(camera.getRoot().getPosition(), rayDirection);
 
         ObjectPool.VECTOR3F_POOL.free(origin);
         ObjectPool.VECTOR3F_POOL.free(target);
