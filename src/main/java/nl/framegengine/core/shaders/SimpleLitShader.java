@@ -153,26 +153,26 @@ public class SimpleLitShader extends Shader {
     //Set uniforms
     public void setUniform(String uniformName, DirectionalLight directionalLight){
         setUniform(uniformName + ".color", directionalLight.getColor());
-        Vector3f lightDir = directionalLight.getForward();
+        Vector3f lightDir = directionalLight.getRoot().getForward();
         setUniform(uniformName + ".direction", new Vector3f(lightDir));
         setUniform(uniformName + ".intensity", directionalLight.getIntensity());
     }
 
     public void setUniform(String uniformName, SpotLight spotlight){
         setUniform(uniformName + ".color", spotlight.getColor());
-        setUniform(uniformName + ".position", spotlight.getPosition());
+        setUniform(uniformName + ".position", spotlight.getRoot().getPosition());
         setUniform(uniformName + ".intensity", spotlight.getIntensity());
         setUniform(uniformName + ".constant", spotlight.getConstant());
         setUniform(uniformName + ".linear", spotlight.getLinear());
         setUniform(uniformName + ".exponent", spotlight.getExponent());
-        setUniform(uniformName + ".coneDirection", spotlight.getForward());
+        setUniform(uniformName + ".coneDirection", spotlight.getRoot().getForward());
         setUniform(uniformName + ".cutOff", spotlight.getCutOff());
         setUniform(uniformName + ".outerCutOff", spotlight.getOuterCutOff());
     }
 
     public void setUniform(String uniformName, PointLight pointLight){
         setUniform(uniformName + ".color", pointLight.getColor());
-        setUniform(uniformName + ".position", pointLight.getPosition());
+        setUniform(uniformName + ".position", pointLight.getRoot().getPosition());
         setUniform(uniformName + ".intensity", pointLight.getIntensity());
         setUniform(uniformName + ".constant", pointLight.getConstant());
         setUniform(uniformName + ".linear", pointLight.getLinear());

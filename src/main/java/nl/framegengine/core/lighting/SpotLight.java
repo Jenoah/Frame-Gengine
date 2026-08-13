@@ -19,20 +19,16 @@ public class SpotLight extends Light {
     public SpotLight(){ super(); }
 
     public SpotLight(Vector3f color, Vector3f position, float intensity, float constant, float linear, float exponent, float cutOff, float outerCutOff) {
-        super(color, position, intensity, constant, linear, exponent);
+        super(color, intensity, constant, linear, exponent);
 
         this.cutOff = cutOff;
         this.outerCutOff = outerCutOff;
-
-        setPosition(position);
     }
 
-    public SpotLight(Vector3f color, Vector3f position, float intensity, float distance, float cutOff, float outerCutOff) {
-        super(color, position, intensity, distance);
+    public SpotLight(Vector3f color, float intensity, float distance, float cutOff, float outerCutOff) {
+        super(color, intensity, distance);
         this.cutOff = cutOff;
         this.outerCutOff = outerCutOff;
-
-        setPosition(position);
     }
 
     public float getCutOff() {
@@ -62,7 +58,7 @@ public class SpotLight extends Light {
             Mesh proxyMesh = PrimitiveLoader.getQuadRotatedMesh();
 
             MeshMaterialSet mms = new MeshMaterialSet(proxyMesh, proxyMaterial);
-            addComponent(new RenderComponent(mms));
+            root.addComponent(new RenderComponent(mms));
 
             isShowingProxy = true;
         }
