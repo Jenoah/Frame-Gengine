@@ -29,8 +29,8 @@ public class ShadowFrustum {
 
     protected Vector3f computeFrustumCenter() {
         if (cam == null) return center.set(0);
-        cameraPosition.set(cam.getPosition());
-        Vector3f forward = cam.getForward();
+        cameraPosition.set(cam.getRoot().getPosition());
+        Vector3f forward = cam.getRoot().getForward();
         // Center is the midpoint between near and far planes along the view direction
         float halfDist = (Constants.Z_NEAR + Constants.SHADOW_DISTANCE) / 2f;
         center.set(cameraPosition).fma(halfDist, forward);
@@ -45,7 +45,7 @@ public class ShadowFrustum {
         if(cam == null) return;
         this.lightViewMatrix.set(lightViewMatrix);
 
-        Vector3f forwardVector = cam.getForward();
+        Vector3f forwardVector = cam.getRoot().getForward();
 
         Vector3f centerNear = new Vector3f(cameraPosition).fma(Constants.Z_NEAR, forwardVector);
         Vector3f centerFar  = new Vector3f(cameraPosition).fma(Constants.SHADOW_DISTANCE, forwardVector);

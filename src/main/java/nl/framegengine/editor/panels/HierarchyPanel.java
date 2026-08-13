@@ -205,8 +205,10 @@ public class HierarchyPanel extends EditorPanel {
             }
             if (ImGui.beginMenu("Built-in")) {
                 if (ImGui.menuItem("Camera")) {
+                    GameObject cameraGO = new GameObject("Camera");
                     Camera cameraObject = new Camera();
-                    SceneManager.currentScene.addEntity(cameraObject);
+                    cameraGO.addComponent(cameraObject);
+                    SceneManager.currentScene.addEntity(cameraGO);
                     ImGui.closeCurrentPopup();
                 }
                 if (ImGui.beginMenu("Light")) {

@@ -58,7 +58,7 @@ public class SceneManager {
         scene.getGameObjects().forEach(go -> {
             Light lightComponent = go.getComponent(Light.class);
             if(lightComponent != null) tryAddLight(lightComponent, scene);
-            if(go instanceof Camera camera) camera.showProxy();
+            if(go.getComponent(Camera.class) != null) go.getComponent(Camera.class).showProxy();
             for (Component component : go.components.stream().toList()) {
                 component.initiate();
             }

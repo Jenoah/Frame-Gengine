@@ -172,16 +172,17 @@ public class GamePanel extends EditorPanel {
 
     private void addEditorCamera(){
         if(SceneManager.currentScene == null) return;
+        GameObject editorCameraGO = new GameObject(EngineSettings.editorCameraName);
         Camera editorCamera = new Camera();
-        editorCamera.setPosition(SceneManager.currentScene.getEditorCameraPosition());
-        editorCamera.setRotation(SceneManager.currentScene.getEditorCameraRotation());
-        editorCamera.setName(EngineSettings.editorCameraName);
-        editorCamera.addComponent(new ScenePreviewCameraControls());
-        editorCamera.addComponent(new SelectSceneObjects(editorCamera,
+        editorCameraGO.addComponent(editorCamera);
+        editorCameraGO.setPosition(SceneManager.currentScene.getEditorCameraPosition());
+        editorCameraGO.setRotation(SceneManager.currentScene.getEditorCameraRotation());
+        editorCameraGO.addComponent(new ScenePreviewCameraControls());
+        editorCameraGO.addComponent(new SelectSceneObjects(editorCamera,
                 EditorWindow.getEditorLayout().getEditorPanelOfType(HierarchyPanel.class)));
-        editorCamera.setShowInEditor(false);
-        editorCamera.canBeSaved(false);
-        SceneManager.currentScene.addEntity(editorCamera);
+        editorCameraGO.setShowInEditor(false);
+        editorCameraGO.canBeSaved(false);
+        SceneManager.currentScene.addEntity(editorCameraGO);
         RenderManager.setRenderCamera(editorCamera);
     }
 

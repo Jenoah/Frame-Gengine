@@ -95,7 +95,7 @@ public class SimpleLitShader extends Shader {
     }
 
     public void render(Camera camera){
-        setUniform("viewPosition", camera.getPosition());
+        setUniform("viewPosition", camera.getRoot().getPosition());
 
         int lightCount = spotLights != null ? spotLights.length : 0;
         for (int i = 0; i < lightCount; i++) {
