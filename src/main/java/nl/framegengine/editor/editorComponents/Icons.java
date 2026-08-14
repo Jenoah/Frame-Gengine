@@ -1,5 +1,8 @@
 package nl.framegengine.editor.editorComponents;
 
+import nl.framegengine.core.components.audio.AudioListener;
+import nl.framegengine.core.components.audio.AudioSource;
+import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.entity.Camera;
 import nl.framegengine.core.lighting.Light;
 import nl.framegengine.core.utils.IJsonSerializable;
@@ -23,10 +26,16 @@ public class Icons {
     public static final String DISPLAY          = "\uF302";
     public static final String FOLDER           = "\uF3D7";
     public static final String TERMINAL         = "\uF5C3";
+    public static final String AUDIO            = "\uF610";
+    public static final String GLASSES          = "\uF343";
+    public static final String HEADPHONE        = "\uF413";
 
     public static String GetIcon(IJsonSerializable object){
         if(object instanceof Camera) return CAMERA;
         if(object instanceof Light) return LIGHT;
+        if(object instanceof AudioSource) return AUDIO;
+        if(object instanceof RenderComponent) return GLASSES;
+        if(object instanceof AudioListener) return HEADPHONE;
         return BOX;
     }
 }

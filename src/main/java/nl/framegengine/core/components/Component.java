@@ -19,7 +19,7 @@ public class Component implements IJsonSerializable {
     protected boolean hasCleanedUp = false;
     protected boolean addedDuringPlaymode = false;
 
-    public static final Set<String> fieldsToIgnore = Set.of("fieldsToIgnore");
+    protected Set<String> fieldsToIgnore = Set.of("fieldsToIgnore", "runInEditor", "guid", "root", "hasCleanedUp", "addedDuringPlaymode", "hasInitiated");
 
     private boolean isEnabled = true;
 
@@ -70,7 +70,7 @@ public class Component implements IJsonSerializable {
 
     @Override
     public JsonObject serializeToJson() {
-        return JsonHelper.objectToJson(this, new String[]{"hasInitiated"});
+        return JsonHelper.objectToJson(this, new String[]{"hasInitiated", "fieldsToIgnore"});
     }
 
     @Override
@@ -84,5 +84,9 @@ public class Component implements IJsonSerializable {
             throw new RuntimeException(e);
         }
         return this;
+    }
+
+    public Set<String> getFieldsToIgnore(){
+        return fieldsToIgnore;
     }
 }

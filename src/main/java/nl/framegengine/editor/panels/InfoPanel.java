@@ -7,7 +7,6 @@ import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import imgui.type.ImString;
-import nl.framegengine.core.components.Component;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.lighting.Light;
@@ -29,6 +28,7 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.*;
 
 public class InfoPanel extends EditorPanel {
@@ -50,36 +50,49 @@ public class InfoPanel extends EditorPanel {
         if(currentlySelectedObject == null) return;
         DrawTitlePanel(currentlySelectedObject);
 
-        if(currentlySelectedObject instanceof GameObject){
-            DrawTransform((GameObject) currentlySelectedObject);
+        if(currentlySelectedObject instanceof GameObject gameObject){
+            DrawTransform(gameObject);
+
+            gameObject.getComponents().forEach(comp -> {
+                Panel.startPanel();
+                ImGui.text(Icons.GetIcon(comp) + " " + comp.getClass().getSimpleName());
+                ImGui.spacing();
+
+                boolean hasFields = false;
+
+                Class<?> clazz = comp.getClass();
+
+                while (clazz != null && clazz != Object.class) {
+                    for (Field field : clazz.getDeclaredFields()) {
+                        if (Modifier.isPrivate(field.getModifiers()) || comp.getFieldsToIgnore().contains(field.getName())) continue;
+
+                        try {
+                            field.setAccessible(true);
+                            Object value = field.get(comp);
+
+                            if (value == null) continue;
+
+                            drawOption(field, comp);
+                            hasFields = true;
+                        } catch (IllegalAccessException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+
+                    clazz = clazz.getSuperclass();
+                }
+
+                ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingX());
+                if(!hasFields) ImGui.text(Icons.GetIcon(comp) + " No fields found");
+
+                Panel.endPanel();
+            });
         }
 
         if(currentlySelectedObject instanceof Light){
             DrawLightSettingsPanel((Light)currentlySelectedObject);
         }
-
-        boolean isPanel = currentlySelectedObject instanceof IJsonSerializable;
-        if(isPanel) Panel.startPanel();
-
-        for (Field field : hierarchyObjects) {
-            try {
-                field.setAccessible(true);
-                Object value = field.get(currentlySelectedObject);
-                if(value == null) continue;
-                if(value instanceof IJsonSerializable){
-                    Panel.endPanel();
-                    Panel.startPanel();
-                }
-                drawOption(field, currentlySelectedObject);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        if(isPanel) Panel.endPanel();
     }
-
-
 
     public void setCurrentlySelectedObject(IJsonSerializable selectedObject){
         currentlySelectedObject = selectedObject;
@@ -102,7 +115,8 @@ public class InfoPanel extends EditorPanel {
         String fieldName = field.getName() + "##" + field.hashCode();
 
         if(drawingObject instanceof GameObject && GameObject.fieldsToIgnore.contains(field.getName())) return;
-        if(drawingObject instanceof Component && Component.fieldsToIgnore.contains(field.getName())) return;
+
+        ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingX());
 
         // Special handling for Texture fields (even if null)
         if (field.getType() == Texture.class) {
@@ -167,7 +181,6 @@ public class InfoPanel extends EditorPanel {
                 if (ImGui.inputFloat3(fieldName, vec3Array)) {
                     vector.set(vec3Array[0], vec3Array[1], vec3Array[2]);
                     if (drawingObject instanceof GameObject go) {
-                        String rawFieldName = getRawFieldName(fieldName);
                         field.setAccessible(true);
                         field.set(drawingObject, vector);
                         go.callUpdate();
@@ -449,7 +462,6 @@ public class InfoPanel extends EditorPanel {
         }
 
         Panel.endPanel();
-        ImGui.spacing();
     }
 
     private void DrawLightSettingsPanel(Light light) {

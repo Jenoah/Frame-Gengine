@@ -2,7 +2,6 @@ package nl.framegengine.core.lighting;
 
 import nl.framegengine.core.components.Component;
 import nl.framegengine.core.components.visual.RenderComponent;
-import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.modelLoaders.PrimitiveLoader;
 import nl.framegengine.core.shaders.ShaderManager;
 import nl.framegengine.core.utils.IJsonSerializable;
@@ -26,8 +25,8 @@ public class Light extends Component {
     protected float linear;
     protected float exponent;
     protected boolean isShowingProxy = false;
-    public static final Set<String> fieldsToIgnore = Set.of("intensity", "color", "constant", "linear", "exponent", "isShowingProxy");
 
+    protected Set<String> fieldsToIgnore = Set.of("fieldsToIgnore", "runInEditor", "guid", "root", "hasCleanedUp", "addedDuringPlaymode", "hasInitiated", "isShowingProxy");
 
     public Light(){}
 
@@ -119,12 +118,17 @@ public class Light extends Component {
 
     @Override
     public JsonObject serializeToJson() {
-        return JsonHelper.objectToJson(this, new String[]{"isShowingProxy"});
+        return JsonHelper.objectToJson(this, new String[]{"hasInitiated", "isShowingProxy", "fieldsToIgnore"});
     }
 
     public IJsonSerializable deserializeFromJson(String json) {
         super.deserializeFromJson(json);
         if(root != null && root.getComponent(RenderComponent.class) != null) root.removeComponent(root.getComponent(RenderComponent.class));
         return this;
+    }
+
+    @Override
+    public final Set<String> getFieldsToIgnore(){
+        return fieldsToIgnore;
     }
 }
