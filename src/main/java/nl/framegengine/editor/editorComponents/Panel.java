@@ -24,6 +24,20 @@ public class Panel {
         ImGui.setCursorPosY(ImGui.getCursorPosY() + paddingY);
     }
 
+    public static void startPanel(int width){
+        ImDrawList drawList = ImGui.getWindowDrawList();
+
+        panelWidth = width;
+
+        drawList.channelsSplit(2);
+        drawList.channelsSetCurrent(1);
+
+        ImGui.beginGroup();
+
+        ImGui.setCursorPosX(ImGui.getCursorPosX() + paddingX);
+        ImGui.setCursorPosY(ImGui.getCursorPosY() + paddingY);
+    }
+
     public static void endPanel() {
         ImDrawList drawList = ImGui.getWindowDrawList();
 

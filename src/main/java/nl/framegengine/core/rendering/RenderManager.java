@@ -232,8 +232,8 @@ public class RenderManager {
         fontRenderer.recordMetrics(recordMetrics);
     }
 
-    public static String getMetrics() {
-        return recordMetrics ? metrics.getMetrics() : "Metrics not recorded";
+    public static RenderMetrics getMetrics() {
+        return recordMetrics ? metrics : null;
     }
 
     public static void setWireframeMode(boolean wireframeMode){

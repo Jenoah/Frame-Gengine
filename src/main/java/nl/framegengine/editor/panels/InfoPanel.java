@@ -373,7 +373,7 @@ public class InfoPanel extends EditorPanel {
 
         float tableWidth = Panel.getPanelWidth() - Panel.getPaddingX() * 2.0f;
 
-        ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingY());
+        ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingX());
         if (ImGui.beginTable("transform##" + gameObject.getGuid(), 2, ImGuiTableFlags.SizingStretchProp, new ImVec2(tableWidth, 0))) {
 
             ImGui.tableSetupColumn("Label", ImGuiTableColumnFlags.WidthStretch, 1.0f);

@@ -4,8 +4,10 @@ import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.extension.imguizmo.ImGuizmo;
 import imgui.flag.ImGuiStyleVar;
+import imgui.flag.ImGuiTableFlags;
 import imgui.flag.ImGuiWindowFlags;
 import nl.framegengine.core.debugging.Debug;
+import nl.framegengine.core.debugging.RenderMetrics;
 import nl.framegengine.core.engine.EngineManager;
 import nl.framegengine.core.engine.WindowManager;
 import nl.framegengine.core.entity.Camera;
@@ -17,6 +19,7 @@ import nl.framegengine.core.rendering.RenderManager;
 import nl.framegengine.editor.*;
 import nl.framegengine.editor.editorComponents.Button;
 import nl.framegengine.editor.editorComponents.Icons;
+import nl.framegengine.editor.editorComponents.Panel;
 import nl.framegengine.editor.sceneComponents.GizmoMovement;
 import nl.framegengine.editor.sceneComponents.ScenePreviewCameraControls;
 import nl.framegengine.editor.sceneComponents.SelectSceneObjects;
@@ -34,8 +37,11 @@ public class GamePanel extends EditorPanel {
     private String editingSceneJson = null;
 
     private final int[] fpsValues = new int[10];
+    private final float[] deltaTimeValues = new float[10];
     private int fpsIteration = 0;
+    private int deltaTimeIteration = 0;
     private int fpsAverage = 0;
+    private float deltaTimeAverage = 0f;
 
     private final float[] frameTimeValues = new float[10];
     private int frameTimeIteration = 0;
@@ -95,17 +101,11 @@ public class GamePanel extends EditorPanel {
 
         updateFpsAverage();
         updateFrameTimeAverage();
-        ImGui.setCursorPos(8, EditorLayout.topSpacing + 16);
-        ImGui.text("FPS: " + fpsAverage);
-        ImGui.setCursorPos(8, EditorLayout.topSpacing + 32);
-        ImGui.text("Frametime: " + frameTimeAverage);
+        updateAverageDeltaTime();
 
-        if(showStats){
-            ImGui.setCursorPos(8, EditorLayout.topSpacing + 48);
-            ImGui.pushTextWrapPos(sizeX / 2f);
-            ImGui.text("Stats: " + RenderManager.getMetrics());
-            ImGui.popTextWrapPos();
-        }
+        ImGui.setCursorPos(0, EditorLayout.topSpacing);
+
+        if(showStats) DrawStatsPanel();
 
         if(!EngineSettings.isInGame){
             if((Button.Regular(Icons.TRANSFORM, sizeX / 2f - 48f, EditorLayout.topSpacing + 16) || WindowManager.getInstance().isKeyPressed(GLFW.GLFW_KEY_Q)) && gizmoMovement != null){
@@ -126,6 +126,19 @@ public class GamePanel extends EditorPanel {
         if(fpsIteration >= fpsValues.length){
             fpsIteration = 0;
             fpsAverage = Arrays.stream(fpsValues).sum() / fpsValues.length;
+        }
+    }
+
+    private void updateAverageDeltaTime(){
+        deltaTimeValues[deltaTimeIteration] = EngineManager.getDeltaTimeMS();
+        deltaTimeIteration++;
+        if(deltaTimeIteration >= deltaTimeValues.length){
+            deltaTimeIteration = 0;
+            deltaTimeAverage = 0f;
+            for (float deltaTimeValue : deltaTimeValues) {
+                deltaTimeAverage += deltaTimeValue;
+            }
+            deltaTimeAverage /= deltaTimeValues.length;
         }
     }
 
@@ -258,6 +271,43 @@ public class GamePanel extends EditorPanel {
     public void disableStats(){
         showStats = false;
         RenderManager.recordMetrics(false);
+    }
+
+    public void DrawStatsPanel(){
+        int panelWidth = 400;
+
+        RenderMetrics metrics = RenderManager.getMetrics();
+        if(metrics == null) return;
+
+        ImGui.setCursorPos(ImGui.getCursorPosX() + ImGui.getStyle().getWindowPaddingX(), ImGui.getCursorPosY() + ImGui.getStyle().getWindowPaddingY());
+
+        Panel.startPanel(panelWidth);
+
+        ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingX());
+        ImGui.beginTable("statsTable", 3, ImGuiTableFlags.SizingStretchSame, (float)panelWidth - Panel.getPaddingX() * 3f, 0f);
+
+        ImGui.tableNextRow();
+        ImGui.tableNextColumn();
+        ImGui.text("FPS: " + fpsAverage);
+        ImGui.tableNextColumn();
+        ImGui.text("Frame time: " + String.format("%.2fms", frameTimeAverage));
+        ImGui.tableNextColumn();
+        ImGui.text("DeltaTime: " + String.format("%.2fms", deltaTimeAverage));
+
+        ImGui.tableNextRow();
+        ImGui.tableNextColumn();
+        ImGui.text("Draws: " + metrics.getDrawCalls());
+        ImGui.tableNextColumn();
+        ImGui.text("VAO: " + metrics.getVAOBinds());
+        ImGui.tableNextColumn();
+        ImGui.text("Shaders: " + metrics.getShaderBinds());
+
+        ImGui.tableNextRow();
+        ImGui.tableNextColumn();
+        ImGui.text("Vertices: " + metrics.getVertexCount());
+
+        ImGui.endTable();
+        Panel.endPanel();
     }
 
     public void toggleWireframe(){

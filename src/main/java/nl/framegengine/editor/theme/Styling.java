@@ -40,7 +40,7 @@ public class Styling {
         ImGuiStyle style = ImGui.getStyle();
 
         style.setColor(ImGuiCol.WindowBg,       0.094f, 0.102f, 0.122f, 1.0f);
-        style.setColor(ImGuiCol.ChildBg,        0.125f, 0.141f, 0.169f, 1.0f);
+        style.setColor(ImGuiCol.ChildBg,        0.047f, 0.051f, 0.061f, 0.6f);
         style.setColor(ImGuiCol.PopupBg,        0.110f, 0.122f, 0.145f, 1.0f);
 
         style.setColor(ImGuiCol.MenuBarBg,      0.094f, 0.102f, 0.122f, 1.0f);
