@@ -1,6 +1,7 @@
 package nl.framegengine.core.engine;
 
 import nl.framegengine.core.debugging.Debug;
+import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.shaders.ShaderManager;
 import nl.framegengine.core.utils.Constants;
 import nl.framegengine.editor.EditorWindow;
@@ -90,6 +91,7 @@ public class WindowManager {
         GLFW.glfwSetFramebufferSizeCallback(window, (window, width, height) -> {
             setWindowSize(width, height);
             updateProjectionMatrix();
+            if(SceneManager.currentScene != null && SceneManager.currentScene.getMainCamera() != null) SceneManager.currentScene.getMainCamera().updateProjectionMatrix();
             ShaderManager.updateGenericUniforms();
             if(!standalone){
                 EditorWindow.windowWidth = this.width;
@@ -210,7 +212,7 @@ public class WindowManager {
     public Matrix4f updateProjectionMatrix() {
         float aspectRatio = (float) width / height;
         projectionMatrix.setPerspective(Constants.FOV, aspectRatio, Constants.Z_NEAR, Constants.Z_FAR);
-        ShaderManager.updateGenericUniforms();        ShaderManager.updateGenericUniforms();
+        ShaderManager.updateGenericUniforms();
         return projectionMatrix;
     }
 

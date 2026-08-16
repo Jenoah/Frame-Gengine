@@ -61,6 +61,7 @@ public class RenderManager {
             regenerateFrameBuffer();
             window.setResize(false);
             window.updateProjectionMatrix();
+            if(currentScene.getMainCamera() != null) currentScene.getMainCamera().updateProjectionMatrix();
             PostProcessing.updateResolution();
         }
 
