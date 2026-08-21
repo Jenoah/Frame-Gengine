@@ -3,8 +3,6 @@ package nl.framegengine.core.lighting;
 import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.modelLoaders.PrimitiveLoader;
 import nl.framegengine.core.shaders.ShaderManager;
-import nl.framegengine.core.utils.Constants;
-import nl.framegengine.core.utils.ObjectPool;
 import nl.framegengine.core.visual.Material;
 import nl.framegengine.core.visual.Mesh;
 import nl.framegengine.core.visual.MeshMaterialSet;

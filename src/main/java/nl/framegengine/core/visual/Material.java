@@ -83,17 +83,32 @@ public class Material implements IJsonSerializable {
 //      Setters
 
     public Material setAmbientColor(Vector4f ambientColor) {
-        this.ambientColor = ambientColor;
+        this.ambientColor.set(ambientColor);
+        return this;
+    }
+
+    public Material setAmbientColor(float r, float g, float b, float a) {
+        this.ambientColor.set(r, g, b, a);
         return this;
     }
 
     public Material setDiffuseColor(Vector4f diffuseColor) {
-        this.diffuseColor = diffuseColor;
+        this.diffuseColor.set(diffuseColor);
+        return this;
+    }
+
+    public Material setDiffuseColor(float r, float g, float b, float a) {
+        this.diffuseColor.set(r, g, b, a);
         return this;
     }
 
     public Material setSpecularColor(Vector4f specularColor) {
-        this.specularColor = specularColor;
+        this.specularColor.set(specularColor);
+        return this;
+    }
+
+    public Material setSpecularColor(float r, float g, float b, float a) {
+        this.specularColor.set(r, g, b, a);
         return this;
     }
 

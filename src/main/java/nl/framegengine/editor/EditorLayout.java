@@ -27,6 +27,10 @@ public class EditorLayout {
         gameSettingsPopupPanel.updateTextureList();
     }
 
+    public void postStartInit(){
+        ((InfoPanel)editorPanels[3]).postStartInit();
+    }
+
     public void recalculatePanels(){
         editorPanels[0].setSizeAndPosition(0, topSpacing, fromPercentageX(20), fromPercentageY(70) - topSpacing);
         editorPanels[1].setSizeAndPosition(fromPercentageX(20), topSpacing, fromPercentageX(60), fromPercentageY(60) - topSpacing);

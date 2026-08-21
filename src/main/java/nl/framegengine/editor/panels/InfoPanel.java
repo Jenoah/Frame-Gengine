@@ -23,6 +23,7 @@ import nl.framegengine.editor.ManifestHelper;
 import nl.framegengine.editor.editorComponents.Icons;
 import nl.framegengine.editor.editorComponents.Panel;
 import nl.framegengine.editor.editorComponents.Text;
+import nl.framegengine.editor.editorRenderers.MaterialRenderer;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -35,14 +36,26 @@ public class InfoPanel extends EditorPanel {
 
     private IJsonSerializable currentlySelectedObject = null;
     private final List<Field> hierarchyObjects = new ArrayList<>();
-
     private String[] textureNames = new String[0];
+    private MaterialRenderer materialRenderer;
+    private int materialPreviewFBOID = -1;
+    private Vector4f vector4fPlaceholder = new Vector4f(0);
 
     public InfoPanel(int posX, int posY, int sizeX, int sizeY) {
         super(posX, posY, sizeX, sizeY);
         ManifestHelper.addEventCallback(this::updateTextureList);
         updateTextureList();
         windowName = Icons.BOX + " Info";
+        materialRenderer = new MaterialRenderer();
+    }
+
+    public void postStartInit(){
+        try {
+            materialRenderer.postStartInit();
+            materialPreviewFBOID = materialRenderer.getPreviewFBOID();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -209,8 +222,7 @@ public class InfoPanel extends EditorPanel {
                 }
             }
             case Material material -> {
-                ImGui.text(field.getName());
-                drawObject(material);
+                DrawMaterialPanel(material, drawingObject);
             }
             case Set<?> set -> {
                 if(!set.isEmpty()) {
@@ -276,7 +288,7 @@ public class InfoPanel extends EditorPanel {
 
             ImInt currentSelectedItem = new ImInt(selectedIndex);
 
-            if(ImGui.combo(fileType.name().toLowerCase() + "##" + field.hashCode(), currentSelectedItem, textureNames)){
+            if(ImGui.combo("##" + fileType.name().toLowerCase() + field.hashCode(), currentSelectedItem, textureNames)){
                 String selectedName = textureNames[currentSelectedItem.get()];
 
                 if(selectedName.equals(NO_TEXTURE_LABEL)) {
@@ -528,23 +540,260 @@ public class InfoPanel extends EditorPanel {
             ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingY());
             ImFloat linear = new ImFloat(light.getIntensity());
             if (ImGui.inputFloat("linear##" + light.getGuid(), linear)) {
-                light.setIntensity(linear.get());
+                light.setLinear(linear.get());
             }
 
             ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingY());
             ImFloat exponent = new ImFloat(light.getExponent());
-            if (ImGui.inputFloat("intensity##" + light.getGuid(), exponent)) {
-                light.setIntensity(exponent.get());
+            if (ImGui.inputFloat("exponent##" + light.getGuid(), exponent)) {
+                light.setExponent(exponent.get());
             }
 
             ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingY());
             ImFloat constant = new ImFloat(light.getConstant());
             if (ImGui.inputFloat("constant##" + light.getGuid(), constant)) {
-                light.setIntensity(constant.get());
+                light.setConstant(constant.get());
             }
 
             Panel.endPanel();
         }
     }
 
+    private void DrawMaterialPanel(Material material, Object drawingObject) {
+        ImGui.text(Icons.HIGHLIGHT + " Material");
+        ImGui.text("Shader: " + material.getShader().getClass().getSimpleName());
+        ImGui.spacing();
+
+        float tableWidth = Panel.getPanelWidth() - Panel.getPaddingX() * 2.0f;
+
+        if (ImGui.beginTable("materialSettings##" + material.getGuid(), 2, ImGuiTableFlags.SizingStretchProp, new ImVec2(tableWidth, 0))) {
+
+            ImGui.tableSetupColumn("Label", ImGuiTableColumnFlags.WidthStretch, 1.0f);
+            ImGui.tableSetupColumn("Value", ImGuiTableColumnFlags.WidthStretch, 4.0f);
+
+            ImGui.tableNextRow();
+            ImGui.tableNextColumn();
+            ImGui.tableNextColumn();
+
+            if (ImGui.beginTable(
+                    "materialRGBAHeader##" + material.getGuid(), 4, ImGuiTableFlags.SizingStretchSame)) {
+
+                ImGui.tableNextColumn();
+                Text.ColoredAndCentered("R", 0.85f, 0.25f, 0.25f);
+
+                ImGui.tableNextColumn();
+                Text.ColoredAndCentered("G", 0.30f, 0.85f, 0.30f);
+
+                ImGui.tableNextColumn();
+                Text.ColoredAndCentered("B", 0.35f, 0.50f, 1.00f);
+
+                ImGui.tableNextColumn();
+                Text.ColoredAndCentered("A", 1.00f, 1.00f, 1.00f);
+
+                ImGui.endTable();
+            }
+
+            ImGui.tableNextRow();
+            ImGui.tableNextColumn();
+            ImGui.text("Diffuse");
+
+            ImGui.tableNextColumn();
+
+            Vector4f colorVector = vector4fPlaceholder.set(material.getDiffuseColor());
+
+            float[] lightColor = {
+                    colorVector.x,
+                    colorVector.y,
+                    colorVector.z,
+                    colorVector.w
+            };
+
+
+            ImGui.setNextItemWidth(-1);
+            if (ImGui.inputFloat4("##materialDiffuse" + material.getGuid(), lightColor)) {
+                material.setDiffuseColor(lightColor[0], lightColor[1], lightColor[2], lightColor[3]);
+            }
+
+            ImGui.tableNextRow();
+            ImGui.tableNextColumn();
+            ImGui.text("Ambient");
+
+            ImGui.tableNextColumn();
+
+            colorVector.set(material.getAmbientColor());
+
+            lightColor = new float[]{
+                    colorVector.x,
+                    colorVector.y,
+                    colorVector.z,
+                    colorVector.w
+            };
+
+
+            ImGui.setNextItemWidth(-1);
+            if (ImGui.inputFloat4("##materialAmbient" + material.getGuid(), lightColor)) {
+                material.setAmbientColor(lightColor[0], lightColor[1], lightColor[2], lightColor[3]);
+            }
+
+            ImGui.tableNextRow();
+            ImGui.tableNextColumn();
+            ImGui.text("Specular");
+
+            ImGui.tableNextColumn();
+
+            colorVector.set(material.getSpecularColor());
+
+            lightColor = new float[]{
+                    colorVector.x,
+                    colorVector.y,
+                    colorVector.z,
+                    colorVector.w
+            };
+
+
+            ImGui.setNextItemWidth(-1);
+            if (ImGui.inputFloat4("##materialSpecular" + material.getGuid(), lightColor)) {
+                material.setSpecularColor(lightColor[0], lightColor[1], lightColor[2], lightColor[3]);
+            }
+
+            ImGui.endTable();
+        }
+
+        ImGui.spacing();
+
+        //ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingX());
+        ImFloat reflectance = new ImFloat(material.getReflectance());
+        if (ImGui.inputFloat("reflectance##reflectance" + material.getGuid(), reflectance)) {
+            material.setReflectance(reflectance.get());
+        }
+
+        //ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingX());
+        ImFloat metallic = new ImFloat(material.getMetallic());
+        if (ImGui.inputFloat("metallic##metallic" + material.getGuid(), metallic)) {
+            material.setMetallic(metallic.get());
+        }
+
+        //ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingX());
+        ImFloat roughness = new ImFloat(material.getRoughness());
+        if (ImGui.inputFloat("roughness##roughness" + material.getGuid(), roughness)) {
+            material.setRoughness(roughness.get());
+        }
+
+        //ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingX());
+        ImFloat tiling = new ImFloat(material.getTilingScale());
+        if (ImGui.inputFloat("tiling##tiling" + material.getGuid(), tiling)) {
+            material.setTilingScale(tiling.get());
+        }
+
+        ImGui.spacing();
+
+        //ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingX());
+        if (ImGui.beginTable("materialTextures##" + material.getGuid(), 2, ImGuiTableFlags.SizingStretchProp, new ImVec2(tableWidth, 0))) {
+
+            ImGui.tableSetupColumn("Label", ImGuiTableColumnFlags.WidthStretch, 1.0f);
+            ImGui.tableSetupColumn("Value", ImGuiTableColumnFlags.WidthStretch, 2.0f);
+
+            ImGui.tableNextRow();
+            ImGui.tableNextColumn();
+
+            ImGui.text("Albedo");
+            ImGui.tableNextColumn();
+            try {
+                Field albedoField = material.getClass().getDeclaredField("albedoTexture");
+                albedoField.setAccessible(true);
+                drawManifestType(ManifestHelper.manifestFileType.TEXTURE, material.getAlbedoTexture(), albedoField, drawingObject);
+            } catch (Exception e) {
+                Debug.logError("Error loading texture: " + e);
+            }
+
+            ImGui.tableNextRow();
+            ImGui.tableNextColumn();
+
+            ImGui.text("Normal");
+            ImGui.tableNextColumn();
+
+            try {
+                Field normalField = material.getClass().getDeclaredField("normalMap");
+                normalField.setAccessible(true);
+                drawManifestType(ManifestHelper.manifestFileType.TEXTURE, material.getNormalMap(), normalField, drawingObject);
+            } catch (Exception e) {
+                Debug.logError("Error loading texture: " + e);
+            }
+
+            ImGui.tableNextRow();
+            ImGui.tableNextColumn();
+
+            ImGui.text("Roughness");
+            ImGui.tableNextColumn();
+
+            try {
+                Field roughnessField = material.getClass().getDeclaredField("roughnessMap");
+                roughnessField.setAccessible(true);
+                drawManifestType(ManifestHelper.manifestFileType.TEXTURE, material.getRoughnessMap(), roughnessField, drawingObject);
+            } catch (Exception e) {
+                Debug.logError("Error loading texture: " + e);
+            }
+
+            ImGui.tableNextRow();
+            ImGui.tableNextColumn();
+
+            ImGui.text("Metallic");
+            ImGui.tableNextColumn();
+
+            try {
+                Field metallicField = material.getClass().getDeclaredField("metallicMap");
+                metallicField.setAccessible(true);
+                drawManifestType(ManifestHelper.manifestFileType.TEXTURE, material.getMetallicMap(), metallicField, drawingObject);
+            } catch (Exception e) {
+                Debug.logError("Error loading texture: " + e);
+            }
+
+            ImGui.tableNextRow();
+            ImGui.tableNextColumn();
+
+            ImGui.text("Ambient Occlusion");
+            ImGui.tableNextColumn();
+
+            try {
+                Field aoField = material.getClass().getDeclaredField("aoMap");
+                aoField.setAccessible(true);
+                drawManifestType(ManifestHelper.manifestFileType.TEXTURE, material.getAoMap(), aoField, drawingObject);
+            } catch (Exception e) {
+                Debug.logError("Error loading texture: " + e);
+            }
+
+            ImGui.endTable();
+        }
+
+        ImGui.spacing();
+
+        //ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingX());
+        ImBoolean doubleSided = new ImBoolean(material.isDoubleSided());
+        if (ImGui.checkbox("doubleSided##doubleSided" + material.getGuid(), doubleSided)) {
+            material.setDoubleSided(doubleSided.get());
+        }
+
+        //ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingX());
+        ImBoolean castShadow = new ImBoolean(material.castShadow());
+        if (ImGui.checkbox("castShadow##castShadow" + material.getGuid(), castShadow)) {
+            material.castShadow(castShadow.get());
+        }
+
+        //ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingX());
+        ImBoolean receiveShadow = new ImBoolean(material.receiveShadows());
+        if (ImGui.checkbox("receiveShadow##receiveShadow" + material.getGuid(), receiveShadow)) {
+            material.receiveShadows(receiveShadow.get());
+        }
+
+        //ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingX());
+        ImBoolean transparent = new ImBoolean(material.isTransparent());
+        if (ImGui.checkbox("transparent##transparent" + material.getGuid(), transparent)) {
+            material.setTransparent(transparent.get());
+        }
+
+        ImGui.spacing();
+
+        materialRenderer.renderPreview(material);
+        ImGui.image(materialPreviewFBOID, new ImVec2(tableWidth, tableWidth));
+    }
 }

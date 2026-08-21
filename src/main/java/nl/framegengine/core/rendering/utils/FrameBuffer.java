@@ -2,6 +2,7 @@ package nl.framegengine.core.rendering.utils;
 
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.engine.WindowManager;
+import nl.framegengine.editor.EditorWindow;
 import org.lwjgl.opengl.*;
 
 import java.nio.ByteBuffer;
@@ -69,7 +70,9 @@ public class FrameBuffer {
      */
     public void unbindFrameBuffer() {
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
-        GL11.glViewport(0, 0, WindowManager.getInstance().getWidth(), WindowManager.getInstance().getHeight());
+        int width = WindowManager.getInstance() != null ? WindowManager.getInstance().getWidth() : EditorWindow.windowWidth;
+        int height = WindowManager.getInstance() != null ? WindowManager.getInstance().getHeight() : EditorWindow.windowHeight;
+        GL11.glViewport(0, 0, width, height);
     }
 
     /**

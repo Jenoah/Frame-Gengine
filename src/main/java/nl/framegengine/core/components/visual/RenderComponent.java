@@ -33,6 +33,8 @@ public class RenderComponent extends Component {
     protected List<String> meshPaths = new ArrayList<>();
 
     protected final Set<MeshMaterialSet> meshMaterialSets = new HashSet<>();
+    protected Set<String> fieldsToIgnore = Set.of("fieldsToIgnore", "runInEditor", "guid", "root", "hasCleanedUp", "addedDuringPlaymode", "hasInitiated", "meshPaths");
+
 
     public RenderComponent(){ }
 
@@ -275,5 +277,10 @@ public class RenderComponent extends Component {
 
 
         return this;
+    }
+
+    @Override
+    public final Set<String> getFieldsToIgnore(){
+        return fieldsToIgnore;
     }
 }

@@ -29,6 +29,7 @@ public class Icons {
     public static final String AUDIO            = "\uF610";
     public static final String GLASSES          = "\uF343";
     public static final String HEADPHONE        = "\uF413";
+    public static final String HIGHLIGHT        = "\uF8EE";
 
     public static String GetIcon(IJsonSerializable object){
         if(object instanceof Camera) return CAMERA;
