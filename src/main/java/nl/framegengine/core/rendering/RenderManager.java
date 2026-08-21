@@ -60,8 +60,10 @@ public class RenderManager {
             glViewport(0, 0, window.getWidth(), window.getHeight());
             regenerateFrameBuffer();
             window.setResize(false);
-            window.updateProjectionMatrix();
-            if(currentScene.getMainCamera() != null) currentScene.getMainCamera().updateProjectionMatrix();
+            if(currentScene.getMainCamera() != null){
+                currentScene.getMainCamera().updateAspectRatio();
+                currentScene.getMainCamera().updateProjectionMatrix();
+            }
             PostProcessing.updateResolution();
         }
 

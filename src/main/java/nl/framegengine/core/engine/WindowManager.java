@@ -90,8 +90,10 @@ public class WindowManager {
 
         GLFW.glfwSetFramebufferSizeCallback(window, (window, width, height) -> {
             setWindowSize(width, height);
-            updateProjectionMatrix();
-            if(SceneManager.currentScene != null && SceneManager.currentScene.getMainCamera() != null) SceneManager.currentScene.getMainCamera().updateProjectionMatrix();
+            if(SceneManager.currentScene != null && SceneManager.currentScene.getMainCamera() != null){
+                SceneManager.currentScene.getMainCamera().updateAspectRatio();
+                SceneManager.currentScene.getMainCamera().updateProjectionMatrix();
+            }
             ShaderManager.updateGenericUniforms();
             if(!standalone){
                 EditorWindow.windowWidth = this.width;
@@ -205,23 +207,6 @@ public class WindowManager {
 
     public void setClearColor(float r, float g, float b, float a){ glClearColor(r,g,b,a); }
 
-    public Matrix4f getProjectionMatrix() {
-        return projectionMatrix;
-    }
-
-    public Matrix4f updateProjectionMatrix() {
-        float aspectRatio = (float) width / height;
-        projectionMatrix.setPerspective(Constants.FOV, aspectRatio, Constants.Z_NEAR, Constants.Z_FAR);
-        ShaderManager.updateGenericUniforms();
-        return projectionMatrix;
-    }
-
-    public Matrix4f updateProjectionMatrix(Matrix4f matrix, int width, int height) {
-        float aspectRatio = (float) width / height;
-        matrix.setPerspective(Constants.FOV, aspectRatio, Constants.Z_NEAR, Constants.Z_FAR);
-        ShaderManager.updateGenericUniforms();
-        return matrix;
-    }
 
     public boolean isStandalone() {
         return standalone;

@@ -33,7 +33,6 @@ public class EngineManager {
         window = WindowManager.getInstance();
         gameLogic = IGameLogic;
         window.init();
-        window.updateProjectionMatrix();
 
         gameLogic.init();
         MouseInput.init();

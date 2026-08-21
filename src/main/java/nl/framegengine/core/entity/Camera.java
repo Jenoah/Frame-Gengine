@@ -31,6 +31,7 @@ public class Camera extends Component {
     private final AABB worldFrustumTestingAABB = new AABB();
     private final Vector3f frustumPlaneNormal = new Vector3f();
     private boolean isShowingProxy = false;
+    private float aspectRatio = 1.777f;
     public float FOV = 60f;
 
     public Camera() {
@@ -45,6 +46,7 @@ public class Camera extends Component {
         }
 
         updateViewFrustum();
+        updateAspectRatio();
         updateProjectionMatrix();
         //root.callUpdate();
     }
@@ -142,9 +144,16 @@ public class Camera extends Component {
     }
 
     public void updateProjectionMatrix(){
-        float aspectRatio = windowManager == null ? 1.777f : ((float) windowManager.getWidth() / windowManager.getHeight());
         projectionMatrix.setPerspective((float) Math.toRadians(FOV), aspectRatio, Constants.Z_NEAR, Constants.Z_FAR);
         ShaderManager.updateGenericUniforms();
+    }
+
+    public void updateAspectRatio(){
+        aspectRatio = windowManager == null ? 1.777f : ((float) windowManager.getWidth() / windowManager.getHeight());
+    }
+
+    public void updateAspectRatio(float aspect){
+        aspectRatio = aspect;
     }
 
     public Matrix4f getProjectionMatrix(){

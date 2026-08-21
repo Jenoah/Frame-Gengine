@@ -30,7 +30,7 @@ public class DebugShader extends Shader{
 
         this.setUniform("modelMatrix", modelMatrix);
         this.setUniform("viewMatrix", camera.getViewMatrix());
-        this.setUniform("projectionMatrix", window.getProjectionMatrix());
+        this.setUniform("projectionMatrix", camera.getProjectionMatrix());
     }
 
     public void setColor(Vector3f color){
