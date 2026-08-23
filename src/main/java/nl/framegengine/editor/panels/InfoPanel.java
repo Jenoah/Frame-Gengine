@@ -222,7 +222,7 @@ public class InfoPanel extends EditorPanel {
                 }
             }
             case Material material -> {
-                DrawMaterialPanel(material, drawingObject);
+                DrawMaterialPanel(material);
             }
             case Set<?> set -> {
                 if(!set.isEmpty()) {
@@ -559,7 +559,7 @@ public class InfoPanel extends EditorPanel {
         }
     }
 
-    private void DrawMaterialPanel(Material material, Object drawingObject) {
+    private void DrawMaterialPanel(Material material) {
         ImGui.text(Icons.HIGHLIGHT + " Material");
         ImGui.text("Shader: " + material.getShader().getClass().getSimpleName());
         ImGui.spacing();
@@ -701,7 +701,7 @@ public class InfoPanel extends EditorPanel {
             try {
                 Field albedoField = material.getClass().getDeclaredField("albedoTexture");
                 albedoField.setAccessible(true);
-                drawManifestType(ManifestHelper.manifestFileType.TEXTURE, material.getAlbedoTexture(), albedoField, drawingObject);
+                drawManifestType(ManifestHelper.manifestFileType.TEXTURE, material.getAlbedoTexture(), albedoField, material);
             } catch (Exception e) {
                 Debug.logError("Error loading texture: " + e);
             }
@@ -715,7 +715,7 @@ public class InfoPanel extends EditorPanel {
             try {
                 Field normalField = material.getClass().getDeclaredField("normalMap");
                 normalField.setAccessible(true);
-                drawManifestType(ManifestHelper.manifestFileType.TEXTURE, material.getNormalMap(), normalField, drawingObject);
+                drawManifestType(ManifestHelper.manifestFileType.TEXTURE, material.getNormalMap(), normalField, material);
             } catch (Exception e) {
                 Debug.logError("Error loading texture: " + e);
             }
@@ -729,7 +729,7 @@ public class InfoPanel extends EditorPanel {
             try {
                 Field roughnessField = material.getClass().getDeclaredField("roughnessMap");
                 roughnessField.setAccessible(true);
-                drawManifestType(ManifestHelper.manifestFileType.TEXTURE, material.getRoughnessMap(), roughnessField, drawingObject);
+                drawManifestType(ManifestHelper.manifestFileType.TEXTURE, material.getRoughnessMap(), roughnessField, material);
             } catch (Exception e) {
                 Debug.logError("Error loading texture: " + e);
             }
@@ -743,7 +743,7 @@ public class InfoPanel extends EditorPanel {
             try {
                 Field metallicField = material.getClass().getDeclaredField("metallicMap");
                 metallicField.setAccessible(true);
-                drawManifestType(ManifestHelper.manifestFileType.TEXTURE, material.getMetallicMap(), metallicField, drawingObject);
+                drawManifestType(ManifestHelper.manifestFileType.TEXTURE, material.getMetallicMap(), metallicField, material);
             } catch (Exception e) {
                 Debug.logError("Error loading texture: " + e);
             }
@@ -757,7 +757,7 @@ public class InfoPanel extends EditorPanel {
             try {
                 Field aoField = material.getClass().getDeclaredField("aoMap");
                 aoField.setAccessible(true);
-                drawManifestType(ManifestHelper.manifestFileType.TEXTURE, material.getAoMap(), aoField, drawingObject);
+                drawManifestType(ManifestHelper.manifestFileType.TEXTURE, material.getAoMap(), aoField, material);
             } catch (Exception e) {
                 Debug.logError("Error loading texture: " + e);
             }
