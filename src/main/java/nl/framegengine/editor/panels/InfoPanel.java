@@ -62,10 +62,10 @@ public class InfoPanel extends EditorPanel {
     @Override
     public void renderFrame() {
         if(currentlySelectedObject == null) return;
-        DrawTitlePanel(currentlySelectedObject);
+        drawTitlePanel(currentlySelectedObject);
 
         if(currentlySelectedObject instanceof GameObject gameObject){
-            DrawTransform(gameObject);
+            drawTransform(gameObject);
 
             gameObject.getComponents().forEach(comp -> {
                 Panel.startPanel();
@@ -104,7 +104,11 @@ public class InfoPanel extends EditorPanel {
         }
 
         if(currentlySelectedObject instanceof Light){
-            DrawLightSettingsPanel((Light)currentlySelectedObject);
+            drawLightSettingsPanel((Light)currentlySelectedObject);
+        }
+
+        if(currentlySelectedObject instanceof Material){
+            dra
         }
     }
 
@@ -224,7 +228,7 @@ public class InfoPanel extends EditorPanel {
                 }
             }
             case Material material -> {
-                DrawMaterialPanel(material);
+                drawMaterialPanel(material);
             }
             case Set<?> set -> {
                 if(!set.isEmpty()) {
@@ -353,7 +357,7 @@ public class InfoPanel extends EditorPanel {
     }
 
     // Individual items
-    private void DrawTitlePanel(IJsonSerializable jsonObject) {
+    private void drawTitlePanel(IJsonSerializable jsonObject) {
         boolean isGameObject = jsonObject instanceof GameObject;
 
         Panel.startPanel();
@@ -393,7 +397,7 @@ public class InfoPanel extends EditorPanel {
         Panel.endPanel();
     }
 
-    private void DrawTransform(GameObject gameObject){
+    private void drawTransform(GameObject gameObject){
         Panel.startPanel();
         ImGui.text(Icons.TRANSFORM + " Transform");
 
@@ -490,7 +494,7 @@ public class InfoPanel extends EditorPanel {
         Panel.endPanel();
     }
 
-    private void DrawLightSettingsPanel(Light light) {
+    private void drawLightSettingsPanel(Light light) {
         Panel.startPanel();
 
         ImGui.text(Icons.LIGHT + " " + light.getClass().getSimpleName());
@@ -573,7 +577,7 @@ public class InfoPanel extends EditorPanel {
         }
     }
 
-    private void DrawMaterialPanel(Material material) {
+    private void drawMaterialPanel(Material material) {
         ImGui.text(Icons.HIGHLIGHT + " Material");
         ImGui.text("Shader: " + material.getShader().getClass().getSimpleName());
         ImGui.spacing();
