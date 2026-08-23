@@ -40,6 +40,7 @@ public class InfoPanel extends EditorPanel {
     private MaterialRenderer materialRenderer;
     private int materialPreviewFBOID = -1;
     private Vector4f vector4fPlaceholder = new Vector4f(0);
+    private ImString nameBuffer = new ImString();
 
     public InfoPanel(int posX, int posY, int sizeX, int sizeY) {
         super(posX, posY, sizeX, sizeY);
@@ -118,6 +119,7 @@ public class InfoPanel extends EditorPanel {
                 hierarchyObjects.add(ClassHelper.getFieldFromObject("localPosition", currentlySelectedObject.getClass()));
                 hierarchyObjects.add(ClassHelper.getFieldFromObject("localRotation", currentlySelectedObject.getClass()));
                 hierarchyObjects.add(ClassHelper.getFieldFromObject("scale", currentlySelectedObject.getClass()));
+                nameBuffer.set(((GameObject) currentlySelectedObject).getName());
             }
         } catch (NoSuchFieldException ignored) {}
         ClassHelper.getAllPublicAndProtectedProperties(hierarchyObjects, currentlySelectedObject.getClass());
@@ -368,12 +370,24 @@ public class InfoPanel extends EditorPanel {
 
             float rightEdge = ImGui.getCursorPosX() + ImGui.getContentRegionAvailX();
 
+            ImGui.newLine();
+
+            ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingX());
+            ImGui.setNextItemWidth(ImGui.getContentRegionAvailX() - checkboxWidth * 2);
+            if(ImGui.inputText("Name##" + gameObject.getGuid(), nameBuffer)){
+                gameObject.setName(nameBuffer.get());
+            }
+
+            ImGui.sameLine();
             ImGui.setCursorPosX(rightEdge - checkboxWidth - Panel.getPaddingX());
 
             if (ImGui.checkbox("Enabled##" + gameObject.getGuid(), gameObject.isEnabled())) {
                 gameObject.setEnabled(!gameObject.isEnabled());
                 gameObject.callUpdate();
             }
+
+
+
         }
 
         Panel.endPanel();
