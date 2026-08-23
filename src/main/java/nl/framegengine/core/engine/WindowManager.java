@@ -4,7 +4,6 @@ import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.shaders.ShaderManager;
 import nl.framegengine.editor.EditorWindow;
-import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWImage;
@@ -26,7 +25,6 @@ public class WindowManager {
     private long window;
     private boolean resize = false;
     private final boolean vSync;
-    private final Matrix4f projectionMatrix = new Matrix4f();
     private boolean standalone = true;
     private boolean isInFocus = true;
 
