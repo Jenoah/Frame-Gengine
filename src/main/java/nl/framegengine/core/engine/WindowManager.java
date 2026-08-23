@@ -3,7 +3,6 @@ package nl.framegengine.core.engine;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.shaders.ShaderManager;
-import nl.framegengine.core.utils.Constants;
 import nl.framegengine.editor.EditorWindow;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
@@ -142,7 +141,8 @@ public class WindowManager {
     }
 
     public boolean isKeyPressed(int keyCode){
-        return GLFW.glfwGetKey(window, keyCode) == GLFW.GLFW_PRESS;
+        if(isInFocus) return GLFW.glfwGetKey(window, keyCode) == GLFW.GLFW_PRESS;
+        return false;
     }
 
     public boolean isResize(){
