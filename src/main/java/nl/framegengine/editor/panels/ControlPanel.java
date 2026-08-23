@@ -36,22 +36,22 @@ public class ControlPanel extends EditorPanel {
 
         ImGui.setCursorPos(startX, startY);
 
-        if (Button.Regular(Icons.PLAY)) {
+        if (Button.regular(Icons.PLAY)) {
             if (gamePanel != null) gamePanel.startGame();
         }
         ImGui.sameLine(0, spacing);
 
-        if (Button.Regular(Icons.STOP)) {
+        if (Button.regular(Icons.STOP)) {
             if (gamePanel != null) gamePanel.stopGame();
         }
         ImGui.sameLine(0, spacing);
 
-        if (ImGui.button("Stats", buttonWidth, buttonHeight)) {
+        if (Button.regular("Stats")) {
             if (gamePanel != null) gamePanel.toggleStats();
         }
         ImGui.sameLine(0, spacing);
 
-        if (ImGui.button("Wireframe", buttonWidth, buttonHeight)) {
+        if (Button.regular("Wireframe")) {
             if (gamePanel != null) gamePanel.toggleWireframe();
         }
         ImGui.sameLine(0, spacing);

@@ -97,7 +97,7 @@ public class HierarchyPanel extends EditorPanel {
         }
 
         if(!hasChildren){
-            if (Button.Regular(goLabel, true)) {
+            if (Button.regular(goLabel, true)) {
                 setCurrentlySelectedGameObject(go);
             }
         }else {

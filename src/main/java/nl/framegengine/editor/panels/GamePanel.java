@@ -108,13 +108,13 @@ public class GamePanel extends EditorPanel {
         if(showStats) DrawStatsPanel();
 
         if(!EngineSettings.isInGame){
-            if((Button.Regular(Icons.TRANSFORM, sizeX / 2f - 48f, EditorLayout.topSpacing + 16) || WindowManager.getInstance().isKeyPressed(GLFW.GLFW_KEY_Q)) && gizmoMovement != null){
+            if((Button.regular(Icons.TRANSFORM, sizeX / 2f - 48f, EditorLayout.topSpacing + 16) || WindowManager.getInstance().isKeyPressed(GLFW.GLFW_KEY_Q)) && gizmoMovement != null){
                 gizmoMovement.SetTransformMode(GizmoMovement.TransformMode.TRANSLATE);
             }
-            if((Button.Regular(Icons.ROTATE, sizeX / 2f, EditorLayout.topSpacing + 16) || WindowManager.getInstance().isKeyPressed(GLFW.GLFW_KEY_R)) && gizmoMovement != null){
+            if((Button.regular(Icons.ROTATE, sizeX / 2f, EditorLayout.topSpacing + 16) || WindowManager.getInstance().isKeyPressed(GLFW.GLFW_KEY_R)) && gizmoMovement != null){
                 gizmoMovement.SetTransformMode(GizmoMovement.TransformMode.ROTATE);
             }
-            if((Button.Regular(Icons.SCALE, sizeX / 2f + 48f, EditorLayout.topSpacing + 16)  || WindowManager.getInstance().isKeyPressed(GLFW.GLFW_KEY_E)) && gizmoMovement != null){
+            if((Button.regular(Icons.SCALE, sizeX / 2f + 48f, EditorLayout.topSpacing + 16)  || WindowManager.getInstance().isKeyPressed(GLFW.GLFW_KEY_E)) && gizmoMovement != null){
                 gizmoMovement.SetTransformMode(GizmoMovement.TransformMode.SCALE);
             }
         }
@@ -212,6 +212,7 @@ public class GamePanel extends EditorPanel {
 
     public void setAspectRatio(float aspectRatio){
         this.aspectRatio = aspectRatio;
+        WindowManager.getInstance().setResize(true);
         recalculateResolution(true);
     }
 
@@ -312,6 +313,14 @@ public class GamePanel extends EditorPanel {
 
     public void toggleWireframe(){
         RenderManager.toggleWireframe();
+    }
+
+    public int getWidth(){
+        return aspectWidth;
+    }
+
+    public int getHeight(){
+        return aspectHeight;
     }
 
 }

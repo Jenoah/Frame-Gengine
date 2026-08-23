@@ -4,21 +4,21 @@ import imgui.ImGui;
 
 public class Button {
 
-    public static boolean Regular(String text, float posX, float posY){
+    public static boolean regular(String text, float posX, float posY){
         ImGui.setCursorPos(posX, posY);
-        return Regular(text, false);
+        return regular(text, false);
     }
 
-    public static boolean Regular(String text, float posX, float posY, boolean autoWidth){
+    public static boolean regular(String text, float posX, float posY, boolean autoWidth){
         ImGui.setCursorPos(posX, posY);
-        return Regular(text, autoWidth);
+        return regular(text, autoWidth);
     }
 
-    public static boolean Regular(String text){
-        return Regular(text, false);
+    public static boolean regular(String text){
+        return regular(text, false);
     }
 
-    public static boolean Regular(String text, boolean autoWidth){
+    public static boolean regular(String text, boolean autoWidth){
         if(!autoWidth) {
             return ImGui.button(text);
         }

@@ -6,6 +6,7 @@ import imgui.type.ImInt;
 import imgui.type.ImString;
 import nl.framegengine.core.utils.FileHelper;
 import nl.framegengine.editor.*;
+import nl.framegengine.editor.editorComponents.Button;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,13 +54,13 @@ public class GameSettingsPopupPanel extends EditorPanel {
                 EngineSettings.currentProjectIconGuid = textureGUID;
             }
             ImGui.setCursorPos(16, sizeY - 32);
-            if(ImGui.button("Save settings")){
+            if(Button.regular("Save settings")){
                 saveSettings();
                 EngineSettings.saveSettings();
                 hide();
             }
             ImGui.sameLine();
-            if(ImGui.button("Cancel")){
+            if(Button.regular("Cancel")){
                 hide();
             }
 
