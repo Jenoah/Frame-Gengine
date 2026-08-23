@@ -103,12 +103,16 @@ public class InfoPanel extends EditorPanel {
             });
         }
 
-        if(currentlySelectedObject instanceof Light){
-            drawLightSettingsPanel((Light)currentlySelectedObject);
+        if(currentlySelectedObject instanceof Light light){
+            drawLightSettingsPanel(light);
         }
 
-        if(currentlySelectedObject instanceof Material){
-            dra
+        if(currentlySelectedObject instanceof Material material){
+            Panel.startPanel();
+            ImGui.beginGroup();
+            drawMaterialPanel(material);
+            ImGui.endGroup();
+            Panel.endPanel();
         }
     }
 
