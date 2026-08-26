@@ -31,8 +31,7 @@ public class EditorGameLauncher {
     }
 
     public void stop(){
-        //SceneManager.setCurrentScene(1);
-        //engine.stop();
-        //engine = null;
+        engine.stop();
+        engine = null;
     }
 }

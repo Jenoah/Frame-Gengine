@@ -69,7 +69,11 @@ public class Styling {
     public static void ApplyFonts(){
         ImGuiIO io = ImGui.getIO();
         byte[] jostFont = FileHelper.loadResourceAsBytes("/fonts/Jost-Regular.ttf");
-        io.getFonts().addFontFromMemoryTTF(jostFont, 18.0f);
+
+        ImFontConfig fontConfig = new ImFontConfig();
+        fontConfig.setFontDataOwnedByAtlas(false);
+        io.getFonts().addFontFromMemoryTTF(jostFont, 18.0f, fontConfig);
+        fontConfig.destroy();
 
         ImFontConfig iconConfig = new ImFontConfig();
         iconConfig.setMergeMode(true);
@@ -85,9 +89,7 @@ public class Styling {
         };
 
         io.getFonts().addFontFromMemoryTTF(iconsFont, 10.0f, iconConfig, iconRanges);
-
         iconConfig.destroy();
-
 
         io.getFonts().build();
     }

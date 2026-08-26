@@ -256,7 +256,11 @@ public class GamePanel extends EditorPanel {
                 addEditorCamera();
             }
         }
+    }
 
+    public void stopEngine(){
+        if(editorGameLauncher == null) return;
+        editorGameLauncher.stop();
     }
 
     public void toggleStats(){
