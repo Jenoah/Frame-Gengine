@@ -21,6 +21,7 @@ import nl.framegengine.editor.EditorPanel;
 import nl.framegengine.editor.ImGuiHelper;
 import nl.framegengine.editor.ManifestHelper;
 import nl.framegengine.editor.editorComponents.Icons;
+import nl.framegengine.editor.editorComponents.InputField;
 import nl.framegengine.editor.editorComponents.Panel;
 import nl.framegengine.editor.editorComponents.Text;
 import nl.framegengine.editor.editorRenderers.MaterialRenderer;
@@ -39,8 +40,8 @@ public class InfoPanel extends EditorPanel {
     private String[] textureNames = new String[0];
     private MaterialRenderer materialRenderer;
     private int materialPreviewFBOID = -1;
-    private Vector4f vector4fPlaceholder = new Vector4f(0);
     private ImString nameBuffer = new ImString();
+
 
     public InfoPanel(int posX, int posY, int sizeX, int sizeY) {
         super(posX, posY, sizeX, sizeY);
@@ -618,65 +619,23 @@ public class InfoPanel extends EditorPanel {
             ImGui.tableNextRow();
             ImGui.tableNextColumn();
             ImGui.text("Diffuse");
-
             ImGui.tableNextColumn();
-
-            Vector4f colorVector = vector4fPlaceholder.set(material.getDiffuseColor());
-
-            float[] lightColor = {
-                    colorVector.x,
-                    colorVector.y,
-                    colorVector.z,
-                    colorVector.w
-            };
-
-
             ImGui.setNextItemWidth(-1);
-            if (ImGui.inputFloat4("##materialDiffuse" + material.getGuid(), lightColor)) {
-                material.setDiffuseColor(lightColor[0], lightColor[1], lightColor[2], lightColor[3]);
-            }
+            InputField.vector4("##materialDiffuse" + material.getGuid(), material.getDiffuseColor());
 
             ImGui.tableNextRow();
             ImGui.tableNextColumn();
             ImGui.text("Ambient");
-
             ImGui.tableNextColumn();
-
-            colorVector.set(material.getAmbientColor());
-
-            lightColor = new float[]{
-                    colorVector.x,
-                    colorVector.y,
-                    colorVector.z,
-                    colorVector.w
-            };
-
-
             ImGui.setNextItemWidth(-1);
-            if (ImGui.inputFloat4("##materialAmbient" + material.getGuid(), lightColor)) {
-                material.setAmbientColor(lightColor[0], lightColor[1], lightColor[2], lightColor[3]);
-            }
+            InputField.vector4("##materialAmbient" + material.getGuid(), material.getAmbientColor());
 
             ImGui.tableNextRow();
             ImGui.tableNextColumn();
             ImGui.text("Specular");
-
             ImGui.tableNextColumn();
-
-            colorVector.set(material.getSpecularColor());
-
-            lightColor = new float[]{
-                    colorVector.x,
-                    colorVector.y,
-                    colorVector.z,
-                    colorVector.w
-            };
-
-
             ImGui.setNextItemWidth(-1);
-            if (ImGui.inputFloat4("##materialSpecular" + material.getGuid(), lightColor)) {
-                material.setSpecularColor(lightColor[0], lightColor[1], lightColor[2], lightColor[3]);
-            }
+            InputField.vector4("##materialSpecular" + material.getGuid(), material.getSpecularColor());
 
             ImGui.endTable();
         }

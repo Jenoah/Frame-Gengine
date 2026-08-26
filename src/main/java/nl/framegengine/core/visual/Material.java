@@ -14,9 +14,9 @@ import java.io.StringReader;
 
 public class Material implements IJsonSerializable {
 
-    protected Vector4f ambientColor = Constants.DEFAULT_COLOR;
-    protected Vector4f diffuseColor = Constants.DEFAULT_COLOR;
-    protected Vector4f specularColor = Constants.DEFAULT_COLOR;
+    protected Vector4f ambientColor = new Vector4f(Constants.DEFAULT_COLOR);
+    protected Vector4f diffuseColor = new Vector4f(Constants.DEFAULT_COLOR);
+    protected Vector4f specularColor = new Vector4f(Constants.DEFAULT_COLOR);
 
     protected float reflectance = 0.04f;
     protected float roughness = 0.1f;
