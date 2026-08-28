@@ -1,11 +1,20 @@
 package nl.framegengine.core.entity;
 
+import imgui.ImGui;
+import imgui.ImVec2;
+import imgui.flag.ImGuiTableColumnFlags;
+import imgui.flag.ImGuiTableFlags;
 import nl.framegengine.core.utils.*;
 import nl.framegengine.core.components.Component;
 import nl.framegengine.core.components.visual.RenderComponent;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.rendering.RenderManager;
 import nl.framegengine.editor.EngineSettings;
+import nl.framegengine.editor.editorComponents.Icons;
+import nl.framegengine.editor.editorComponents.Panel;
+import nl.framegengine.editor.editorComponents.Text;
+import nl.framegengine.editor.panels.ICustomEditorPanel;
+import nl.framegengine.editor.panels.InfoPanel;
 import org.joml.*;
 import org.joml.Math;
 import javax.json.*;
@@ -14,7 +23,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 
-public class GameObject implements IJsonSerializable{
+public class GameObject implements IJsonSerializable, ICustomEditorPanel {
     private String name = "GameObject";
     private final Vector3f localPosition = new Vector3f();
     private final Quaternionf localRotation = new Quaternionf();
@@ -629,5 +638,123 @@ public class GameObject implements IJsonSerializable{
         if(JsonHelper.hasJsonKey(jsonInfo, "parentGuid")) setParentByGUID(jsonInfo.getString("parentGuid"));
         addWaitingChildren();
         return this;
+    }
+
+    @Override
+    public void renderPanel() {
+        drawTransform();
+
+        if(components.isEmpty()) return;
+
+        getComponents().forEach(comp -> {
+            Panel.startPanel();
+            ImGui.text(Icons.GetIcon(comp) + " " + comp.getClass().getSimpleName());
+            ImGui.spacing();
+            if(comp instanceof ICustomEditorPanel customPanel) {
+                customPanel.renderPanel();
+            }else{
+                InfoPanel.drawObject(comp);
+            }
+            Panel.endPanel();
+        });
+    }
+
+    private void drawTransform(){
+        Panel.startPanel();
+        ImGui.beginGroup();
+
+        ImGui.text(Icons.TRANSFORM + " Transform");
+
+        float tableWidth = Panel.getPanelWidth() - Panel.getPaddingX() * 2.0f;
+
+        if (ImGui.beginTable("transform##" + getGuid(), 2, ImGuiTableFlags.SizingStretchProp, new ImVec2(tableWidth, 0))) {
+
+            ImGui.tableSetupColumn("Label", ImGuiTableColumnFlags.WidthStretch, 1.0f);
+            ImGui.tableSetupColumn("Value", ImGuiTableColumnFlags.WidthStretch, 3.0f);
+
+            ImGui.tableNextRow();
+            ImGui.tableNextColumn();
+            ImGui.tableNextColumn();
+
+            if (ImGui.beginTable(
+                    "transformXYZHeader##" + getGuid(), 3, ImGuiTableFlags.SizingStretchSame)) {
+
+                ImGui.tableNextColumn();
+                Text.ColoredAndCentered("X", 0.85f, 0.25f, 0.25f);
+
+                ImGui.tableNextColumn();
+                Text.ColoredAndCentered("Y", 0.30f, 0.85f, 0.30f);
+
+                ImGui.tableNextColumn();
+                Text.ColoredAndCentered("Z", 0.35f, 0.50f, 1.00f);
+
+                ImGui.endTable();
+            }
+
+            ImGui.tableNextRow();
+            ImGui.tableNextColumn();
+            ImGui.text("Position");
+
+            ImGui.tableNextColumn();
+            Vector3f transformVector = ObjectPool.VECTOR3F_POOL.obtain()
+                    .set(getLocalPosition());
+
+            float[] position = {
+                    transformVector.x,
+                    transformVector.y,
+                    transformVector.z
+            };
+
+
+            ImGui.setNextItemWidth(-1);
+            if (ImGui.inputFloat3("##position", position)) {
+                setPosition(position[0], position[1], position[2]);
+            }
+
+            ImGui.tableNextRow();
+            ImGui.tableNextColumn();
+            ImGui.text("Rotation");
+
+            ImGui.tableNextColumn();
+            transformVector = ObjectPool.VECTOR3F_POOL.obtain()
+                    .set(getLocalEulerAngles());
+
+            float[] rotation = {
+                    transformVector.x,
+                    transformVector.y,
+                    transformVector.z
+            };
+
+            ImGui.setNextItemWidth(-1);
+            if (ImGui.inputFloat3("##rotation", rotation)) {
+                setRotation(rotation[0], rotation[1], rotation[2]);
+            }
+
+            ImGui.tableNextRow();
+            ImGui.tableNextColumn();
+            ImGui.text("Scale");
+
+            ImGui.tableNextColumn();
+            transformVector = ObjectPool.VECTOR3F_POOL.obtain()
+                    .set(getLocalScale());
+
+            float[] scale = {
+                    transformVector.x,
+                    transformVector.y,
+                    transformVector.z
+            };
+
+            ImGui.setNextItemWidth(-1);
+            if (ImGui.inputFloat3("##scale", scale)) {
+                setScale(scale[0], scale[1], scale[2]);
+            }
+
+            ImGui.endTable();
+
+            ObjectPool.VECTOR3F_POOL.free(transformVector);
+        }
+
+        ImGui.endGroup();
+        Panel.endPanel();
     }
 }

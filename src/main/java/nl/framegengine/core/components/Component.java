@@ -1,18 +1,24 @@
 package nl.framegengine.core.components;
 
+import imgui.ImGui;
 import nl.framegengine.core.utils.IJsonSerializable;
 import nl.framegengine.core.entity.GameObject;
 import nl.framegengine.core.utils.JsonHelper;
 import nl.framegengine.editor.EngineSettings;
+import nl.framegengine.editor.editorComponents.Panel;
+import nl.framegengine.editor.panels.ICustomEditorPanel;
+import nl.framegengine.editor.panels.InfoPanel;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import java.io.StringReader;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.Set;
 
-public class Component implements IJsonSerializable {
+public class Component implements IJsonSerializable, ICustomEditorPanel {
     protected GameObject root = null;
     protected boolean hasInitiated = false;
     public boolean runInEditor = false;
@@ -86,7 +92,28 @@ public class Component implements IJsonSerializable {
         return this;
     }
 
-    public Set<String> getFieldsToIgnore(){
-        return fieldsToIgnore;
+
+    @Override
+    public void renderPanel() {
+        boolean hasFields = false;
+        for (Field field : getClass().getDeclaredFields()) {
+            if (Modifier.isPrivate(field.getModifiers()) || fieldsToIgnore.contains(field.getName())) continue;
+
+            hasFields = true;
+
+            try {
+                field.setAccessible(true);
+                Object value = field.get(this);
+
+                if (value == null) continue;
+
+                InfoPanel.drawOption(field, this);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingX());
+        if(!hasFields) ImGui.text("No fields found");
     }
 }
