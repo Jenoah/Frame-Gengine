@@ -38,7 +38,7 @@ public class GizmoMovement extends Component {
 
         SelectSceneObjects.selectedObject.getMatrix().get(model);
         camera.getViewMatrix().get(view);
-        windowManager.getProjectionMatrix().get(projection);
+        camera.getProjectionMatrix().get(projection);
 
         ImGuizmo.manipulate(
                 view,

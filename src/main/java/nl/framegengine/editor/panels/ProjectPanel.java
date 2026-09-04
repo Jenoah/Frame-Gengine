@@ -12,6 +12,7 @@ import nl.framegengine.core.visual.MaterialManager;
 import nl.framegengine.editor.*;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.core.utils.FileHelper;
+import nl.framegengine.editor.editorComponents.Icons;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +20,7 @@ import java.io.IOException;
 public class ProjectPanel extends EditorPanel {
     public ProjectPanel(int posX, int posY, int sizeX, int sizeY) {
         super(posX, posY, sizeX, sizeY);
+        windowName = Icons.FOLDER + " Project";
     }
 
     @Override
@@ -52,7 +54,9 @@ public class ProjectPanel extends EditorPanel {
                 ImGui.selectable(projectFoldersAndFile.getName(), false, ImGuiSelectableFlags.AllowDoubleClick);
 
                 if(ImGui.isItemHovered()){
-                    if(ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left)) {
+                    if(ImGui.isMouseClicked(ImGuiMouseButton.Left)){
+                        infoPanelPreview(projectFoldersAndFile);
+                    }else if(ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left)) {
                         selectFile(projectFoldersAndFile);
                     }
                     if(ImGui.isMouseReleased(ImGuiMouseButton.Right)){
@@ -64,6 +68,21 @@ public class ProjectPanel extends EditorPanel {
             }
         }
         ImGui.unindent(10 * level);
+    }
+
+    private void infoPanelPreview(File selectedFile){
+        try {
+            if (ManifestHelper.pathToManifestFileType(selectedFile.toPath()) == ManifestHelper.manifestFileType.MATERIAL) {
+                String materialContent = FileHelper.readFile(selectedFile.getPath());
+
+                Material material = (Material) new Material().deserializeFromJson(materialContent);
+                material = MaterialManager.loadMaterialByGuid(material.getGuid());
+
+                EditorWindow.getEditorLayout().getEditorPanelOfType(InfoPanel.class).setCurrentlySelectedObject(material);
+            }
+        } catch (Exception e) {
+            Debug.logError("Cannot show selected file: " + e.getMessage());
+        }
     }
 
     private void showContextMenu(String stringID, String path){
@@ -127,14 +146,6 @@ public class ProjectPanel extends EditorPanel {
                     GameObject importedObject = StaticMeshLoader.loadIntoGameObject(selectedFile.getPath());
                     if (importedObject != null) SceneManager.currentScene.addEntity(importedObject);
                 }
-            }else if(ManifestHelper.pathToManifestFileType(selectedFile.toPath()) == ManifestHelper.manifestFileType.MATERIAL){
-                String materialContent = FileHelper.readFile(selectedFile.getPath());
-
-                Material material = (Material) new Material().deserializeFromJson(materialContent);
-                material = MaterialManager.loadMaterialByGuid(material.getGuid());
-
-                EditorWindow.getEditorLayout().getEditorPanelOfType(InfoPanel.class).setCurrentlySelectedObject(material);
-
             } else {
                 FileHelper.openFile(selectedFile);
             }

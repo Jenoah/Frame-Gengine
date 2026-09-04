@@ -35,6 +35,7 @@ public class BillboardShader extends Shader{
         this.setUniform("objectPosition", meshMaterialSet.getRoot().getPosition());
         this.setUniform("modelScale", meshMaterialSet.getRoot().getScale());
         this.setUniform("viewMatrix", camera.getViewMatrix());
+        this.setUniform("projectionMatrix", camera.getProjectionMatrix());
 
         if(meshMaterialSet.material.getAlbedoTexture() != null){
             GL13.glActiveTexture(GL13.GL_TEXTURE0);
@@ -50,9 +51,6 @@ public class BillboardShader extends Shader{
         this.setUniform("fogColor", SceneManager.currentScene != null ? SceneManager.currentScene.getFogColor() : Constants.AMBIENT_COLOR);
         this.setUniform("fogDensity", SceneManager.currentScene != null ? SceneManager.currentScene.getFogDensity() : 0.025f);
         this.setUniform("fogGradient", SceneManager.currentScene != null ? SceneManager.currentScene.getFogGradient() : 10f);
-
-        //Camera
-        setUniform("projectionMatrix", window.getProjectionMatrix());
 
         unbind();
     }

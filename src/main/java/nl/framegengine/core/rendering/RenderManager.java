@@ -60,7 +60,10 @@ public class RenderManager {
             glViewport(0, 0, window.getWidth(), window.getHeight());
             regenerateFrameBuffer();
             window.setResize(false);
-            window.updateProjectionMatrix();
+            if(currentScene.getMainCamera() != null){
+                currentScene.getMainCamera().updateAspectRatio();
+                currentScene.getMainCamera().updateProjectionMatrix();
+            }
             PostProcessing.updateResolution();
         }
 
@@ -232,8 +235,8 @@ public class RenderManager {
         fontRenderer.recordMetrics(recordMetrics);
     }
 
-    public static String getMetrics() {
-        return recordMetrics ? metrics.getMetrics() : "Metrics not recorded";
+    public static RenderMetrics getMetrics() {
+        return recordMetrics ? metrics : null;
     }
 
     public static void setWireframeMode(boolean wireframeMode){

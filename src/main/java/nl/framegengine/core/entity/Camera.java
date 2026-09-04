@@ -7,6 +7,7 @@ import nl.framegengine.core.modelLoaders.PrimitiveLoader;
 import nl.framegengine.core.rendering.utils.FrustumPlane;
 import nl.framegengine.core.shaders.ShaderManager;
 import nl.framegengine.core.utils.AABB;
+import nl.framegengine.core.utils.Constants;
 import nl.framegengine.core.utils.ObjectPool;
 import nl.framegengine.core.visual.Material;
 import nl.framegengine.core.visual.Mesh;
@@ -15,10 +16,13 @@ import nl.framegengine.core.visual.Texture;
 import nl.framegengine.editor.EngineSettings;
 import org.joml.*;
 
+import java.lang.Math;
+
 public class Camera extends Component {
 
     private static Camera mainCamera = null;
 
+    private final Matrix4f projectionMatrix = new Matrix4f();
     private final Matrix4f viewProjectionMatrix = new Matrix4f();
     private final Matrix4f viewMatrix = new Matrix4f();
     private final WindowManager windowManager;
@@ -27,6 +31,8 @@ public class Camera extends Component {
     private final AABB worldFrustumTestingAABB = new AABB();
     private final Vector3f frustumPlaneNormal = new Vector3f();
     private boolean isShowingProxy = false;
+    private float aspectRatio = 1.777f;
+    public float FOV = 60f;
 
     public Camera() {
         super();
@@ -40,6 +46,8 @@ public class Camera extends Component {
         }
 
         updateViewFrustum();
+        updateAspectRatio();
+        updateProjectionMatrix();
         //root.callUpdate();
     }
 
@@ -135,12 +143,29 @@ public class Camera extends Component {
         return true;
     }
 
+    public void updateProjectionMatrix(){
+        projectionMatrix.setPerspective((float) Math.toRadians(FOV), aspectRatio, Constants.Z_NEAR, Constants.Z_FAR);
+        ShaderManager.updateGenericUniforms();
+    }
+
+    public void updateAspectRatio(){
+        aspectRatio = windowManager == null ? 1.777f : ((float) windowManager.getWidth() / windowManager.getHeight());
+    }
+
+    public void updateAspectRatio(float aspect){
+        aspectRatio = aspect;
+    }
+
+    public Matrix4f getProjectionMatrix(){
+        return projectionMatrix;
+    }
+
     public final Matrix4f getViewProjectionMatrix(){
         return viewProjectionMatrix;
     }
 
     public final Matrix4f updateViewProjectionMatrix(){
-        this.viewProjectionMatrix.set(windowManager.getProjectionMatrix()).mul(getViewMatrix());
+        this.viewProjectionMatrix.set(projectionMatrix).mul(getViewMatrix());
         return viewProjectionMatrix;
     }
 

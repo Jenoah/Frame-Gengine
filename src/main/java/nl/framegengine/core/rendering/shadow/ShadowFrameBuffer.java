@@ -1,6 +1,7 @@
 package nl.framegengine.core.rendering.shadow;
 
 import nl.framegengine.core.engine.WindowManager;
+import nl.framegengine.editor.EditorWindow;
 import org.lwjgl.opengl.*;
 
 import java.nio.ByteBuffer;
@@ -31,7 +32,7 @@ public class ShadowFrameBuffer {
 
     public void unbindFrameBuffer() {
         GL30.glBindFramebuffer(GL30.GL_FRAMEBUFFER, 0);
-        GL11.glViewport(0, 0, WindowManager.getInstance().getWidth(), WindowManager.getInstance().getHeight());
+        GL11.glViewport(0, 0, WindowManager.getInstance() != null ? WindowManager.getInstance().getWidth() : EditorWindow.windowWidth, WindowManager.getInstance() != null ? WindowManager.getInstance().getHeight() : EditorWindow.windowHeight);
     }
 
     public int getShadowMap() {

@@ -203,6 +203,15 @@ public class FileHelper {
         return result;
     }
 
+    public static byte[] loadResourceAsBytes(String fileName){
+        try(InputStream in = Utils.class.getResourceAsStream(fileName)){
+            if (in == null) throw new FileNotFoundException("Resource not found: " + fileName);
+            return in.readAllBytes();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static List<String> readAllLines(String fileName) {
         File file = new File(fileName);
         List<String> list = new ArrayList<>();

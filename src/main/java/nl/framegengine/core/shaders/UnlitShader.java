@@ -40,6 +40,7 @@ public class UnlitShader extends Shader{
         this.setUniform("material", meshMaterialSet.material);
         this.setUniform("modelMatrix", modelMatrix);
         this.setUniform("viewMatrix", camera.getViewMatrix());
+        this.setUniform("projectionMatrix", camera.getProjectionMatrix());
 
         if(meshMaterialSet.material.hasAlbedoTexture()){
             GL13.glActiveTexture(GL13.GL_TEXTURE0);
@@ -55,9 +56,6 @@ public class UnlitShader extends Shader{
         this.setUniform("fogColor", SceneManager.currentScene != null ? SceneManager.currentScene.getFogColor() : Constants.AMBIENT_COLOR);
         this.setUniform("fogDensity", SceneManager.currentScene != null ? SceneManager.currentScene.getFogDensity() : 0.025f);
         this.setUniform("fogGradient", SceneManager.currentScene != null ? SceneManager.currentScene.getFogGradient() : 10f);
-
-        //Camera
-        setUniform("projectionMatrix", window.getProjectionMatrix());
 
         unbind();
     }

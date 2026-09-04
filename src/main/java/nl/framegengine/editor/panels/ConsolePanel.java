@@ -4,6 +4,8 @@ import imgui.ImGui;
 import nl.framegengine.core.debugging.ConsoleColors;
 import nl.framegengine.core.debugging.Debug;
 import nl.framegengine.editor.EditorPanel;
+import nl.framegengine.editor.editorComponents.Button;
+import nl.framegengine.editor.editorComponents.Icons;
 
 public class ConsolePanel extends EditorPanel {
 
@@ -11,6 +13,7 @@ public class ConsolePanel extends EditorPanel {
 
     public ConsolePanel(int posX, int posY, int sizeX, int sizeY) {
         super(posX, posY, sizeX, sizeY);
+        windowName = Icons.TERMINAL + " Console";
     }
 
     @Override
@@ -29,7 +32,7 @@ public class ConsolePanel extends EditorPanel {
         }
 
         ImGui.setCursorScreenPos(posX + sizeX - 192, posY + 48);
-        if(ImGui.button("Clear", 72, 32)){
+        if(Button.regular("Clear")){
             Debug.clearLogs();
         }
     }

@@ -11,7 +11,7 @@ import javax.json.*;
 import java.io.StringReader;
 
 public class MeshMaterialSet implements IJsonSerializable {
-    private Mesh mesh;
+    protected Mesh mesh;
     public Material material;
     private GameObject root;
 

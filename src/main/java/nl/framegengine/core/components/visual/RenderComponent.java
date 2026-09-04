@@ -16,23 +16,29 @@ import nl.framegengine.core.visual.MaterialManager;
 import nl.framegengine.core.visual.Mesh;
 import nl.framegengine.core.visual.MeshMaterialSet;
 import nl.framegengine.editor.ManifestHelper;
+import nl.framegengine.editor.panels.ICustomEditorPanel;
+import nl.framegengine.editor.panels.InfoPanel;
 import org.joml.Vector3f;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import java.io.StringReader;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class RenderComponent extends Component {
+public class RenderComponent extends Component implements ICustomEditorPanel {
 
     protected List<String> meshPaths = new ArrayList<>();
 
     protected final Set<MeshMaterialSet> meshMaterialSets = new HashSet<>();
+    private Set<String> fieldsToIgnore = Set.of("fieldsToIgnore", "runInEditor", "guid", "root", "hasCleanedUp", "addedDuringPlaymode", "hasInitiated", "meshPaths");
+
 
     public RenderComponent(){ }
 
@@ -193,9 +199,6 @@ public class RenderComponent extends Component {
             ignoredKeys.add("meshPaths");
             ignoredKeys.add("meshMaterialSets");
         } else {
-            // Convert meshPaths to stable references before serialization:
-            // - builtin: paths stay as-is
-            // - project model paths get converted to manifest GUIDs
             List<String> originalPaths = new ArrayList<>(meshPaths);
             meshPaths.clear();
             for (String path : originalPaths) {
@@ -216,26 +219,17 @@ public class RenderComponent extends Component {
         return result;
     }
 
-    /**
-     * Converts a mesh path to a stable serializable reference.
-     * - Paths starting with "builtin:" are returned as-is.
-     * - Paths that can be resolved to a manifest GUID are returned as the GUID.
-     * - All other paths (legacy / unresolvable) are returned as-is for backward compatibility.
-     */
     private String toStableReference(String path) {
         if (path == null || path.isBlank()) return path;
         if (path.startsWith(Mesh.BUILTIN_PREFIX)) return path;
 
-        // Already a GUID? Check if the manifest knows it
         if (ManifestHelper.hasGuid(ManifestHelper.manifestFileType.MODEL, path)) {
             return path;
         }
 
-        // Try to look up the GUID by path
         String guid = ManifestHelper.getGuidByPath(ManifestHelper.manifestFileType.MODEL, path);
         if (guid != null) return guid;
 
-        // Fallback: return path as-is (legacy compatibility)
         return path;
     }
 
@@ -275,5 +269,23 @@ public class RenderComponent extends Component {
 
 
         return this;
+    }
+
+    @Override
+    public void renderPanel() {
+        for (Field field : RenderComponent.class.getDeclaredFields()) {
+            if (Modifier.isPrivate(field.getModifiers()) || fieldsToIgnore.contains(field.getName())) continue;
+
+            try {
+                field.setAccessible(true);
+                Object value = field.get(this);
+
+                if (value == null) continue;
+
+                InfoPanel.drawOption(field, this);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

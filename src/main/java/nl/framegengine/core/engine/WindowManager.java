@@ -1,10 +1,9 @@
 package nl.framegengine.core.engine;
 
 import nl.framegengine.core.debugging.Debug;
+import nl.framegengine.core.entity.SceneManager;
 import nl.framegengine.core.shaders.ShaderManager;
-import nl.framegengine.core.utils.Constants;
 import nl.framegengine.editor.EditorWindow;
-import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWImage;
@@ -26,7 +25,6 @@ public class WindowManager {
     private long window;
     private boolean resize = false;
     private final boolean vSync;
-    private final Matrix4f projectionMatrix = new Matrix4f();
     private boolean standalone = true;
     private boolean isInFocus = true;
 
@@ -89,7 +87,10 @@ public class WindowManager {
 
         GLFW.glfwSetFramebufferSizeCallback(window, (window, width, height) -> {
             setWindowSize(width, height);
-            updateProjectionMatrix();
+            if(SceneManager.currentScene != null && SceneManager.currentScene.getMainCamera() != null){
+                SceneManager.currentScene.getMainCamera().updateAspectRatio();
+                SceneManager.currentScene.getMainCamera().updateProjectionMatrix();
+            }
             ShaderManager.updateGenericUniforms();
             if(!standalone){
                 EditorWindow.windowWidth = this.width;
@@ -138,7 +139,8 @@ public class WindowManager {
     }
 
     public boolean isKeyPressed(int keyCode){
-        return GLFW.glfwGetKey(window, keyCode) == GLFW.GLFW_PRESS;
+        if(isInFocus) return GLFW.glfwGetKey(window, keyCode) == GLFW.GLFW_PRESS;
+        return false;
     }
 
     public boolean isResize(){
@@ -203,23 +205,6 @@ public class WindowManager {
 
     public void setClearColor(float r, float g, float b, float a){ glClearColor(r,g,b,a); }
 
-    public Matrix4f getProjectionMatrix() {
-        return projectionMatrix;
-    }
-
-    public Matrix4f updateProjectionMatrix() {
-        float aspectRatio = (float) width / height;
-        projectionMatrix.setPerspective(Constants.FOV, aspectRatio, Constants.Z_NEAR, Constants.Z_FAR);
-        ShaderManager.updateGenericUniforms();        ShaderManager.updateGenericUniforms();
-        return projectionMatrix;
-    }
-
-    public Matrix4f updateProjectionMatrix(Matrix4f matrix, int width, int height) {
-        float aspectRatio = (float) width / height;
-        matrix.setPerspective(Constants.FOV, aspectRatio, Constants.Z_NEAR, Constants.Z_FAR);
-        ShaderManager.updateGenericUniforms();
-        return matrix;
-    }
 
     public boolean isStandalone() {
         return standalone;

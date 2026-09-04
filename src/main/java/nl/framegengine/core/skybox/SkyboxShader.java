@@ -33,7 +33,7 @@ public class SkyboxShader extends Shader {
         viewMatrix.m30(0);
         viewMatrix.m31(0);
         viewMatrix.m32(0);
-        Matrix4f projectionMatrix = window.getProjectionMatrix();
+        Matrix4f projectionMatrix = camera.getProjectionMatrix();
 
         setUniform("viewMatrix", viewMatrix);
         setUniform("projectionMatrix", projectionMatrix);

@@ -73,6 +73,7 @@ public class SimpleLitShader extends Shader {
         this.setUniform("modelMatrix", modelMatrix);
         this.setUniform("viewMatrix", camera.getViewMatrix());
         this.setUniform("shadowSpaceMatrix", shadowSpaceMatrix);
+        this.setUniform("projectionMatrix", camera.getProjectionMatrix());
 
         /*
         if(mat.getAlbedoTexture() != null){
@@ -226,9 +227,6 @@ public class SimpleLitShader extends Shader {
         setUniform("specularPower", Constants.SPECULAR_POWER);
         setUniform("pointLightCount", SceneManager.currentScene != null ? SceneManager.currentScene.getPointLights().length : 0);
         setUniform("spotLightCount", SceneManager.currentScene != null ? SceneManager.currentScene.getSpotLights().length : 0);
-
-        //Camera
-        setUniform("projectionMatrix", window.getProjectionMatrix());
 
         unbind();
     }

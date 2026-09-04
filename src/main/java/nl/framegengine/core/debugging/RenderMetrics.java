@@ -76,5 +76,33 @@ public class RenderMetrics {
                 EngineManager.getDeltaTimeMS()
         );
     }
+
+    public final String getLastFrameDuration(){
+        return String.format("%.2fms", lastFrameDuration / 1e6);
+    }
+
+    public final String getGPUFrameDuration(){
+        return String.format("%.2fms", gpuFrameDurationNs / 1e6);
+    }
+
+    public final int getVAOBinds(){
+        return vaoBinds;
+    }
+
+    public final int getShaderBinds(){
+        return shaderBinds;
+    }
+
+    public final int getVertexCount(){
+        return vertexCount;
+    }
+
+    public final int getDrawCalls(){
+        return drawCalls;
+    }
+
+    public final float getDeltaTimeMS(){
+        return EngineManager.getDeltaTimeMS();
+    }
 }
 

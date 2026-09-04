@@ -54,7 +54,7 @@ public class Raycast {
         mousePosition.x = (2f * mousePosition.x) / WindowManager.getInstance().getWidth() - 1f;
         mousePosition.y = 1f - (2f * mousePosition.y) / WindowManager.getInstance().getHeight();
 
-        Matrix4f invertedProjectionMatrix = ObjectPool.MATRIX4F_OBJECT_POOL.obtain().set(WindowManager.getInstance().getProjectionMatrix()).invert();
+        Matrix4f invertedProjectionMatrix = ObjectPool.MATRIX4F_OBJECT_POOL.obtain().set(camera.getProjectionMatrix()).invert();
         Matrix4f invertedViewMatrix = ObjectPool.MATRIX4F_OBJECT_POOL.obtain().set(camera.getViewMatrix()).invert();
 
         Vector4f nearPoint = new Vector4f(mousePosition.x, mousePosition.y, -1f, 1f); // Near plane

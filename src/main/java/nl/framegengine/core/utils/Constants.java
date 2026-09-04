@@ -63,7 +63,7 @@ public class Constants {
     public static final float SHADOW_POLYGON_OFFSET_FACTOR = 2.0f;  // slope-scaled polygon offset during shadow depth pass
     public static final float SHADOW_POLYGON_OFFSET_UNITS = 8.0f;   // constant polygon offset during shadow depth pass
     public static final int SHADOW_MAP_SIZE = 2048;
-    public static final int SHADOW_TRANSITION_DISTANCE = 10;
+    public static final float SHADOW_TRANSITION_DISTANCE = 10f;
     public static final int SHADOW_PCF_COUNT = 2;
 
     //Colors
