@@ -17,6 +17,7 @@ import nl.framegengine.core.visual.TextureLoader;
 import nl.framegengine.editor.EditorPanel;
 import nl.framegengine.editor.ImGuiHelper;
 import nl.framegengine.editor.ManifestHelper;
+import nl.framegengine.editor.editorComponents.Collapse;
 import nl.framegengine.editor.editorComponents.Icons;
 import nl.framegengine.editor.editorComponents.Panel;
 import nl.framegengine.editor.editorRenderers.MaterialRenderer;
@@ -88,33 +89,24 @@ public class InfoPanel extends EditorPanel {
 
         if (drawingObject instanceof GameObject && GameObject.fieldsToIgnore.contains(field.getName())) return;
 
-        ImGui.setCursorPosX(ImGui.getCursorPosX() + Panel.getPaddingX());
-
         // Special handling for Texture fields (even if null)
         if (field.getType() == Texture.class) {
-            ImGui.setWindowFontScale(1.1f);
             ImGui.text(field.getName());
             if (objectValue != null) {
                 drawObject(objectValue);
             }
             drawManifestType(ManifestHelper.manifestFileType.TEXTURE, objectValue, field, drawingObject);
-            ImGui.setWindowFontScale(0.4f);
-            ImGui.newLine();
-            ImGui.setWindowFontScale(1f);
+            ImGui.spacing();
             return;
         }
 
         if (objectValue == null) {
-            ImGui.setWindowFontScale(1.1f);
             ImGui.text(field.getName());
             ImGui.text("null");
-            ImGui.setWindowFontScale(0.4f);
-            ImGui.newLine();
-            ImGui.setWindowFontScale(1f);
+            ImGui.spacing();
             return;
         }
 
-        ImGui.setWindowFontScale(1.1f);
         switch (objectValue) {
             case Float f -> {
                 ImFloat ImFl = new ImFloat(f);
@@ -185,9 +177,9 @@ public class InfoPanel extends EditorPanel {
             }
             case Set<?> set -> {
                 if (!set.isEmpty()) {
-                    if (ImGui.collapsingHeader(field.getName())) {
+                    if (Collapse.Regular(field.getName())) {
                         set.forEach(setItem -> {
-                            if (ImGui.collapsingHeader(setItem.getClass().getSimpleName() + "##" + setItem.hashCode() + currentlySelectedObject.getGuid())) {
+                            if (Collapse.Regular(setItem.getClass().getSimpleName() + "##" + setItem.hashCode() + currentlySelectedObject.getGuid())) {
                                 drawObject(setItem);
                             }
                         });
@@ -199,9 +191,7 @@ public class InfoPanel extends EditorPanel {
                 ImGui.text(objectValue.toString());
             }
         }
-        ImGui.setWindowFontScale(0.4f);
-        ImGui.newLine();
-        ImGui.setWindowFontScale(1f);
+        ImGui.spacing();
     }
 
     public static void drawObject(Object object) {

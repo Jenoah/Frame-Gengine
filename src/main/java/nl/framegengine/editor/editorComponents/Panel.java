@@ -34,7 +34,7 @@ public class Panel {
 
         ImGui.beginGroup();
 
-        ImGui.setCursorPosX(ImGui.getCursorPosX() + paddingX);
+        ImGui.indent(paddingX);
         ImGui.setCursorPosY(ImGui.getCursorPosY() + paddingY);
     }
 

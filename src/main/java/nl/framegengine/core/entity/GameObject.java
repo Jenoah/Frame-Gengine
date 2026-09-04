@@ -650,11 +650,7 @@ public class GameObject implements IJsonSerializable, ICustomEditorPanel {
             Panel.startPanel();
             ImGui.text(Icons.GetIcon(comp) + " " + comp.getClass().getSimpleName());
             ImGui.spacing();
-            if(comp instanceof ICustomEditorPanel customPanel) {
-                customPanel.renderPanel();
-            }else{
-                InfoPanel.drawObject(comp);
-            }
+            comp.renderPanel();
             Panel.endPanel();
         });
     }
