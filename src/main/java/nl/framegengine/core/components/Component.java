@@ -97,7 +97,7 @@ public class Component implements IJsonSerializable, ICustomEditorPanel {
     public void renderPanel() {
         boolean hasFields = false;
         for (Field field : getClass().getDeclaredFields()) {
-            if (Modifier.isPrivate(field.getModifiers()) || fieldsToIgnore.contains(field.getName())) continue;
+            if (Modifier.isPrivate(field.getModifiers()) || fieldsToIgnore.contains(field.getName()) || Modifier.isStatic(field.getModifiers())) continue;
 
             hasFields = true;
 
